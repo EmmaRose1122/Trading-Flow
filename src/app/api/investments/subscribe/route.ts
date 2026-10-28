@@ -69,7 +69,15 @@ export async function POST(req: Request) {
       createdAt: new Date().toISOString(),
     });
 
-    return NextResponse.json({ success: true, investment });
+    let referralCommissions: { credited: number; total: number } = { credited: 0, total: 0 };
+    try {
+      const distribution = db.distributeReferralCommissions(investment);
+      referralCommissions = { credited: distribution.credited, total: distribution.total };
+    } catch (commissionError) {
+      console.error("Referral commission error:", commissionError);
+    }
+
+    return NextResponse.json({ success: true, investment, referralCommissions });
   } catch (err) {
     console.error("Investment subscribe error:", err);
     return NextResponse.json({ error: "Server error" }, { status: 500 });

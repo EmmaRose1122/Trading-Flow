@@ -7,8 +7,8 @@ import {
   RefreshCw,
   ShieldCheck,
   Smartphone,
-  TrendingUp,
 } from "lucide-react";
+import BrandLockup from "@/components/site/BrandLockup";
 
 export const metadata: Metadata = {
   title: "Download Android App | Trading Flow",
@@ -27,13 +27,8 @@ export default function DownloadPage() {
     <div className="min-h-screen bg-[#080C15]">
       <header className="border-b border-white/5 bg-[#080C15]/90 backdrop-blur-xl">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2.5">
-            <span className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-400 to-cyan-500 flex items-center justify-center">
-              <TrendingUp className="w-5 h-5 text-slate-950" />
-            </span>
-            <span className="font-bold tracking-tight text-white">
-              TRADING<span className="text-emerald-400">FLOW</span>
-            </span>
+          <Link href="/" aria-label="Trading Flow Capital home">
+            <BrandLockup iconSize={36} />
           </Link>
           <Link
             href="/"

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { summarizeReferralNetwork } from "@/lib/referral";
 
 export async function GET() {
   const session = await getSession();
@@ -11,19 +12,28 @@ export async function GET() {
 
   const all = db.getTransactions();
   const pending = all.filter((t) => t.status === "PENDING");
-  const users = db.getUsers().map((u) => ({
+  const allUsers = db.getUsers();
+  const users = allUsers.map((u) => ({
     id: u.id,
     name: u.name,
     email: u.email,
     role: u.role,
     referralCode: u.referralCode,
     referredBy: u.referredBy || null,
+    createdAt: u.createdAt,
+    twoFactorEnabled: Boolean(u.twoFactorEnabled),
+    kycStatus: u.kycStatus || "NOT_STARTED",
+    kycDetails: u.kycDetails || null,
+    payoutWallets: db.getPayoutWalletsByUserId(u.id),
+    referralSummary: summarizeReferralNetwork(u.id, allUsers, all),
     wallet: db.getWalletByUserId(u.id),
   }));
 
   return NextResponse.json({
     pendingRequests: pending,
-    allTransactions: all.slice(0, 50),
+    allTransactions: all.slice(0, 200),
+    allInvestments: db.getAllInvestments(),
+    depositAccounts: db.getDepositAccounts(),
     users,
   });
 }

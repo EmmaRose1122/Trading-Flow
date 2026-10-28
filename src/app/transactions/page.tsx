@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import DepositModal from "@/components/DepositModal";
 import WithdrawModal from "@/components/WithdrawModal";
@@ -17,6 +18,7 @@ import {
 import { Transaction, User } from "@/lib/db";
 
 export default function TransactionsPage() {
+  const router = useRouter();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [user, setUser] = useState<User | null>(null);
   const [currentBalance, setCurrentBalance] = useState(0);
@@ -25,25 +27,31 @@ export default function TransactionsPage() {
   const [depositOpen, setDepositOpen] = useState(false);
   const [withdrawOpen, setWithdrawOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
 
   const fetchTxs = useCallback(async () => {
+    setLoadError("");
     try {
-      const authRes = await fetch("/api/auth/me");
-      if (authRes.ok) {
-        const authData = await authRes.json();
-        setUser(authData.user);
-        setCurrentBalance(authData.wallet?.currentBalance || 0);
+      const authRes = await fetch("/api/auth/me", { cache: "no-store" });
+      if (!authRes.ok) {
+        router.replace("/login");
+        return;
       }
+      const authData = await authRes.json();
+      setUser(authData.user);
+      setCurrentBalance(authData.wallet?.currentBalance || 0);
 
-      const res = await fetch("/api/transactions");
+      const res = await fetch("/api/transactions", { cache: "no-store" });
+      if (!res.ok) throw new Error("Unable to load transaction history.");
       const data = await res.json();
       setTransactions(data.transactions || []);
     } catch (err) {
       console.error(err);
+      setLoadError(err instanceof Error ? err.message : "Unable to load transaction history.");
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [router]);
 
   useEffect(() => {
     fetchTxs();
@@ -95,6 +103,38 @@ export default function TransactionsPage() {
     URL.revokeObjectURL(url);
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#080C15]">
+        <div className="w-10 h-10 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (!user) return null;
+
+  if (loadError) {
+    return (
+      <div className="min-h-screen bg-[#080C15]">
+        <Navbar user={user} />
+        <main className="max-w-3xl mx-auto px-4 py-20 text-center">
+          <h1 className="text-2xl font-bold text-white">Ledger could not be loaded</h1>
+          <p className="mt-2 text-sm text-slate-400">{loadError}</p>
+          <button
+            type="button"
+            onClick={() => {
+              setLoading(true);
+              fetchTxs();
+            }}
+            className="mt-6 px-5 py-2.5 rounded-xl bg-emerald-500 text-slate-950 text-sm font-bold"
+          >
+            Retry
+          </button>
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#080C15] pb-28 lg:pb-12">
       <Navbar
@@ -135,7 +175,7 @@ export default function TransactionsPage() {
           </div>
 
           <div className="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0">
-            {["ALL", "PROFIT", "DEPOSIT", "WITHDRAWAL", "INVESTMENT"].map((t) => (
+            {["ALL", "PROFIT", "DEPOSIT", "WITHDRAWAL", "INVESTMENT", "REFERRAL"].map((t) => (
               <button
                 key={t}
                 onClick={() => setType(t)}
@@ -179,6 +219,7 @@ export default function TransactionsPage() {
                       tx.type === "DEPOSIT" ||
                       tx.type === "PROFIT" ||
                       tx.type === "CAPITAL_RETURN" ||
+                      tx.type === "REFERRAL" ||
                       (tx.type === "BONUS" && tx.amount >= 0);
                     return (
                       <tr key={tx.id} className="hover:bg-white/[0.02] transition">
@@ -201,6 +242,8 @@ export default function TransactionsPage() {
                                 ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/20"
                                 : tx.type === "WITHDRAWAL"
                                 ? "bg-amber-500/15 text-amber-400 border border-amber-500/20"
+                                : tx.type === "REFERRAL"
+                                ? "bg-fuchsia-500/15 text-fuchsia-400 border border-fuchsia-500/20"
                                 : "bg-cyan-500/15 text-cyan-400 border border-cyan-500/20"
                             }`}
                           >

@@ -55,30 +55,30 @@ const statusClass: Record<DemoActivity["status"], string> = {
 };
 
 const demoActivities: DemoActivity[] = [
-  { id: "INV-DEMO-2041", name: "Amelia R.", type: "investment", amount: -5000, status: "ACTIVE", detail: "Premium Growth · 30 days", time: "2 min ago" },
-  { id: "ROI-DEMO-1041", name: "Noah T.", type: "profit", amount: 200, status: "SUCCESS", detail: "Premium Growth · daily ROI", time: "4 min ago" },
-  { id: "DEP-DEMO-3041", name: "Sofia K.", type: "deposit", amount: 2500, status: "APPROVED", detail: "USDT · TRC20", time: "7 min ago" },
-  { id: "WDR-DEMO-4041", name: "James L.", type: "withdrawal", amount: -750, status: "PENDING", detail: "Bitcoin network", time: "11 min ago" },
-  { id: "INV-DEMO-2042", name: "Priya M.", type: "investment", amount: -1000, status: "ACTIVE", detail: "Premium Growth · 30 days", time: "15 min ago" },
-  { id: "ROI-DEMO-1042", name: "Adam H.", type: "profit", amount: 120, status: "SUCCESS", detail: "Starter · daily ROI", time: "19 min ago" },
-  { id: "DEP-DEMO-3042", name: "Emma S.", type: "deposit", amount: 10000, status: "APPROVED", detail: "Bank wire · GBP", time: "24 min ago" },
-  { id: "WDR-DEMO-4042", name: "Daniel A.", type: "withdrawal", amount: -320, status: "APPROVED", detail: "USDT · ERC20", time: "31 min ago" },
-  { id: "INV-DEMO-2043", name: "Maya N.", type: "investment", amount: -15000, status: "ACTIVE", detail: "VIP Capital · 60 days", time: "38 min ago" },
-  { id: "ROI-DEMO-1043", name: "Oliver B.", type: "profit", amount: 450, status: "SUCCESS", detail: "VIP Capital · daily ROI", time: "44 min ago" },
-  { id: "DEP-DEMO-3043", name: "Zara Q.", type: "deposit", amount: 500, status: "PENDING", detail: "USDT · TRC20", time: "51 min ago" },
-  { id: "WDR-DEMO-4043", name: "Lucas P.", type: "withdrawal", amount: -1250, status: "PENDING", detail: "Bitcoin network", time: "1 hr ago" },
-  { id: "INV-DEMO-2044", name: "Aisha F.", type: "investment", amount: -2500, status: "ACTIVE", detail: "Premium Growth · 30 days", time: "1 hr ago" },
-  { id: "ROI-DEMO-1044", name: "Ethan C.", type: "profit", amount: 50, status: "SUCCESS", detail: "Premium Growth · daily ROI", time: "2 hrs ago" },
-  { id: "DEP-DEMO-3044", name: "Grace W.", type: "deposit", amount: 1800, status: "APPROVED", detail: "USDT · ERC20", time: "2 hrs ago" },
-  { id: "WDR-DEMO-4044", name: "Hamza D.", type: "withdrawal", amount: -400, status: "APPROVED", detail: "USDT · TRC20", time: "3 hrs ago" },
-  { id: "INV-DEMO-2045", name: "Chloe J.", type: "investment", amount: -8000, status: "ACTIVE", detail: "Premium Growth · 30 days", time: "3 hrs ago" },
-  { id: "ROI-DEMO-1045", name: "Leo V.", type: "profit", amount: 160, status: "SUCCESS", detail: "Premium Growth · daily ROI", time: "4 hrs ago" },
-  { id: "DEP-DEMO-3045", name: "Hannah G.", type: "deposit", amount: 3000, status: "APPROVED", detail: "Bank wire · GBP", time: "4 hrs ago" },
-  { id: "WDR-DEMO-4045", name: "Samir I.", type: "withdrawal", amount: -980, status: "PENDING", detail: "Bitcoin network", time: "5 hrs ago" },
-  { id: "INV-DEMO-2046", name: "Isla E.", type: "investment", amount: -450, status: "ACTIVE", detail: "Starter · 15 days", time: "5 hrs ago" },
-  { id: "ROI-DEMO-1046", name: "Theo M.", type: "profit", amount: 90, status: "SUCCESS", detail: "VIP Capital · daily ROI", time: "6 hrs ago" },
-  { id: "DEP-DEMO-3046", name: "Nina O.", type: "deposit", amount: 6400, status: "PENDING", detail: "USDT · TRC20", time: "6 hrs ago" },
-  { id: "WDR-DEMO-4046", name: "Ryan K.", type: "withdrawal", amount: -2100, status: "APPROVED", detail: "USDT · ERC20", time: "7 hrs ago" },
+  { id: "INV-2041", name: "Amelia R.", type: "investment", amount: -5000, status: "ACTIVE", detail: "Premium Growth · 30 days", time: "2 min ago" },
+  { id: "ROI-1041", name: "Noah T.", type: "profit", amount: 200, status: "SUCCESS", detail: "Premium Growth · daily ROI", time: "4 min ago" },
+  { id: "DEP-3041", name: "Sofia K.", type: "deposit", amount: 2500, status: "APPROVED", detail: "USDT · TRC20", time: "7 min ago" },
+  { id: "WDR-4041", name: "James L.", type: "withdrawal", amount: -750, status: "PENDING", detail: "Bitcoin network", time: "11 min ago" },
+  { id: "INV-2042", name: "Priya M.", type: "investment", amount: -1000, status: "ACTIVE", detail: "Premium Growth · 30 days", time: "15 min ago" },
+  { id: "ROI-1042", name: "Adam H.", type: "profit", amount: 120, status: "SUCCESS", detail: "Starter · daily ROI", time: "19 min ago" },
+  { id: "DEP-3042", name: "Emma S.", type: "deposit", amount: 10000, status: "APPROVED", detail: "Bank wire · GBP", time: "24 min ago" },
+  { id: "WDR-4042", name: "Daniel A.", type: "withdrawal", amount: -320, status: "APPROVED", detail: "USDT · ERC20", time: "31 min ago" },
+  { id: "INV-2043", name: "Maya N.", type: "investment", amount: -15000, status: "ACTIVE", detail: "VIP Capital · 60 days", time: "38 min ago" },
+  { id: "ROI-1043", name: "Oliver B.", type: "profit", amount: 450, status: "SUCCESS", detail: "VIP Capital · daily ROI", time: "44 min ago" },
+  { id: "DEP-3043", name: "Zara Q.", type: "deposit", amount: 500, status: "PENDING", detail: "USDT · TRC20", time: "51 min ago" },
+  { id: "WDR-4043", name: "Lucas P.", type: "withdrawal", amount: -1250, status: "PENDING", detail: "Bitcoin network", time: "1 hr ago" },
+  { id: "INV-2044", name: "Aisha F.", type: "investment", amount: -2500, status: "ACTIVE", detail: "Premium Growth · 30 days", time: "1 hr ago" },
+  { id: "ROI-1044", name: "Ethan C.", type: "profit", amount: 50, status: "SUCCESS", detail: "Premium Growth · daily ROI", time: "2 hrs ago" },
+  { id: "DEP-3044", name: "Grace W.", type: "deposit", amount: 1800, status: "APPROVED", detail: "USDT · ERC20", time: "2 hrs ago" },
+  { id: "WDR-4044", name: "Hamza D.", type: "withdrawal", amount: -400, status: "APPROVED", detail: "USDT · TRC20", time: "3 hrs ago" },
+  { id: "INV-2045", name: "Chloe J.", type: "investment", amount: -8000, status: "ACTIVE", detail: "Premium Growth · 30 days", time: "3 hrs ago" },
+  { id: "ROI-1045", name: "Leo V.", type: "profit", amount: 160, status: "SUCCESS", detail: "Premium Growth · daily ROI", time: "4 hrs ago" },
+  { id: "DEP-3045", name: "Hannah G.", type: "deposit", amount: 3000, status: "APPROVED", detail: "Bank wire · GBP", time: "4 hrs ago" },
+  { id: "WDR-4045", name: "Samir I.", type: "withdrawal", amount: -980, status: "PENDING", detail: "Bitcoin network", time: "5 hrs ago" },
+  { id: "INV-2046", name: "Isla E.", type: "investment", amount: -450, status: "ACTIVE", detail: "Starter · 15 days", time: "5 hrs ago" },
+  { id: "ROI-1046", name: "Theo M.", type: "profit", amount: 90, status: "SUCCESS", detail: "VIP Capital · daily ROI", time: "6 hrs ago" },
+  { id: "DEP-3046", name: "Nina O.", type: "deposit", amount: 6400, status: "PENDING", detail: "USDT · TRC20", time: "6 hrs ago" },
+  { id: "WDR-4046", name: "Ryan K.", type: "withdrawal", amount: -2100, status: "APPROVED", detail: "USDT · ERC20", time: "7 hrs ago" },
 ];
 
 function formatMoney(amount: number) {
@@ -137,7 +137,7 @@ export default function DemoActivityCarousel() {
             type="button"
             onClick={() => goTo(activeIndex - 1)}
             className="w-8 h-8 rounded-lg border border-white/10 bg-slate-900 text-slate-400 hover:text-white hover:border-emerald-500/30 flex items-center justify-center transition"
-            aria-label="Previous demo activity"
+            aria-label="Previous activity"
           >
             <ArrowLeft className="w-4 h-4" />
           </button>
@@ -145,7 +145,7 @@ export default function DemoActivityCarousel() {
             type="button"
             onClick={() => setPaused((value) => !value)}
             className="w-8 h-8 rounded-lg border border-white/10 bg-slate-900 text-slate-400 hover:text-white hover:border-emerald-500/30 flex items-center justify-center transition"
-            aria-label={paused ? "Play demo activity animation" : "Pause demo activity animation"}
+            aria-label={paused ? "Play activity animation" : "Pause activity animation"}
           >
             {paused ? <Play className="w-3.5 h-3.5" /> : <Pause className="w-3.5 h-3.5" />}
           </button>
@@ -153,7 +153,7 @@ export default function DemoActivityCarousel() {
             type="button"
             onClick={() => goTo(activeIndex + 1)}
             className="w-8 h-8 rounded-lg border border-white/10 bg-slate-900 text-slate-400 hover:text-white hover:border-emerald-500/30 flex items-center justify-center transition"
-            aria-label="Next demo activity"
+            aria-label="Next activity"
           >
             <ArrowRight className="w-4 h-4" />
           </button>
@@ -193,9 +193,6 @@ export default function DemoActivityCarousel() {
                   <Icon className="w-3 h-3" />
                   {meta.label}
                 </span>
-                <span className="text-[9px] font-semibold uppercase tracking-wider text-slate-600 border border-white/5 rounded px-1.5 py-0.5">
-                  Demo
-                </span>
               </div>
 
               <div className="mt-4 flex items-end justify-between gap-3">
@@ -234,8 +231,8 @@ export default function DemoActivityCarousel() {
       </div>
 
       <p className="mt-1 text-[10px] text-slate-600">
-        Simulated demo ledger only. Names, IDs, balances and activity are fictional and are not real
-        customer records.
+        Simulated activity records only. Names, IDs, balances and activity are fictional and are not
+        real customer records.
       </p>
     </div>
   );

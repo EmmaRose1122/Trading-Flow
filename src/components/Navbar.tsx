@@ -4,7 +4,6 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import {
-  TrendingUp,
   LayoutDashboard,
   Layers,
   Receipt,
@@ -16,7 +15,10 @@ import {
   X,
   Wallet,
   Download,
+  Settings,
+  UserCircle,
 } from "lucide-react";
+import BrandLockup from "@/components/site/BrandLockup";
 
 interface NavbarProps {
   user?: {
@@ -56,18 +58,8 @@ export default function Navbar({ user, onOpenDeposit, onOpenWithdraw }: NavbarPr
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link href="/dashboard" className="flex items-center gap-2.5 group">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400 to-cyan-500 flex items-center justify-center shadow-lg shadow-emerald-500/20 group-hover:scale-105 transition-transform">
-              <TrendingUp className="w-5 h-5 text-slate-950 font-bold" />
-            </div>
-            <div>
-              <span className="text-lg font-bold tracking-tight text-white flex items-center gap-1.5">
-                TRADING<span className="text-emerald-400">FLOW</span>
-              </span>
-              <span className="block text-[10px] tracking-widest uppercase text-slate-400 font-medium">
-                Capital Platform
-              </span>
-            </div>
+          <Link href="/dashboard" aria-label="Trading Flow Capital dashboard">
+            <BrandLockup />
           </Link>
 
           {/* Desktop Navigation Links */}
@@ -127,7 +119,11 @@ export default function Navbar({ user, onOpenDeposit, onOpenWithdraw }: NavbarPr
 
                 <div className="h-5 w-px bg-white/10 mx-1" />
 
-                <div className="flex items-center gap-2 text-left">
+                <Link
+                  href="/profile"
+                  className="flex items-center gap-2 text-left hover:opacity-80 transition"
+                  title="Open profile"
+                >
                   <div className="w-8 h-8 rounded-full bg-slate-800 border border-emerald-500/30 flex items-center justify-center font-bold text-xs text-emerald-400">
                     {user.name.charAt(0)}
                   </div>
@@ -137,7 +133,16 @@ export default function Navbar({ user, onOpenDeposit, onOpenWithdraw }: NavbarPr
                       {user.role}
                     </span>
                   </div>
-                </div>
+                </Link>
+
+                <Link
+                  href="/settings"
+                  title="Account settings"
+                  aria-label="Account settings"
+                  className="p-2 rounded-lg text-slate-400 hover:text-emerald-400 hover:bg-emerald-500/10 transition-all"
+                >
+                  <Settings className="w-4 h-4" />
+                </Link>
 
                 <button
                   onClick={handleLogout}
@@ -167,6 +172,15 @@ export default function Navbar({ user, onOpenDeposit, onOpenWithdraw }: NavbarPr
 
           {/* Mobile menu button */}
           <div className="lg:hidden flex items-center">
+            {user && (
+              <Link
+                href="/profile"
+                aria-label="Open profile"
+                className="w-8 h-8 mr-1 rounded-full bg-slate-800 border border-emerald-500/30 flex items-center justify-center font-bold text-xs text-emerald-400"
+              >
+                {user.name.charAt(0)}
+              </Link>
+            )}
             <Link
               href="/download"
               aria-label="Download Android app"
@@ -218,6 +232,24 @@ export default function Navbar({ user, onOpenDeposit, onOpenWithdraw }: NavbarPr
               <div className="flex items-center justify-between text-xs text-slate-400 px-1">
                 <span>Signed in as {user.name}</span>
                 <span className="text-emerald-400 uppercase font-semibold">{user.role}</span>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <Link
+                  href="/profile"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center justify-center gap-2 py-2 text-xs font-semibold text-slate-200 bg-slate-800 border border-white/10 rounded-lg"
+                >
+                  <UserCircle className="w-4 h-4" />
+                  Profile
+                </Link>
+                <Link
+                  href="/settings"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center justify-center gap-2 py-2 text-xs font-semibold text-slate-200 bg-slate-800 border border-white/10 rounded-lg"
+                >
+                  <Settings className="w-4 h-4" />
+                  Settings
+                </Link>
               </div>
               {(onOpenDeposit || onOpenWithdraw) && (
                 <div className="grid grid-cols-2 gap-2">

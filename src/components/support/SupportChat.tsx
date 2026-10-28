@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { Bot, Mail, MessageCircle, RotateCcw, Send, ShieldAlert, Sparkles, UserRound, X } from "lucide-react";
+import { Mail, MessageCircle, RotateCcw, Send, ShieldAlert, Sparkles, UserRound, X } from "lucide-react";
 import { COMPANY } from "@/lib/site";
 
 type ChatRole = "user" | "assistant";
@@ -146,9 +147,13 @@ export default function SupportChat() {
         >
           <header className="flex items-center justify-between gap-3 px-4 py-3 border-b border-white/10 bg-[#0F172A]">
             <div className="flex items-center gap-2.5 min-w-0">
-              <span className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-400 to-cyan-500 flex items-center justify-center shrink-0">
-                <Bot className="w-5 h-5 text-slate-950" />
-              </span>
+              <Image
+                src="/brand/app-icon.png"
+                alt=""
+                width={36}
+                height={36}
+                className="w-9 h-9 rounded-xl shrink-0"
+              />
               <div className="min-w-0">
                 <h2 className="text-sm font-bold text-white truncate">{COMPANY.name}</h2>
               </div>

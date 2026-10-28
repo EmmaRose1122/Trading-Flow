@@ -13,16 +13,42 @@ export async function POST(req: Request) {
     const user = db.findUserById(session.userId);
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const { amount, method, destination } = await req.json();
+    const { amount, method, destination, payoutWalletId } = await req.json();
     const withdrawAmount = parseMoney(amount);
-    const normalizedDestination = typeof destination === "string" ? destination.trim() : "";
 
+    if (user.kycStatus !== "APPROVED") {
+      return NextResponse.json(
+        { error: "KYC verification must be approved before you can withdraw funds." },
+        { status: 403 }
+      );
+    }
     if (withdrawAmount === null || withdrawAmount < 20) {
       return NextResponse.json({ error: "Enter a valid withdrawal of at least $20 with up to 2 decimals" }, { status: 400 });
     }
 
-    if (normalizedDestination.length < 6 || normalizedDestination.length > 128) {
+    let payoutAddress = typeof destination === "string" ? destination.trim() : "";
+    let payoutMethod = typeof method === "string" && method.trim() ? method.trim() : "USDT (TRC20)";
+    let savedWalletId: string | undefined;
+
+    if (typeof payoutWalletId === "string" && payoutWalletId) {
+      const savedWallet = db
+        .getPayoutWalletsByUserId(user.id)
+        .find((wallet) => wallet.id === payoutWalletId);
+      if (!savedWallet) {
+        return NextResponse.json({ error: "Payout wallet not found" }, { status: 400 });
+      }
+      payoutAddress = savedWallet.address;
+      payoutMethod = savedWallet.network
+        ? `${savedWallet.method} · ${savedWallet.network}`
+        : savedWallet.method;
+      savedWalletId = savedWallet.id;
+    }
+
+    if (payoutAddress.length < 6 || payoutAddress.length > 240) {
       return NextResponse.json({ error: "A valid destination wallet address is required" }, { status: 400 });
+    }
+    if (payoutMethod.length > 120) {
+      return NextResponse.json({ error: "Payout method is too long" }, { status: 400 });
     }
 
     const wallet = db.getWalletByUserId(user.id);
@@ -49,9 +75,12 @@ export async function POST(req: Request) {
       amount: withdrawAmount,
       fee,
       status: "PENDING",
-      method: typeof method === "string" && method.trim() ? method.trim() : "USDT (TRC20)",
-      destination: normalizedDestination,
-      note: "Withdrawal request queued for processing",
+      method: payoutMethod,
+      destination: payoutAddress,
+      payoutWalletId: savedWalletId,
+      note: savedWalletId
+        ? "Withdrawal request queued to saved payout wallet"
+        : "Withdrawal request queued for processing",
       createdAt: new Date().toISOString(),
     });
 

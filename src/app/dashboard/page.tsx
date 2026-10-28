@@ -26,6 +26,7 @@ import {
   Download,
 } from "lucide-react";
 import { Investment, Transaction, Wallet as WalletType, User } from "@/lib/db";
+import { displayReferralCode } from "@/lib/referral";
 
 type InvestmentProfit = Investment & { dailyProfit: number };
 
@@ -137,7 +138,7 @@ export default function DashboardPage() {
             </div>
             <p className="text-xs text-slate-400">
               Account ID: #{user?.id} | Referral Code:{" "}
-              <strong className="text-emerald-400 font-mono">{user?.referralCode}</strong>
+              <strong className="text-emerald-400 font-mono">{displayReferralCode(user?.referralCode)}</strong>
             </p>
           </div>
 
@@ -390,6 +391,7 @@ export default function DashboardPage() {
                       tx.type === "DEPOSIT" ||
                       tx.type === "PROFIT" ||
                       tx.type === "CAPITAL_RETURN" ||
+                      tx.type === "REFERRAL" ||
                       (tx.type === "BONUS" && tx.amount >= 0);
                     return (
                       <tr key={tx.id} className="hover:bg-white/[0.02] transition-colors">

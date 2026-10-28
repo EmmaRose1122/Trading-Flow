@@ -2,6 +2,25 @@ import fs from "fs";
 import path from "path";
 import bcrypt from "bcryptjs";
 import { calculateDailyProfit } from "./money";
+import {
+  PLATFORM_REFERRAL_CODE,
+  REFERRAL_LEVEL_RATES,
+  normalizeReferralCode,
+} from "./referral";
+
+export type KycStatus = "NOT_STARTED" | "PENDING" | "APPROVED" | "REJECTED";
+
+export interface KycDetails {
+  legalName: string;
+  dateOfBirth: string;
+  country: string;
+  address: string;
+  documentType: string;
+  documentReference: string;
+  submittedAt: string;
+  reviewedAt?: string;
+  rejectionReason?: string;
+}
 
 export interface User {
   id: string;
@@ -11,6 +30,36 @@ export interface User {
   role: "USER" | "ADMIN";
   referralCode: string;
   referredBy?: string;
+  createdAt: string;
+  twoFactorEnabled?: boolean;
+  twoFactorSecret?: string;
+  twoFactorPendingSecret?: string;
+  twoFactorRecoveryHashes?: string[];
+  kycStatus?: KycStatus;
+  kycDetails?: KycDetails;
+}
+
+export interface DepositAccount {
+  id: string;
+  label: string;
+  method: string;
+  network?: string;
+  currency: string;
+  address: string;
+  accountName?: string;
+  instructions?: string;
+  isActive: boolean;
+  createdAt: string;
+}
+
+export interface PayoutWallet {
+  id: string;
+  userId: string;
+  label: string;
+  method: string;
+  network?: string;
+  address: string;
+  isProfitDestination: boolean;
   createdAt: string;
 }
 
@@ -22,6 +71,7 @@ export interface Wallet {
   totalProfit: number;
   totalDeposited: number;
   totalWithdrawn: number;
+  totalReferralEarnings?: number;
   updatedAt: string;
 }
 
@@ -55,14 +105,27 @@ export interface Transaction {
   userId: string;
   userEmail?: string;
   userName?: string;
-  type: "DEPOSIT" | "WITHDRAWAL" | "INVESTMENT" | "PROFIT" | "CAPITAL_RETURN" | "BONUS";
+  type:
+    | "DEPOSIT"
+    | "WITHDRAWAL"
+    | "INVESTMENT"
+    | "PROFIT"
+    | "CAPITAL_RETURN"
+    | "BONUS"
+    | "REFERRAL";
   amount: number;
   fee: number;
   status: "PENDING" | "APPROVED" | "REJECTED" | "SUCCESS";
   method: string;
   txHash?: string;
   destination?: string;
+  payoutWalletId?: string;
   proofUrl?: string;
+  depositAccountId?: string;
+  referralLevel?: number;
+  sourceUserId?: string;
+  sourceUserName?: string;
+  investmentId?: string;
   note?: string;
   adminId?: string;
   previousBalance?: number;
@@ -76,6 +139,8 @@ interface DatabaseSchema {
   plans: InvestmentPlan[];
   investments: Investment[];
   transactions: Transaction[];
+  depositAccounts?: DepositAccount[];
+  payoutWallets?: PayoutWallet[];
 }
 
 const DB_FILE = process.env.DB_FILE
@@ -92,75 +157,159 @@ const CURRENT_PLAN_RATES: Record<string, number> = {
 };
 
 function ensureBootstrapAdmin(data: DatabaseSchema) {
-  const adminEmail = (process.env.ADMIN_EMAIL || "admin@tradingflow.com").trim().toLowerCase();
-  const adminPassword = (process.env.ADMIN_PASSWORD || "").trim();
-  const adminName = (process.env.ADMIN_NAME || "Platform Master Admin").trim();
-  const adminReferral = (process.env.ADMIN_REFERRAL_CODE || "ADMIN001").trim().toUpperCase();
+  const adminEmail = (process.env.ADMIN_EMAIL || "").trim().toLowerCase();
+  const adminPassword = process.env.ADMIN_PASSWORD || "";
+  const adminName = (process.env.ADMIN_NAME || "Platform Admin").trim();
+  const adminReferral = PLATFORM_REFERRAL_CODE;
 
-  // If custom password provided in environment variables (minimum 6 characters)
-  if (adminPassword.length >= 6) {
-    const existing = data.users.find((u) => u.email.toLowerCase() === adminEmail);
-    if (existing) {
-      existing.passwordHash = bcrypt.hashSync(adminPassword, 12);
-      existing.role = "ADMIN";
-      existing.name = adminName;
-      return true;
-    }
+  const demoAdminEmails = new Set(["admin@tradingflow.com"]);
+  if (
+    data.users.some(
+      (user) => user.role === "ADMIN" && !demoAdminEmails.has(user.email.toLowerCase())
+    )
+  ) {
+    return false;
+  }
+  if (!/^\S+@\S+\.\S+$/.test(adminEmail) || adminPassword.length < 12) return false;
+  if (data.users.some((user) => user.email.toLowerCase() === adminEmail)) return false;
 
-    const userId = "usr_bootstrap_admin";
-    data.users.unshift({
-      id: userId,
-      email: adminEmail,
-      name: adminName,
-      passwordHash: bcrypt.hashSync(adminPassword, 12),
-      role: "ADMIN",
-      referralCode: adminReferral,
-      createdAt: new Date().toISOString(),
-    });
-
-    if (!data.wallets.some((w) => w.userId === userId)) {
-      data.wallets.push({
-        id: "wlt_bootstrap_admin",
-        userId,
-        currentBalance: 500000.0,
-        totalInvested: 0,
-        totalProfit: 0,
-        totalDeposited: 500000.0,
-        totalWithdrawn: 0,
-        updatedAt: new Date().toISOString(),
-      });
-    }
-    return true;
+  if (
+    data.users.some(
+      (user) => normalizeReferralCode(user.referralCode) === normalizeReferralCode(adminReferral)
+    )
+  ) {
+    return false;
   }
 
-  // Fallback: Ensure at least one admin exists if database has no admin
-  if (!data.users.some((u) => u.role === "ADMIN")) {
-    const userId = "usr_admin";
-    data.users.unshift({
-      id: userId,
-      email: adminEmail,
-      name: adminName,
-      passwordHash: bcrypt.hashSync("admin123", 12),
-      role: "ADMIN",
-      referralCode: adminReferral,
-      createdAt: new Date().toISOString(),
-    });
-    if (!data.wallets.some((w) => w.userId === userId)) {
-      data.wallets.push({
-        id: "wlt_admin",
-        userId,
-        currentBalance: 500000.0,
-        totalInvested: 0,
-        totalProfit: 0,
-        totalDeposited: 500000.0,
-        totalWithdrawn: 0,
-        updatedAt: new Date().toISOString(),
-      });
+  const userId = "usr_bootstrap_admin";
+  data.users.unshift({
+    id: userId,
+    email: adminEmail,
+    name: adminName,
+    passwordHash: bcrypt.hashSync(adminPassword, 12),
+    role: "ADMIN",
+    referralCode: adminReferral,
+    createdAt: new Date().toISOString(),
+  });
+  data.wallets.push({
+    id: "wlt_bootstrap_admin",
+    userId,
+    currentBalance: 0,
+    totalInvested: 0,
+    totalProfit: 0,
+    totalDeposited: 0,
+    totalWithdrawn: 0,
+    updatedAt: new Date().toISOString(),
+  });
+  return true;
+}
+
+function getDefaultDepositAccounts(): DepositAccount[] {
+  const createdAt = new Date().toISOString();
+  return [
+    {
+      id: "dep_usdt_trc20",
+      label: "USDT (TRC20)",
+      method: "USDT (TRC20)",
+      network: "TRON",
+      currency: "USDT",
+      address: "TNVbE1fB8QzLkmXzV8o14Y7J6Xk9Pq3Wa7",
+      accountName: "Trading Flow Capital",
+      instructions: "Send only USDT on the TRC20 network to this address.",
+      isActive: true,
+      createdAt,
+    },
+    {
+      id: "dep_btc",
+      label: "Bitcoin (BTC)",
+      method: "Bitcoin (BTC)",
+      network: "Bitcoin",
+      currency: "BTC",
+      address: "bc1q8x4f0k726af8yqlpt840x9812lkm904",
+      accountName: "Trading Flow Capital",
+      instructions: "Send only Bitcoin to this address.",
+      isActive: true,
+      createdAt,
+    },
+    {
+      id: "dep_eth_erc20",
+      label: "Ethereum (ERC20)",
+      method: "Ethereum (ERC20)",
+      network: "Ethereum",
+      currency: "ETH / USDT",
+      address: "0x71C7656EC7ab88b098defB751B7401B5f6d8976F",
+      accountName: "Trading Flow Capital",
+      instructions: "Confirm the network before sending funds.",
+      isActive: true,
+      createdAt,
+    },
+    {
+      id: "dep_gbp_bank",
+      label: "GBP Bank Transfer (demo)",
+      method: "Bank Transfer",
+      network: "Faster Payments",
+      currency: "GBP",
+      address: "Demo Bank · Sort code 00-00-00 · Account 00000000",
+      accountName: "Trading Flow Capital Ltd",
+      instructions: "Demonstration account details. Replace before accepting real funds.",
+      isActive: true,
+      createdAt,
+    },
+  ];
+}
+
+function ensureFeatureCollections(data: DatabaseSchema) {
+  let changed = false;
+  if (!Array.isArray(data.depositAccounts)) {
+    data.depositAccounts = getDefaultDepositAccounts();
+    changed = true;
+  }
+  if (!Array.isArray(data.payoutWallets)) {
+    data.payoutWallets = [];
+    changed = true;
+  }
+  return changed;
+}
+
+function ensurePlatformReferralCode(data: DatabaseSchema) {
+  const configuredEmail = (process.env.ADMIN_EMAIL || "").trim().toLowerCase();
+  const admin =
+    data.users.find(
+      (user) => user.role === "ADMIN" && user.email.toLowerCase() === configuredEmail
+    ) || data.users.find((user) => user.role === "ADMIN");
+  if (!admin) return false;
+
+  const platformCode = normalizeReferralCode(PLATFORM_REFERRAL_CODE);
+  const currentCode = normalizeReferralCode(admin.referralCode);
+  let changed = false;
+
+  if (currentCode !== platformCode) {
+    const conflict = data.users.some(
+      (user) => user.id !== admin.id && normalizeReferralCode(user.referralCode) === platformCode
+    );
+    if (conflict) return false;
+    admin.referralCode = PLATFORM_REFERRAL_CODE;
+    changed = true;
+    if (currentCode) {
+      for (const user of data.users) {
+        if (normalizeReferralCode(user.referredBy) === currentCode) {
+          user.referredBy = PLATFORM_REFERRAL_CODE;
+        }
+      }
     }
-    return true;
+  } else if (admin.referralCode !== PLATFORM_REFERRAL_CODE) {
+    admin.referralCode = PLATFORM_REFERRAL_CODE;
+    changed = true;
   }
 
-  return false;
+  for (const user of data.users) {
+    if (user.role !== "ADMIN" && !normalizeReferralCode(user.referredBy)) {
+      user.referredBy = PLATFORM_REFERRAL_CODE;
+      changed = true;
+    }
+  }
+
+  return changed;
 }
 
 function synchronizePlanCatalog(data: DatabaseSchema) {
@@ -196,7 +345,7 @@ function getDefaultData(): DatabaseSchema {
         name: "Platform Master Admin",
         passwordHash: adminHash,
         role: "ADMIN",
-        referralCode: "ADMIN001",
+        referralCode: PLATFORM_REFERRAL_CODE,
         createdAt: "2026-01-01T00:00:00.000Z",
       },
       {
@@ -206,6 +355,7 @@ function getDefaultData(): DatabaseSchema {
         passwordHash: userHash,
         role: "USER",
         referralCode: "TF89231",
+        referredBy: PLATFORM_REFERRAL_CODE,
         createdAt: "2026-01-10T00:00:00.000Z",
       },
     ] : [],
@@ -218,6 +368,7 @@ function getDefaultData(): DatabaseSchema {
         totalProfit: 0,
         totalDeposited: 500000.0,
         totalWithdrawn: 0,
+        totalReferralEarnings: 0,
         updatedAt: new Date().toISOString(),
       },
       {
@@ -228,6 +379,7 @@ function getDefaultData(): DatabaseSchema {
         totalProfit: 6580.45,
         totalDeposited: 36000.0,
         totalWithdrawn: 5000.0,
+        totalReferralEarnings: 0,
         updatedAt: new Date().toISOString(),
       },
     ] : [],
@@ -343,6 +495,21 @@ function getDefaultData(): DatabaseSchema {
         createdAt: "2026-10-16T12:00:00.000Z",
       },
     ] : [],
+    depositAccounts: getDefaultDepositAccounts(),
+    payoutWallets: includeDemoAccounts
+      ? [
+          {
+            id: "pwl_demo_btc",
+            userId: "usr_investor",
+            label: "Demo BTC payout",
+            method: "Bitcoin (BTC)",
+            network: "Bitcoin",
+            address: "bc1q9demo4payout7wallet2example8address",
+            isProfitDestination: true,
+            createdAt: "2026-10-20T10:00:00.000Z",
+          },
+        ]
+      : [],
   };
 }
 
@@ -356,12 +523,18 @@ function loadDatabase(): DatabaseSchema {
     inMemoryData = JSON.parse(raw) as DatabaseSchema;
     const plansChanged = synchronizePlanCatalog(inMemoryData);
     const adminCreated = ensureBootstrapAdmin(inMemoryData);
-    if (plansChanged || adminCreated) saveDatabase(inMemoryData);
+    const featuresInitialized = ensureFeatureCollections(inMemoryData);
+    const platformReferralChanged = ensurePlatformReferralCode(inMemoryData);
+    if (plansChanged || adminCreated || featuresInitialized || platformReferralChanged) {
+      saveDatabase(inMemoryData);
+    }
     return inMemoryData;
   }
 
   const initialData = getDefaultData();
   ensureBootstrapAdmin(initialData);
+  ensureFeatureCollections(initialData);
+  ensurePlatformReferralCode(initialData);
   saveDatabase(initialData);
   return initialData;
 }
@@ -387,7 +560,12 @@ export const db = {
     if (data.users.some((entry) => entry.email.toLowerCase() === user.email.toLowerCase())) {
       throw new Error("DUPLICATE_EMAIL");
     }
-    if (data.users.some((entry) => entry.referralCode === user.referralCode)) {
+    if (
+      data.users.some(
+        (entry) =>
+          normalizeReferralCode(entry.referralCode) === normalizeReferralCode(user.referralCode)
+      )
+    ) {
       throw new Error("DUPLICATE_REFERRAL_CODE");
     }
     data.users.push(user);
@@ -400,6 +578,7 @@ export const db = {
       totalProfit: 0.0,
       totalDeposited: balance,
       totalWithdrawn: 0.0,
+      totalReferralEarnings: 0.0,
       updatedAt: new Date().toISOString(),
     });
     saveDatabase(data);
@@ -435,6 +614,75 @@ export const db = {
     return investment;
   },
 
+  distributeReferralCommissions: (investment: Investment) => {
+    const data = loadDatabase();
+    const investor = data.users.find((user) => user.id === investment.userId);
+    if (!investor || investment.investedAmount <= 0) {
+      return { credited: 0, total: 0, entries: [] as Transaction[] };
+    }
+
+    const alreadyCredited = new Set(
+      data.transactions
+        .filter((tx) => tx.type === "REFERRAL" && tx.investmentId === investment.id)
+        .map((tx) => tx.userId)
+    );
+
+    let current = investor;
+    const seen = new Set<string>([investor.id]);
+    const entries: Transaction[] = [];
+    let total = 0;
+
+    for (let level = 1; level <= REFERRAL_LEVEL_RATES.length; level += 1) {
+      const sponsorCode = normalizeReferralCode(current.referredBy);
+      if (!sponsorCode) break;
+      const sponsor = data.users.find(
+        (user) => normalizeReferralCode(user.referralCode) === sponsorCode
+      );
+      if (!sponsor || seen.has(sponsor.id)) break;
+      seen.add(sponsor.id);
+
+      const rate = REFERRAL_LEVEL_RATES[level - 1];
+      const amount = Math.round(investment.investedAmount * rate) / 100;
+      if (amount > 0 && !alreadyCredited.has(sponsor.id)) {
+        const wallet = data.wallets.find((entry) => entry.userId === sponsor.id);
+        if (wallet) {
+          wallet.currentBalance = Math.round((wallet.currentBalance + amount) * 100) / 100;
+          wallet.totalReferralEarnings =
+            Math.round(((wallet.totalReferralEarnings || 0) + amount) * 100) / 100;
+          wallet.updatedAt = new Date().toISOString();
+
+          const transaction: Transaction = {
+            id: `TX-REF-${investment.id}-L${level}-${sponsor.id}`,
+            userId: sponsor.id,
+            userEmail: sponsor.email,
+            userName: sponsor.name,
+            type: "REFERRAL",
+            amount,
+            fee: 0,
+            status: "SUCCESS",
+            method: `Referral Commission · Level ${level}`,
+            referralLevel: level,
+            sourceUserId: investor.id,
+            sourceUserName: investor.name,
+            investmentId: investment.id,
+            previousBalance: Math.round((wallet.currentBalance - amount) * 100) / 100,
+            newBalance: wallet.currentBalance,
+            note: `Level ${level} commission from ${investor.name} · ${investment.planName}`,
+            createdAt: new Date().toISOString(),
+          };
+          data.transactions.unshift(transaction);
+          entries.push(transaction);
+          total = Math.round((total + amount) * 100) / 100;
+        }
+      }
+
+      current = sponsor;
+    }
+
+    if (entries.length > 0) saveDatabase(data);
+    return { credited: entries.length, total, entries };
+  },
+
   getTransactions: (userId?: string) => {
     const data = loadDatabase();
     if (userId) {
@@ -464,6 +712,9 @@ export const db = {
       if (!wallet || !user) continue;
 
       const profit = calculateDailyProfit(investment.investedAmount, investment.dailyPercentage);
+      const payoutWallet = data.payoutWallets?.find(
+        (entry) => entry.userId === user.id && entry.isProfitDestination
+      );
       wallet.currentBalance = Math.round((wallet.currentBalance + profit) * 100) / 100;
       wallet.totalProfit = Math.round((wallet.totalProfit + profit) * 100) / 100;
       investment.remainingDays -= 1;
@@ -478,7 +729,11 @@ export const db = {
         fee: 0,
         status: "SUCCESS",
         method: "Automated Daily ROI",
-        note: `Daily profit for ${investment.planName}`,
+        destination: payoutWallet?.address,
+        payoutWalletId: payoutWallet?.id,
+        note: payoutWallet
+          ? `Daily profit for ${investment.planName} · payout destination: ${payoutWallet.label}`
+          : `Daily profit for ${investment.planName}`,
         createdAt: date.toISOString(),
       });
       processed += 1;
@@ -548,6 +803,106 @@ export const db = {
     const user = data.users.find((u) => u.id === userId);
     if (!user) return false;
     user.passwordHash = newPasswordHash;
+    saveDatabase(data);
+    return true;
+  },
+
+  updateUserProfile: (userId: string, partial: Pick<User, "name" | "email">) => {
+    const data = loadDatabase();
+    const user = data.users.find((u) => u.id === userId);
+    if (!user) return null;
+    user.name = partial.name;
+    user.email = partial.email;
+    saveDatabase(data);
+    return user;
+  },
+
+  updateUserSecurity: (
+    userId: string,
+    partial: Pick<
+      User,
+      | "twoFactorEnabled"
+      | "twoFactorSecret"
+      | "twoFactorPendingSecret"
+      | "twoFactorRecoveryHashes"
+      | "kycStatus"
+      | "kycDetails"
+    >
+  ) => {
+    const data = loadDatabase();
+    const user = data.users.find((u) => u.id === userId);
+    if (!user) return null;
+    Object.assign(user, partial);
+    saveDatabase(data);
+    return user;
+  },
+
+  getAllInvestments: () => loadDatabase().investments,
+
+  getDepositAccounts: () => loadDatabase().depositAccounts || [],
+
+  createDepositAccount: (account: DepositAccount) => {
+    const data = loadDatabase();
+    data.depositAccounts = data.depositAccounts || [];
+    data.depositAccounts.unshift(account);
+    saveDatabase(data);
+    return account;
+  },
+
+  updateDepositAccount: (id: string, partial: Partial<DepositAccount>) => {
+    const data = loadDatabase();
+    const account = data.depositAccounts?.find((entry) => entry.id === id);
+    if (!account) return null;
+    Object.assign(account, partial, { id: account.id, createdAt: account.createdAt });
+    saveDatabase(data);
+    return account;
+  },
+
+  deleteDepositAccount: (id: string) => {
+    const data = loadDatabase();
+    const initialLength = data.depositAccounts?.length || 0;
+    data.depositAccounts = (data.depositAccounts || []).filter((entry) => entry.id !== id);
+    if (data.depositAccounts.length === initialLength) return false;
+    saveDatabase(data);
+    return true;
+  },
+
+  getPayoutWalletsByUserId: (userId: string) =>
+    loadDatabase().payoutWallets?.filter((wallet) => wallet.userId === userId) || [],
+
+  createPayoutWallet: (wallet: PayoutWallet) => {
+    const data = loadDatabase();
+    data.payoutWallets = data.payoutWallets || [];
+    const userWallets = data.payoutWallets.filter((entry) => entry.userId === wallet.userId);
+    if (wallet.isProfitDestination || userWallets.length === 0) {
+      for (const entry of userWallets) entry.isProfitDestination = false;
+      wallet.isProfitDestination = true;
+    }
+    data.payoutWallets.push(wallet);
+    saveDatabase(data);
+    return wallet;
+  },
+
+  setProfitDestinationWallet: (userId: string, walletId: string) => {
+    const data = loadDatabase();
+    const wallets = data.payoutWallets?.filter((wallet) => wallet.userId === userId) || [];
+    if (!wallets.some((wallet) => wallet.id === walletId)) return false;
+    for (const wallet of wallets) wallet.isProfitDestination = wallet.id === walletId;
+    saveDatabase(data);
+    return true;
+  },
+
+  deletePayoutWallet: (userId: string, walletId: string) => {
+    const data = loadDatabase();
+    const wallet = data.payoutWallets?.find(
+      (entry) => entry.id === walletId && entry.userId === userId
+    );
+    if (!wallet) return false;
+    data.payoutWallets = (data.payoutWallets || []).filter((entry) => entry.id !== walletId);
+    if (wallet.isProfitDestination) {
+      const remaining = data.payoutWallets.find((entry) => entry.userId === userId);
+      if (remaining) remaining.isProfitDestination = true;
+    }
     saveDatabase(data);
     return true;
   },

@@ -3,7 +3,9 @@
 import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { TrendingUp, Lock, Mail, User, ArrowRight, ShieldAlert, Users, Eye, EyeOff } from "lucide-react";
+import { Lock, Mail, User, ArrowRight, ShieldAlert, Users, Eye, EyeOff } from "lucide-react";
+import BrandLockup from "@/components/site/BrandLockup";
+import { PLATFORM_REFERRAL_CODE, displayReferralCode } from "@/lib/referral";
 
 function RegisterForm() {
   const router = useRouter();
@@ -14,7 +16,9 @@ function RegisterForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [referredBy, setReferredBy] = useState(refCode);
+  const [referredBy, setReferredBy] = useState(
+    displayReferralCode(refCode || PLATFORM_REFERRAL_CODE)
+  );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -53,13 +57,12 @@ function RegisterForm() {
   return (
     <div className="relative w-full max-w-md rounded-3xl glass-panel p-8 shadow-2xl border border-white/10">
       <div className="text-center mb-8">
-        <Link href="/" className="inline-flex items-center gap-2.5 mb-3 group">
-          <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-emerald-400 to-cyan-500 flex items-center justify-center shadow-lg shadow-emerald-500/20 group-hover:scale-105 transition-transform">
-            <TrendingUp className="w-6 h-6 text-slate-950 font-bold" />
-          </div>
-          <span className="text-2xl font-extrabold tracking-tight text-white">
-            TRADING<span className="text-emerald-400">FLOW</span>
-          </span>
+        <Link
+          href="/"
+          className="inline-flex mb-3"
+          aria-label="Trading Flow Capital home"
+        >
+          <BrandLockup iconSize={48} priority />
         </Link>
         <h2 className="text-lg font-bold text-white tracking-tight">Create Institutional Account</h2>
         <p className="text-xs text-slate-400 mt-1">
@@ -149,13 +152,17 @@ function RegisterForm() {
               type="text"
               required
               value={referredBy}
-              onChange={(e) => setReferredBy(e.target.value.toUpperCase())}
-              placeholder="e.g. TF89231 or ADMIN001"
+              onChange={(e) => setReferredBy(e.target.value)}
+              placeholder="trading flow"
               className="w-full pl-9 pr-4 py-2.5 rounded-xl bg-slate-900 border border-white/10 text-white placeholder-slate-500 text-sm font-mono tracking-wider focus:outline-none focus:border-emerald-500"
             />
           </div>
           <p className="text-[11px] text-slate-500 mt-1">
-            Platform membership is invitation-only. Please provide your sponsor&apos;s code.
+            Invitation code:{" "}
+            <span className="font-mono text-emerald-400">
+              {displayReferralCode(PLATFORM_REFERRAL_CODE)}
+            </span>{" "}
+            · You can replace it with your sponsor&apos;s code.
           </p>
         </div>
 

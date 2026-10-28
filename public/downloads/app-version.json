@@ -1,9 +1,9 @@
 {
-  "versionName": "1.0.1",
-  "versionCode": 26102820,
+  "versionName": "1.0.2",
+  "versionCode": 26102821,
   "apkUrl": "/downloads/trading-flow.apk",
-  "sha256": "dd14c0207762bc118a1db2fe8ae48c56d41e34397402d6f6168db3211c5b12d5",
-  "sizeBytes": 16868,
-  "publishedAt": "2026-10-28T15:32:56Z",
+  "sha256": "13f8a08ec81feea0e92a6245ce32a1b317fd95a68d6a8a61a98a19a93d125660",
+  "sizeBytes": 103216,
+  "publishedAt": "2026-10-28T15:42:53Z",
   "serverUrl": "https://trading-flow-capital.vercel.app"
 }

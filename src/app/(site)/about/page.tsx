@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Building2, CheckCircle2, ShieldCheck, Users } from "lucide-react";
 import { breadcrumbJsonLd, createPageMetadata } from "@/lib/seo";
 import { COMPANY } from "@/lib/site";
+import { PLATFORM_REFERRAL_CODE, displayReferralCode } from "@/lib/referral";
 
 export const metadata: Metadata = createPageMetadata({
   title: "About Our UK Investment Platform",
@@ -21,7 +23,9 @@ const principles = [
   {
     icon: Users,
     title: "Deliberate access",
-    text: "Invitation-based registration keeps onboarding traceable through sponsor referral codes.",
+    text: `Invitation-based registration keeps onboarding traceable. The platform invitation code is ${displayReferralCode(
+      PLATFORM_REFERRAL_CODE
+    )}, and sponsor referral codes build the 15-level partner network.`,
   },
   {
     icon: CheckCircle2,
@@ -111,6 +115,15 @@ export default function AboutPage() {
           </div>
 
           <aside className="h-fit rounded-2xl border border-white/10 bg-[#0C1320] p-6">
+            <div className="mb-6 overflow-hidden rounded-xl bg-white p-4">
+              <Image
+                src="/brand/logo-lockup-light.png"
+                alt="Trading Flow Capital"
+                width={1220}
+                height={375}
+                className="h-auto w-full"
+              />
+            </div>
             <div className="flex items-center gap-3 mb-5">
               <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
                 <Building2 className="w-5 h-5 text-emerald-400" />

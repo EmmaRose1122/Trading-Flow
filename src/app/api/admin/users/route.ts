@@ -3,6 +3,7 @@ import { randomBytes } from "crypto";
 import { getSession, hashPassword } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { parseMoney, roundMoney } from "@/lib/money";
+import { PLATFORM_REFERRAL_CODE, normalizeReferralCode } from "@/lib/referral";
 
 export async function POST(req: Request) {
   try {
@@ -32,13 +33,13 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Email is already registered" }, { status: 409 });
     }
 
-    // Referral code logic:
-    // If Admin leaves it empty -> Direct Upline (Root / Direct under platform, referredBy = undefined)
-    // If Admin enters a code -> validate that sponsor exists
-    let validReferral: string | undefined = undefined;
+    // Empty sponsor defaults to the platform admin code so every account has a valid upline.
+    let validReferral: string = PLATFORM_REFERRAL_CODE;
     if (typeof referredBy === "string" && referredBy.trim()) {
-      const code = referredBy.trim().toUpperCase();
-      const sponsor = db.getUsers().find((u) => u.referralCode === code);
+      const code = normalizeReferralCode(referredBy);
+      const sponsor = db
+        .getUsers()
+        .find((u) => normalizeReferralCode(u.referralCode) === code);
       if (!sponsor) {
         return NextResponse.json({ error: `Sponsor with referral code "${code}" does not exist` }, { status: 400 });
       }

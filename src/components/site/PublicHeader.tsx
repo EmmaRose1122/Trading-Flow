@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { ArrowRight, Download, Menu, TrendingUp, X } from "lucide-react";
+import { ArrowRight, Download, Menu, X } from "lucide-react";
+import BrandLockup from "@/components/site/BrandLockup";
 import { COMPANY, LEGAL_PAGES, PUBLIC_PAGES } from "@/lib/site";
 
 export default function PublicHeader() {
@@ -19,17 +20,7 @@ export default function PublicHeader() {
             className="flex items-center gap-2.5"
             aria-label={`${COMPANY.name} home`}
           >
-            <span className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400 to-cyan-500 flex items-center justify-center shadow-lg shadow-emerald-500/20">
-              <TrendingUp className="w-5 h-5 text-slate-950" />
-            </span>
-            <span>
-              <span className="block text-lg font-bold tracking-tight text-white leading-none">
-                TRADING<span className="text-emerald-400">FLOW</span>
-              </span>
-              <span className="block text-[9px] tracking-[0.2em] uppercase text-slate-400 mt-1">
-                Capital · United Kingdom
-              </span>
-            </span>
+            <BrandLockup priority />
           </Link>
 
           <nav className="hidden lg:flex items-center gap-1" aria-label="Main navigation">

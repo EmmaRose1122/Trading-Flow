@@ -20,7 +20,7 @@ const ranges: Record<string, number | null> = {
 function balanceEffect(tx: Transaction) {
   if (tx.status === "REJECTED") return 0;
   if (tx.status === "PENDING" && tx.type !== "WITHDRAWAL") return 0;
-  if (["DEPOSIT", "PROFIT", "CAPITAL_RETURN", "BONUS"].includes(tx.type)) return tx.amount;
+  if (["DEPOSIT", "PROFIT", "CAPITAL_RETURN", "BONUS", "REFERRAL"].includes(tx.type)) return tx.amount;
   if (["WITHDRAWAL", "INVESTMENT"].includes(tx.type)) return -(tx.amount + tx.fee);
   return 0;
 }

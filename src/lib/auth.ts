@@ -13,6 +13,7 @@ function getJwtSecret() {
 const TOKEN_NAME = "tf_session";
 const TOKEN_ISSUER = "trading-flow";
 const TOKEN_AUDIENCE = "trading-flow-app";
+const TWO_FACTOR_AUDIENCE = "trading-flow-2fa";
 
 export interface SessionPayload {
   userId: string;
@@ -37,6 +38,31 @@ export async function signToken(payload: SessionPayload): Promise<string> {
     .setIssuedAt()
     .setExpirationTime("7d")
     .sign(getJwtSecret());
+}
+
+export async function signTwoFactorChallenge(userId: string): Promise<string> {
+  return new SignJWT({ userId, purpose: "two-factor-login" })
+    .setProtectedHeader({ alg: "HS256" })
+    .setIssuer(TOKEN_ISSUER)
+    .setAudience(TWO_FACTOR_AUDIENCE)
+    .setIssuedAt()
+    .setExpirationTime("5m")
+    .sign(getJwtSecret());
+}
+
+export async function verifyTwoFactorChallenge(token: string): Promise<string | null> {
+  try {
+    const { payload } = await jwtVerify(token, getJwtSecret(), {
+      issuer: TOKEN_ISSUER,
+      audience: TWO_FACTOR_AUDIENCE,
+    });
+    if (payload.purpose !== "two-factor-login" || typeof payload.userId !== "string") {
+      return null;
+    }
+    return payload.userId;
+  } catch {
+    return null;
+  }
 }
 
 export async function verifyToken(token: string): Promise<SessionPayload | null> {

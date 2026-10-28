@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { X, Copy, Check, ArrowRight, ShieldAlert, QrCode } from "lucide-react";
+import { useEffect, useState } from "react";
+import { X, Copy, Check, ArrowRight, ShieldAlert, Wallet } from "lucide-react";
 
 interface DepositModalProps {
   isOpen: boolean;
@@ -9,51 +9,92 @@ interface DepositModalProps {
   onSuccess: () => void;
 }
 
+interface DepositAccountOption {
+  id: string;
+  label: string;
+  method: string;
+  network?: string;
+  currency: string;
+  address: string;
+  accountName?: string;
+  instructions?: string;
+}
+
 export default function DepositModal({ isOpen, onClose, onSuccess }: DepositModalProps) {
-  const [method, setMethod] = useState("USDT (TRC20)");
+  const [accounts, setAccounts] = useState<DepositAccountOption[]>([]);
+  const [accountId, setAccountId] = useState("");
   const [amount, setAmount] = useState("");
   const [txHash, setTxHash] = useState("");
   const [copied, setCopied] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [accountsLoading, setAccountsLoading] = useState(false);
   const [error, setError] = useState("");
+
+  const account = accounts.find((entry) => entry.id === accountId) || null;
+
+  useEffect(() => {
+    if (!isOpen) return;
+    let cancelled = false;
+    setAmount("");
+    setTxHash("");
+    setError("");
+    setCopied(false);
+    setAccountsLoading(true);
+
+    fetch("/api/deposit-accounts", { cache: "no-store" })
+      .then(async (response) => {
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || "Unable to load deposit methods.");
+        if (cancelled) return;
+        const nextAccounts = Array.isArray(data.accounts) ? data.accounts : [];
+        setAccounts(nextAccounts);
+        setAccountId(nextAccounts[0]?.id || "");
+        if (nextAccounts.length === 0) {
+          setError("No deposit methods are currently available. Please contact support.");
+        }
+      })
+      .catch((err) => {
+        if (!cancelled) setError(err instanceof Error ? err.message : "Unable to load deposit methods.");
+      })
+      .finally(() => {
+        if (!cancelled) setAccountsLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
-  const addresses: Record<string, string> = {
-    "USDT (TRC20)": "TNVbE1fB8QzLkmXzV8o14Y7J6Xk9Pq3Wa7",
-    "Bitcoin (BTC)": "bc1q8x4f0k726af8yqlpt840x9812lkm904",
-    "Ethereum (ERC20)": "0x71C7656EC7ab88b098defB751B7401B5f6d8976F",
-  };
-
-  const depositAddress = addresses[method] || addresses["USDT (TRC20)"];
-
-  const handleCopy = () => {
-    navigator.clipboard.writeText(depositAddress);
+  const handleCopy = async () => {
+    if (!account) return;
+    await navigator.clipboard.writeText(account.address);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
     setError("");
+    if (!account) {
+      setError("Select a deposit method first.");
+      return;
+    }
     setLoading(true);
 
     try {
-      const res = await fetch("/api/transactions/deposit", {
+      const response = await fetch("/api/transactions/deposit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ amount, method, txHash }),
+        body: JSON.stringify({ amount, txHash, depositAccountId: account.id }),
       });
-
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || "Deposit submission failed");
-      }
-
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Deposit submission failed");
       onSuccess();
       onClose();
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Deposit submission failed");
     } finally {
       setLoading(false);
     }
@@ -61,17 +102,19 @@ export default function DepositModal({ isOpen, onClose, onSuccess }: DepositModa
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-      <div className="relative w-full max-w-lg rounded-2xl bg-[#0F172A] border border-white/10 p-6 shadow-2xl">
+      <div className="relative w-full max-w-lg max-h-[92vh] overflow-y-auto rounded-2xl bg-[#0F172A] border border-white/10 p-6 shadow-2xl">
         <button
           onClick={onClose}
           className="absolute top-5 right-5 text-slate-400 hover:text-white"
+          aria-label="Close deposit dialog"
         >
           <X className="w-5 h-5" />
         </button>
 
         <h3 className="text-xl font-bold text-white mb-1">Fund Your Wallet</h3>
         <p className="text-xs text-slate-400 mb-5">
-          Select gateway, transfer to the designated address, and submit proof.
+          Choose an admin-approved receiving account, complete the transfer, then submit the
+          transaction reference for review.
         </p>
 
         {error && (
@@ -84,45 +127,60 @@ export default function DepositModal({ isOpen, onClose, onSuccess }: DepositModa
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-xs font-semibold uppercase text-slate-400 mb-1.5">
-              Select Deposit Gateway
+              Deposit Method
             </label>
-            <div className="grid grid-cols-3 gap-2">
-              {["USDT (TRC20)", "Bitcoin (BTC)", "Ethereum (ERC20)"].map((m) => (
-                <button
-                  type="button"
-                  key={m}
-                  onClick={() => setMethod(m)}
-                  className={`py-2 px-3 rounded-xl text-xs font-semibold border transition-all ${
-                    method === m
-                      ? "bg-emerald-500/15 border-emerald-500 text-emerald-400"
-                      : "bg-slate-900/60 border-white/5 text-slate-400 hover:text-white"
-                  }`}
-                >
-                  {m.split(" ")[0]}
-                </button>
-              ))}
-            </div>
+            {accountsLoading ? (
+              <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-slate-900 px-3 py-3 text-xs text-slate-400">
+                <span className="w-4 h-4 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin" />
+                Loading available accounts...
+              </div>
+            ) : accounts.length === 0 ? (
+              <div className="rounded-xl border border-dashed border-white/10 bg-slate-900/60 px-3 py-4 text-xs text-slate-400">
+                No active deposit accounts are available.
+              </div>
+            ) : (
+              <select
+                value={accountId}
+                onChange={(event) => setAccountId(event.target.value)}
+                className="w-full px-3 py-2.5 rounded-xl bg-slate-900 border border-white/10 text-white text-sm focus:outline-none focus:border-emerald-500"
+              >
+                {accounts.map((entry) => (
+                  <option key={entry.id} value={entry.id}>
+                    {entry.label} {entry.network ? `· ${entry.network}` : ""}
+                  </option>
+                ))}
+              </select>
+            )}
           </div>
 
-          {/* Deposit Address Box */}
-          <div className="p-3.5 rounded-xl bg-slate-900 border border-white/5 flex flex-col gap-2">
-            <div className="flex items-center justify-between text-xs">
-              <span className="text-slate-400">Designated {method} Address:</span>
-              <span className="flex items-center gap-1 text-[11px] text-cyan-400 font-medium">
-                <QrCode className="w-3.5 h-3.5" /> Copy exactly
-              </span>
+          {account && (
+            <div className="p-3.5 rounded-xl bg-slate-900 border border-white/5 space-y-2">
+              <div className="flex items-center justify-between gap-3 text-xs">
+                <span className="flex items-center gap-1.5 text-slate-400">
+                  <Wallet className="w-3.5 h-3.5 text-emerald-400" />
+                  {account.accountName || account.method}
+                </span>
+                <span className="text-[10px] uppercase tracking-wider text-cyan-400">
+                  {account.currency}
+                  {account.network ? ` · ${account.network}` : ""}
+                </span>
+              </div>
+              <div className="flex items-center justify-between gap-2 bg-slate-950 p-2 rounded-lg border border-white/5 font-mono text-xs text-slate-200">
+                <span className="truncate">{account.address}</span>
+                <button
+                  type="button"
+                  onClick={handleCopy}
+                  className="p-1 rounded hover:bg-slate-800 text-slate-400 hover:text-emerald-400 transition"
+                  aria-label="Copy deposit address"
+                >
+                  {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+                </button>
+              </div>
+              {account.instructions && (
+                <p className="text-[10px] text-slate-500 leading-relaxed">{account.instructions}</p>
+              )}
             </div>
-            <div className="flex items-center justify-between gap-2 bg-slate-950 p-2 rounded-lg border border-white/5 font-mono text-xs text-slate-200">
-              <span className="truncate">{depositAddress}</span>
-              <button
-                type="button"
-                onClick={handleCopy}
-                className="p-1 rounded hover:bg-slate-800 text-slate-400 hover:text-emerald-400 transition"
-              >
-                {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
-              </button>
-            </div>
-          </div>
+          )}
 
           <div>
             <label className="block text-xs font-semibold uppercase text-slate-400 mb-1.5">
@@ -136,7 +194,7 @@ export default function DepositModal({ isOpen, onClose, onSuccess }: DepositModa
                 step="any"
                 required
                 value={amount}
-                onChange={(e) => setAmount(e.target.value)}
+                onChange={(event) => setAmount(event.target.value)}
                 placeholder="Minimum $10.00"
                 className="w-full pl-8 pr-4 py-2.5 rounded-xl bg-slate-900 border border-white/10 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-emerald-500"
               />
@@ -145,21 +203,21 @@ export default function DepositModal({ isOpen, onClose, onSuccess }: DepositModa
 
           <div>
             <label className="block text-xs font-semibold uppercase text-slate-400 mb-1.5">
-              Transaction Hash / Reference (TxID)
+              Transaction Hash / Reference
             </label>
             <input
               type="text"
               required
               value={txHash}
-              onChange={(e) => setTxHash(e.target.value)}
-              placeholder="e.g. 0x8f2a...9b42"
+              onChange={(event) => setTxHash(event.target.value)}
+              placeholder="Enter the transfer hash or bank reference"
               className="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-white/10 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-emerald-500"
             />
           </div>
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || accountsLoading || !account}
             className="w-full mt-2 flex items-center justify-center gap-2 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-sm transition-all shadow-lg shadow-emerald-500/20 disabled:opacity-50"
           >
             {loading ? "Submitting Request..." : "Submit Deposit Request"}
@@ -170,4 +228,3 @@ export default function DepositModal({ isOpen, onClose, onSuccess }: DepositModa
     </div>
   );
 }
-

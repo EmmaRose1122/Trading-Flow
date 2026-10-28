@@ -16,7 +16,8 @@
    - `ADMIN_EMAIL` and `ADMIN_PASSWORD` (12+ characters) for the first admin
    - `GEMINI_API_KEY` for the AI support assistant
    - Optional: `GEMINI_MODEL` (defaults to `gemini-3.8-flash`)
-   - Optional: `ADMIN_NAME`, `ADMIN_REFERRAL_CODE`
+   - Optional: `ADMIN_NAME`
+   - The platform referral code is fixed to `trading flow` (stored as `TRADING FLOW`). No environment variable is required.
 4. Deploy. The daily ROI cron is configured in `vercel.json` and calls
    `/api/cron/accrue-profits` every day at `00:00` UTC.
 5. If the production domain changes, update the `APP_URL` GitHub repository variable and the

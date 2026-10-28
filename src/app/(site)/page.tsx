@@ -22,6 +22,7 @@ import FloatingBitcoin from "@/components/site/FloatingBitcoin";
 import Hero3D from "@/components/site/Hero3D";
 import { createPageMetadata } from "@/lib/seo";
 import { SITE_PLANS } from "@/lib/site";
+import { PLATFORM_REFERRAL_CODE, displayReferralCode } from "@/lib/referral";
 
 export const metadata: Metadata = createPageMetadata({
   title: "UK Investment Dashboard & Transparent Investment Plans",
@@ -56,7 +57,9 @@ const benefits = [
   {
     icon: Users,
     title: "Invitation-based access",
-    text: "Registration uses sponsor referral codes, keeping account creation deliberate and traceable.",
+    text: `Registration defaults to the platform invitation code ${displayReferralCode(
+      PLATFORM_REFERRAL_CODE
+    )}, while sponsor codes keep every account traceable.`,
   },
 ];
 
@@ -64,7 +67,9 @@ const steps = [
   {
     number: "01",
     title: "Create your account",
-    text: "Register with a valid sponsor referral code and sign in through the secure session flow.",
+    text: `Register with the platform invitation code ${displayReferralCode(
+      PLATFORM_REFERRAL_CODE
+    )} or your sponsor's code, then sign in through the secure session flow.`,
   },
   {
     number: "02",
@@ -117,7 +122,7 @@ const homeFaqs = [
   {
     question: "How can I access the investor dashboard?",
     answer:
-      "Access is invitation-only. Registration requires a valid sponsor referral code. Once registered, you can sign in to view plans, the profit calculator, deposits, withdrawals and transaction history.",
+      "Access uses the platform invitation code trading flow by default, or a sponsor's referral code. Once registered, you can sign in to view plans, the profit calculator, deposits, withdrawals, transaction history and your 15-level referral network.",
   },
 ];
 
@@ -230,7 +235,11 @@ export default function HomePage() {
               </a>
             </div>
             <div className="mt-9 flex flex-wrap gap-x-6 gap-y-3 text-xs text-slate-400">
-              {["Transparent daily reporting", "Three defined plan terms", "UK support hours"].map(
+              {[
+                "Transparent daily reporting",
+                "Three defined plan terms",
+                `Invitation code: ${displayReferralCode(PLATFORM_REFERRAL_CODE)}`,
+              ].map(
                 (item) => (
                   <span key={item} className="flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4 text-emerald-400" />
@@ -516,14 +525,14 @@ export default function HomePage() {
             <div className="max-w-2xl">
               <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-cyan-500/10 text-cyan-300 border border-cyan-500/20 mb-4">
                 <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
-                Interactive demo ledger
+                Interactive activity ledger
               </span>
               <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
                 A day on the platform, slide by slide
               </h2>
               <p className="mt-4 text-sm sm:text-base text-slate-400 leading-relaxed">
                 Explore 24 simulated records across daily investments, profit credits, deposits and
-                withdrawals. Every slide includes a demo record ID, member name, amount and status.
+                withdrawals. Every slide includes a record ID, member name, amount and status.
               </p>
             </div>
             <div className="rounded-xl border border-white/10 bg-slate-900/60 px-4 py-3 text-xs text-slate-400">

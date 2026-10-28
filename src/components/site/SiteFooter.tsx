@@ -1,6 +1,8 @@
 import Link from "next/link";
-import { Mail, MapPin, Phone, TrendingUp } from "lucide-react";
+import { Mail, MapPin, Phone } from "lucide-react";
+import BrandLockup from "@/components/site/BrandLockup";
 import { COMPANY, LEGAL_PAGES, PUBLIC_PAGES } from "@/lib/site";
+import { PLATFORM_REFERRAL_CODE, displayReferralCode } from "@/lib/referral";
 
 export default function SiteFooter() {
   return (
@@ -8,13 +10,8 @@ export default function SiteFooter() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-9">
           <div className="sm:col-span-2 lg:col-span-1">
-            <Link href="/" className="inline-flex items-center gap-2.5 mb-4">
-              <span className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-400 to-cyan-500 flex items-center justify-center">
-                <TrendingUp className="w-4 h-4 text-slate-950" />
-              </span>
-              <span className="font-bold tracking-tight text-white">
-                TRADING<span className="text-emerald-400">FLOW</span>
-              </span>
+            <Link href="/" className="inline-flex mb-4" aria-label={`${COMPANY.name} home`}>
+              <BrandLockup iconSize={36} />
             </Link>
             <p className="text-xs text-slate-400 leading-relaxed max-w-xs">
               A UK-focused investment dashboard for transparent plans, daily reporting and
@@ -84,6 +81,12 @@ export default function SiteFooter() {
                 </a>
               </p>
               <p className="text-[11px] text-slate-500">{COMPANY.hours}</p>
+              <p className="text-[11px] text-slate-500">
+                Invitation code:{" "}
+                <span className="font-mono text-emerald-400">
+                  {displayReferralCode(PLATFORM_REFERRAL_CODE)}
+                </span>
+              </p>
             </address>
           </div>
         </div>

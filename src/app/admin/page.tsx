@@ -1,8 +1,10 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
+import KycQueue from "@/components/admin/KycQueue";
+import DepositAccountManager from "@/components/admin/DepositAccountManager";
 import {
   ShieldAlert,
   Check,
@@ -20,8 +22,15 @@ import {
   Link as LinkIcon,
   Sparkles,
   KeyRound,
+  Eye,
+  CalendarDays,
+  TrendingUp,
+  CircleDollarSign,
+  Wallet,
 } from "lucide-react";
-import { Transaction, User } from "@/lib/db";
+import { Investment, Transaction, User, Wallet as WalletType, PayoutWallet, KycDetails } from "@/lib/db";
+import { calculateDailyProfit, roundMoney } from "@/lib/money";
+import { displayReferralCode, type ReferralSummary } from "@/lib/referral";
 
 interface AdminUser {
   id: string;
@@ -30,18 +39,26 @@ interface AdminUser {
   role: string;
   referralCode?: string;
   referredBy?: string | null;
-  wallet: {
-    currentBalance: number;
-    totalInvested: number;
-  };
+  createdAt?: string;
+  wallet: WalletType | null;
+  twoFactorEnabled?: boolean;
+  kycStatus?: string;
+  kycDetails?: KycDetails | null;
+  payoutWallets?: PayoutWallet[];
+  referralSummary?: ReferralSummary;
 }
 
 export default function AdminPage() {
   const router = useRouter();
+  const requestIdRef = useRef(0);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [pendingRequests, setPendingRequests] = useState<Transaction[]>([]);
   const [users, setUsers] = useState<AdminUser[]>([]);
+  const [allInvestments, setAllInvestments] = useState<Investment[]>([]);
+  const [allTransactions, setAllTransactions] = useState<Transaction[]>([]);
+  const [selectedUserId, setSelectedUserId] = useState("");
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
   // Balance adjust form
@@ -69,32 +86,52 @@ export default function AdminPage() {
   const [adminPasswordLoading, setAdminPasswordLoading] = useState(false);
 
   const fetchAdminData = useCallback(async () => {
+    const requestId = ++requestIdRef.current;
     try {
-      const authRes = await fetch("/api/auth/me");
+      const authRes = await fetch("/api/auth/me", { cache: "no-store" });
       if (!authRes.ok) {
-        router.push("/login");
+        router.replace("/login");
         return;
       }
       const authData = await authRes.json();
       if (authData.user.role !== "ADMIN") {
-        router.push("/dashboard");
+        router.replace("/dashboard");
         return;
       }
+      if (requestId !== requestIdRef.current) return;
       setCurrentUser(authData.user);
 
-      const res = await fetch("/api/admin/requests");
+      const res = await fetch("/api/admin/requests", { cache: "no-store" });
+      if (!res.ok) throw new Error("Unable to refresh admin data.");
       const data = await res.json();
-      setPendingRequests(data.pendingRequests || []);
-      setUsers(data.users || []);
-      if (data.users?.length > 0 && !targetUserId) {
-        setTargetUserId(data.users[0].id);
+      if (requestId !== requestIdRef.current) return;
+
+      const nextUsers: AdminUser[] = Array.isArray(data.users) ? data.users : [];
+      setPendingRequests(Array.isArray(data.pendingRequests) ? data.pendingRequests : []);
+      setUsers(nextUsers);
+      setAllInvestments(Array.isArray(data.allInvestments) ? data.allInvestments : []);
+      setAllTransactions(Array.isArray(data.allTransactions) ? data.allTransactions : []);
+      const defaultPortfolioUserId =
+        nextUsers.find((entry) => entry.role === "USER")?.id || nextUsers[0]?.id || "";
+      setSelectedUserId((current) =>
+        current && nextUsers.some((user) => user.id === current) ? current : defaultPortfolioUserId
+      );
+      setTargetUserId((current) =>
+        current && nextUsers.some((user) => user.id === current)
+          ? current
+          : defaultPortfolioUserId || nextUsers[0]?.id || ""
+      );
+      setLoadError("");
+    } catch (error) {
+      if (requestId === requestIdRef.current) {
+        setLoadError(
+          error instanceof Error ? error.message : "Unable to refresh admin data. Please retry."
+        );
       }
-    } catch {
-      router.push("/login");
     } finally {
-      setLoading(false);
+      if (requestId === requestIdRef.current) setLoading(false);
     }
-  }, [router, targetUserId]);
+  }, [router]);
 
   useEffect(() => {
     fetchAdminData();
@@ -178,7 +215,7 @@ export default function AdminPage() {
 
       setCreateMsg({
         type: "success",
-        text: `Account created successfully! User: ${data.user.name} (${data.user.email}) | Referral Code: ${data.user.referralCode} | Upline: ${data.user.referredBy || "Direct Upline / Platform"} | Balance: $${Number(data.user.initialBalance || 0).toFixed(2)}`,
+        text: `Account created successfully! User: ${data.user.name} (${data.user.email}) | Referral Code: ${displayReferralCode(data.user.referralCode)} | Upline: ${data.user.referredBy ? displayReferralCode(data.user.referredBy) : "Platform direct"} | Balance: $${Number(data.user.initialBalance || 0).toFixed(2)}`,
       });
 
       setNewUserName("");
@@ -219,6 +256,24 @@ export default function AdminPage() {
     }
   };
 
+  const selectedUser = users.find((user) => user.id === selectedUserId) || null;
+  const selectedInvestments = [...allInvestments]
+    .filter((investment) => investment.userId === selectedUserId)
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  const selectedTransactions = [...allTransactions]
+    .filter((transaction) => transaction.userId === selectedUserId)
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  const selectedActiveInvestments = selectedInvestments.filter(
+    (investment) => investment.status === "ACTIVE"
+  );
+  const selectedDailyProfit = roundMoney(
+    selectedActiveInvestments.reduce(
+      (total, investment) =>
+        total + calculateDailyProfit(investment.investedAmount, investment.dailyPercentage),
+      0
+    )
+  );
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#080C15] text-emerald-400">
@@ -239,11 +294,32 @@ export default function AdminPage() {
             </span>
             <h1 className="text-2xl font-bold text-white tracking-tight">System Operations & User Controls</h1>
           </div>
-          <div className="flex items-center gap-2 text-xs text-slate-400">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
-            Live Admin Session
+          <div className="flex items-center gap-3 text-xs text-slate-400">
+            <span className="flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
+              Live Admin Session
+            </span>
+            <button
+              type="button"
+              onClick={fetchAdminData}
+              className="px-3 py-1.5 rounded-lg border border-white/10 bg-slate-900 text-[11px] font-semibold text-slate-300 hover:text-white"
+            >
+              Refresh
+            </button>
           </div>
         </div>
+
+        {loadError && (
+          <div className="rounded-xl border border-rose-500/20 bg-rose-500/10 p-3 text-xs text-rose-300 flex items-center justify-between gap-3">
+            <span className="flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 shrink-0" />
+              {loadError}
+            </span>
+            <button type="button" onClick={fetchAdminData} className="font-bold underline">
+              Retry
+            </button>
+          </div>
+        )}
 
         {/* 2 Column Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -335,7 +411,7 @@ export default function AdminPage() {
                   <Users className="w-4 h-4 text-cyan-400" />
                   <h3 className="font-bold text-white text-base">Registered Platform Accounts ({users.length})</h3>
                 </div>
-                <span className="text-xs text-slate-400">Direct upline & affiliate overview</span>
+                <span className="text-xs text-slate-400">15-level referral & affiliate overview</span>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs">
@@ -343,9 +419,12 @@ export default function AdminPage() {
                     <tr className="border-b border-white/5 text-slate-400 uppercase text-[10px] tracking-wider font-semibold">
                       <th className="py-2.5 px-3">User & Email</th>
                       <th className="py-2.5 px-3">Referral Code</th>
+                      <th className="py-2.5 px-3">Level</th>
                       <th className="py-2.5 px-3">Upline / Sponsor</th>
                       <th className="py-2.5 px-3">Role</th>
+                      <th className="py-2.5 px-3">KYC / 2FA</th>
                       <th className="py-2.5 px-3">Balance</th>
+                      <th className="py-2.5 px-3">Ref. earned</th>
                       <th className="py-2.5 px-3">Invested</th>
                       <th className="py-2.5 px-3 text-right">Quick Action</th>
                     </tr>
@@ -358,16 +437,19 @@ export default function AdminPage() {
                           <span className="text-[10px] text-slate-500">{u.email}</span>
                         </td>
                         <td className="py-2.5 px-3 font-mono font-semibold text-emerald-400">
-                          {u.referralCode || "N/A"}
+                          {displayReferralCode(u.referralCode) || "N/A"}
+                        </td>
+                        <td className="py-2.5 px-3 font-semibold text-slate-200 whitespace-nowrap">
+                          {u.referralSummary?.level ? `Level ${u.referralSummary.level}` : "Direct"}
                         </td>
                         <td className="py-2.5 px-3">
                           {u.referredBy ? (
                             <span className="font-mono text-cyan-400 bg-cyan-500/10 border border-cyan-500/20 px-2 py-0.5 rounded text-[11px]">
-                              {u.referredBy}
+                              {displayReferralCode(u.referredBy)}
                             </span>
                           ) : (
                             <span className="text-[10px] font-semibold uppercase bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-full">
-                              Direct Upline
+                              Platform Direct
                             </span>
                           )}
                         </td>
@@ -382,23 +464,63 @@ export default function AdminPage() {
                             {u.role}
                           </span>
                         </td>
+                        <td className="py-2.5 px-3">
+                          <div className="flex flex-col gap-1">
+                            <span
+                              className={`w-fit px-1.5 py-0.5 rounded text-[9px] font-bold uppercase ${
+                                u.kycStatus === "APPROVED"
+                                  ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                                  : u.kycStatus === "PENDING"
+                                    ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
+                                    : u.kycStatus === "REJECTED"
+                                      ? "bg-rose-500/10 text-rose-400 border border-rose-500/20"
+                                      : "bg-slate-800 text-slate-400"
+                              }`}
+                            >
+                              {(u.kycStatus || "NOT_STARTED").replace(/_/g, " ")}
+                            </span>
+                            <span className={`text-[9px] font-semibold ${u.twoFactorEnabled ? "text-emerald-400" : "text-slate-500"}`}>
+                              2FA {u.twoFactorEnabled ? "on" : "off"}
+                            </span>
+                          </div>
+                        </td>
                         <td className="py-2.5 px-3 font-semibold text-emerald-400">
                           ${u.wallet?.currentBalance.toLocaleString(undefined, { minimumFractionDigits: 2 }) || "0.00"}
+                        </td>
+                        <td className="py-2.5 px-3 font-semibold text-indigo-300">
+                          ${(u.referralSummary?.totalEarnings || 0).toFixed(2)}
                         </td>
                         <td className="py-2.5 px-3 font-semibold text-cyan-400">
                           ${u.wallet?.totalInvested.toLocaleString(undefined, { minimumFractionDigits: 2 }) || "0.00"}
                         </td>
                         <td className="py-2.5 px-3 text-right">
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setTargetUserId(u.id);
-                              window.scrollTo({ top: 300, behavior: "smooth" });
-                            }}
-                            className="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-[11px] font-medium border border-white/5 transition"
-                          >
-                            Adjust Balance
-                          </button>
+                          <div className="flex items-center justify-end gap-1.5">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setSelectedUserId(u.id);
+                                window.setTimeout(() => {
+                                  document
+                                    .getElementById("admin-user-detail")
+                                    ?.scrollIntoView({ behavior: "smooth", block: "start" });
+                                }, 50);
+                              }}
+                              className="inline-flex items-center gap-1 px-2 py-1 rounded bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 text-[11px] font-medium border border-cyan-500/20 transition"
+                            >
+                              <Eye className="w-3 h-3" />
+                              View
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setTargetUserId(u.id);
+                                window.scrollTo({ top: 300, behavior: "smooth" });
+                              }}
+                              className="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-[11px] font-medium border border-white/5 transition"
+                            >
+                              Adjust
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -417,7 +539,7 @@ export default function AdminPage() {
                 <h3 className="font-bold text-white text-base">Create User Account</h3>
               </div>
               <p className="text-xs text-slate-400 mb-4">
-                Create user directly without referral (Direct Upline) or under a custom sponsor, with instant free balance credit.
+                Create user directly under the platform sponsor or a custom upline, with instant free balance credit.
               </p>
 
               {createMsg && (
@@ -517,13 +639,13 @@ export default function AdminPage() {
                     <label className="block text-[11px] font-semibold uppercase text-slate-400">
                       Sponsor / Referral Code (Optional)
                     </label>
-                    <span className="text-[10px] text-emerald-400 font-medium">Direct Upline if empty</span>
+                    <span className="text-[10px] text-emerald-400 font-medium">Platform sponsor if empty</span>
                   </div>
                   <input
                     type="text"
                     value={newUserReferredBy}
-                    onChange={(e) => setNewUserReferredBy(e.target.value.toUpperCase())}
-                    placeholder="Leave empty for Direct Upline / Platform"
+                    onChange={(e) => setNewUserReferredBy(e.target.value)}
+                    placeholder="trading flow"
                     className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white placeholder-slate-500 text-xs font-mono tracking-wider focus:outline-none focus:border-cyan-400"
                   />
                 </div>
@@ -725,6 +847,389 @@ export default function AdminPage() {
             </div>
           </div>
         </div>
+
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+          <KycQueue onChanged={fetchAdminData} />
+          <DepositAccountManager />
+        </div>
+
+        {selectedUser && (
+          <section
+            id="admin-user-detail"
+            className="glass-card rounded-2xl p-6 scroll-mt-24 border border-cyan-500/15"
+          >
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-white/5">
+              <div className="flex items-center gap-3">
+                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-emerald-400 to-cyan-500 text-slate-950 flex items-center justify-center font-extrabold">
+                  {selectedUser.name.charAt(0).toUpperCase()}
+                </div>
+                <div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h2 className="text-lg font-bold text-white">{selectedUser.name}</h2>
+                    <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase ${
+                      selectedUser.role === "ADMIN"
+                        ? "bg-rose-500/15 text-rose-300 border border-rose-500/20"
+                        : "bg-slate-800 text-slate-300"
+                    }`}>
+                      {selectedUser.role}
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-400 mt-0.5">{selectedUser.email}</p>
+                  <p className="text-[10px] text-slate-500 mt-1">
+                    ID: <span className="font-mono">{selectedUser.id}</span>
+                    {selectedUser.createdAt
+                      ? ` · Joined ${new Date(selectedUser.createdAt).toLocaleDateString("en-GB")}`
+                      : ""}
+                  </p>
+                </div>
+              </div>
+              <div className="flex flex-wrap items-center gap-2 text-[10px]">
+                <span className="px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 font-semibold">
+                  Referral: {displayReferralCode(selectedUser.referralCode) || "N/A"}
+                </span>
+                <span className="px-2.5 py-1 rounded-full bg-slate-800 text-slate-300 border border-white/5 font-semibold">
+                  Sponsor: {selectedUser.referredBy ? displayReferralCode(selectedUser.referredBy) : "Platform direct"}
+                </span>
+                <span className="px-2.5 py-1 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/20 font-semibold">
+                  Level: {selectedUser.referralSummary?.level ? selectedUser.referralSummary.level : "Direct"}
+                </span>
+                <span className="px-2.5 py-1 rounded-full bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 font-semibold">
+                  Referral earned: ${(selectedUser.referralSummary?.totalEarnings || 0).toFixed(2)}
+                </span>
+                <span className={`px-2.5 py-1 rounded-full border font-semibold ${
+                  selectedUser.kycStatus === "APPROVED"
+                    ? "bg-emerald-500/10 text-emerald-300 border-emerald-500/20"
+                    : selectedUser.kycStatus === "PENDING"
+                      ? "bg-amber-500/10 text-amber-300 border-amber-500/20"
+                      : selectedUser.kycStatus === "REJECTED"
+                        ? "bg-rose-500/10 text-rose-300 border-rose-500/20"
+                        : "bg-slate-800 text-slate-300 border-white/5"
+                }`}>
+                  KYC: {(selectedUser.kycStatus || "NOT_STARTED").replace(/_/g, " ")}
+                </span>
+                <span className={`px-2.5 py-1 rounded-full border font-semibold ${
+                  selectedUser.twoFactorEnabled
+                    ? "bg-emerald-500/10 text-emerald-300 border-emerald-500/20"
+                    : "bg-slate-800 text-slate-300 border-white/5"
+                }`}>
+                  2FA: {selectedUser.twoFactorEnabled ? "enabled" : "disabled"}
+                </span>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mt-5">
+              {[
+                {
+                  icon: Wallet,
+                  label: "Wallet balance",
+                  value: `$${(selectedUser.wallet?.currentBalance || 0).toFixed(2)}`,
+                  color: "text-emerald-400",
+                },
+                {
+                  icon: TrendingUp,
+                  label: "Active invested",
+                  value: `$${(selectedUser.wallet?.totalInvested || 0).toFixed(2)}`,
+                  color: "text-cyan-400",
+                },
+                {
+                  icon: CircleDollarSign,
+                  label: "Total profit",
+                  value: `$${(selectedUser.wallet?.totalProfit || 0).toFixed(2)}`,
+                  color: "text-indigo-400",
+                },
+                {
+                  icon: CalendarDays,
+                  label: "Projected daily",
+                  value: `+$${selectedDailyProfit.toFixed(2)}`,
+                  color: "text-emerald-400",
+                },
+              ].map((stat) => {
+                const Icon = stat.icon;
+                return (
+                  <div key={stat.label} className="rounded-xl border border-white/5 bg-slate-900/60 p-3.5">
+                    <div className="flex items-center gap-2 text-[10px] uppercase tracking-wider text-slate-500">
+                      <Icon className="w-3.5 h-3.5" />
+                      {stat.label}
+                    </div>
+                    <p className={`mt-2 text-lg font-extrabold ${stat.color}`}>{stat.value}</p>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-3 text-[11px]">
+              <div className="rounded-lg bg-slate-900/40 border border-white/5 p-3">
+                <span className="text-slate-500 block">Total deposited</span>
+                <span className="text-slate-200 font-semibold mt-1 block">
+                  ${(selectedUser.wallet?.totalDeposited || 0).toFixed(2)}
+                </span>
+              </div>
+              <div className="rounded-lg bg-slate-900/40 border border-white/5 p-3">
+                <span className="text-slate-500 block">Total withdrawn</span>
+                <span className="text-slate-200 font-semibold mt-1 block">
+                  ${(selectedUser.wallet?.totalWithdrawn || 0).toFixed(2)}
+                </span>
+              </div>
+              <div className="rounded-lg bg-slate-900/40 border border-white/5 p-3">
+                <span className="text-slate-500 block">Active contracts</span>
+                <span className="text-slate-200 font-semibold mt-1 block">
+                  {selectedActiveInvestments.length}
+                </span>
+              </div>
+              <div className="rounded-lg bg-slate-900/40 border border-white/5 p-3">
+                <span className="text-slate-500 block">Ledger entries</span>
+                <span className="text-slate-200 font-semibold mt-1 block">
+                  {selectedTransactions.length}
+                </span>
+              </div>
+            </div>
+
+            <div className="mt-3 grid grid-cols-1 lg:grid-cols-2 gap-3 text-[11px]">
+              <div className="rounded-xl border border-white/5 bg-slate-900/40 p-3">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-slate-500">Profit payout destination</span>
+                  {(() => {
+                    const preferred = selectedUser.payoutWallets?.find(
+                      (wallet) => wallet.isProfitDestination
+                    );
+                    return preferred ? (
+                      <span className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 text-[9px] font-bold uppercase text-emerald-300">
+                        {preferred.label}
+                      </span>
+                    ) : (
+                      <span className="rounded-full border border-white/10 bg-slate-800 px-2 py-0.5 text-[9px] font-bold uppercase text-slate-400">
+                        Not configured
+                      </span>
+                    );
+                  })()}
+                </div>
+                <div className="mt-2 space-y-1.5">
+                  {(selectedUser.payoutWallets || []).length === 0 ? (
+                    <p className="text-slate-500">No payout wallets saved by this user.</p>
+                  ) : (
+                    selectedUser.payoutWallets?.map((wallet) => (
+                      <div key={wallet.id} className="flex items-center justify-between gap-2">
+                        <span className="text-slate-300">
+                          {wallet.label} · {wallet.method}
+                          {wallet.network ? ` · ${wallet.network}` : ""}
+                        </span>
+                        <span className="max-w-[55%] truncate font-mono text-slate-500">
+                          {wallet.address}
+                        </span>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+              <div className="rounded-xl border border-white/5 bg-slate-900/40 p-3">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-slate-500">KYC application</span>
+                  <span className="font-semibold text-slate-300">
+                    {(selectedUser.kycStatus || "NOT_STARTED").replace(/_/g, " ")}
+                  </span>
+                </div>
+                {selectedUser.kycDetails ? (
+                  <div className="mt-2 space-y-1.5 text-slate-400">
+                    <p>Legal name: <span className="text-slate-200">{selectedUser.kycDetails.legalName}</span></p>
+                    <p>Country: <span className="text-slate-200">{selectedUser.kycDetails.country}</span></p>
+                    <p>
+                      Document:{" "}
+                      <span className="text-slate-200">
+                        {selectedUser.kycDetails.documentType.replace(/_/g, " ")} ·{" "}
+                        {selectedUser.kycDetails.documentReference}
+                      </span>
+                    </p>
+                    {selectedUser.kycDetails.rejectionReason && (
+                      <p className="text-rose-300">
+                        Rejection reason: {selectedUser.kycDetails.rejectionReason}
+                      </p>
+                    )}
+                  </div>
+                ) : (
+                  <p className="mt-2 text-slate-500">No KYC application submitted.</p>
+                )}
+              </div>
+            </div>
+
+            {selectedUser.referralSummary && (
+              <div className="mt-3 grid grid-cols-1 lg:grid-cols-3 gap-3 text-[11px]">
+                <div className="rounded-xl border border-white/5 bg-slate-900/40 p-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-slate-500">Referral position</span>
+                    <span className="font-semibold text-cyan-300">
+                      {selectedUser.referralSummary.level
+                        ? `Level ${selectedUser.referralSummary.level}`
+                        : "Platform direct"}
+                    </span>
+                  </div>
+                  <div className="mt-2 flex items-center justify-between gap-2">
+                    <span className="text-slate-500">Direct partners</span>
+                    <span className="text-slate-200">{selectedUser.referralSummary.directCount}</span>
+                  </div>
+                  <div className="mt-1.5 flex items-center justify-between gap-2">
+                    <span className="text-slate-500">Total network</span>
+                    <span className="text-slate-200">{selectedUser.referralSummary.networkCount}</span>
+                  </div>
+                  <div className="mt-1.5 flex items-center justify-between gap-2">
+                    <span className="text-slate-500">Referral earnings</span>
+                    <span className="font-semibold text-emerald-400">
+                      ${selectedUser.referralSummary.totalEarnings.toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="mt-3 border-t border-white/5 pt-2">
+                    <p className="text-slate-500 mb-1.5">Upline chain</p>
+                    {selectedUser.referralSummary.upline.length === 0 ? (
+                      <p className="text-slate-500">No sponsor recorded.</p>
+                    ) : (
+                      <ol className="space-y-1">
+                        {selectedUser.referralSummary.upline.map((member) => (
+                          <li key={`${member.level}-${member.id}`} className="flex justify-between gap-2">
+                            <span className="text-slate-500">L{member.level}</span>
+                            <span className="truncate text-slate-300">
+                              {member.name}{" "}
+                              <span className="font-mono text-[9px] text-emerald-400">
+                                {displayReferralCode(member.referralCode)}
+                              </span>
+                            </span>
+                          </li>
+                        ))}
+                      </ol>
+                    )}
+                  </div>
+                </div>
+
+                <div className="lg:col-span-2 rounded-xl border border-white/5 bg-slate-900/40 p-3">
+                  <p className="text-slate-500 mb-2">15-level downline summary</p>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-[10px]">
+                      <thead className="text-slate-500 uppercase tracking-wider">
+                        <tr>
+                          <th className="py-1.5 pr-2">Level</th>
+                          <th className="py-1.5 pr-2">Rate</th>
+                          <th className="py-1.5 pr-2">Members</th>
+                          <th className="py-1.5 pr-2 text-right">Earned</th>
+                          <th className="py-1.5 text-right">Top member</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-white/5 text-slate-300">
+                        {selectedUser.referralSummary.levels.map((level) => (
+                          <tr key={level.level} className={level.count > 0 ? "bg-emerald-500/[0.03]" : ""}>
+                            <td className="py-1.5 pr-2 font-semibold text-white">L{level.level}</td>
+                            <td className="py-1.5 pr-2 text-emerald-400">{level.rate}%</td>
+                            <td className="py-1.5 pr-2">{level.count}</td>
+                            <td className="py-1.5 pr-2 text-right">${level.earnings.toFixed(2)}</td>
+                            <td className="py-1.5 text-right truncate max-w-[140px]">
+                              {level.members[0]
+                                ? `${level.members[0].name} (${displayReferralCode(level.members[0].referralCode)})`
+                                : "—"}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mt-6">
+              <div>
+                <h3 className="text-sm font-bold text-white mb-3">Investments ({selectedInvestments.length})</h3>
+                {selectedInvestments.length === 0 ? (
+                  <p className="text-xs text-slate-500 rounded-xl border border-dashed border-white/10 p-5 text-center">
+                    No investments for this user.
+                  </p>
+                ) : (
+                  <div className="space-y-2.5">
+                    {selectedInvestments.map((investment) => (
+                      <div key={investment.id} className="rounded-xl border border-white/5 bg-slate-900/50 p-3.5">
+                        <div className="flex items-start justify-between gap-3">
+                          <div>
+                            <p className="text-xs font-semibold text-white">{investment.planName}</p>
+                            <p className="text-[9px] font-mono text-slate-600 mt-0.5">{investment.id}</p>
+                            <p className="text-[10px] text-slate-500 mt-1">
+                              ${investment.investedAmount.toFixed(2)} · {investment.dailyPercentage.toFixed(1)}% daily
+                            </p>
+                          </div>
+                          <span className={`px-2 py-0.5 rounded text-[9px] font-bold ${
+                            investment.status === "ACTIVE"
+                              ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                              : "bg-slate-800 text-slate-400"
+                          }`}>
+                            {investment.status}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between mt-3 text-[10px] text-slate-500">
+                          <span>
+                            +${calculateDailyProfit(investment.investedAmount, investment.dailyPercentage).toFixed(2)} / day
+                          </span>
+                          <span>{investment.remainingDays} of {investment.durationDays} days left</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <h3 className="text-sm font-bold text-white mb-3">
+                  Recent transactions ({selectedTransactions.length})
+                </h3>
+                {selectedTransactions.length === 0 ? (
+                  <p className="text-xs text-slate-500 rounded-xl border border-dashed border-white/10 p-5 text-center">
+                    No transactions for this user.
+                  </p>
+                ) : (
+                  <div className="overflow-x-auto rounded-xl border border-white/5">
+                    <table className="w-full text-left text-[11px]">
+                      <thead className="bg-slate-900/80 text-slate-500 uppercase text-[9px]">
+                        <tr>
+                          <th className="px-3 py-2">Type</th>
+                          <th className="px-3 py-2">Amount</th>
+                          <th className="px-3 py-2">Status</th>
+                          <th className="px-3 py-2">Date</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-white/5 text-slate-300">
+                        {selectedTransactions.slice(0, 12).map((transaction) => {
+                          const credit =
+                            transaction.type === "BONUS"
+                              ? transaction.amount >= 0
+                              : ["DEPOSIT", "PROFIT", "CAPITAL_RETURN", "REFERRAL"].includes(transaction.type);
+                          return (
+                          <tr key={transaction.id}>
+                            <td className="px-3 py-2 whitespace-nowrap">
+                              <span className="font-semibold text-slate-200 block">{transaction.type}</span>
+                              <span className="text-[9px] font-mono text-slate-600">{transaction.id}</span>
+                            </td>
+                            <td className={`px-3 py-2 whitespace-nowrap ${credit ? "text-emerald-400" : "text-slate-200"}`}>
+                              {credit ? "+" : "-"}${Math.abs(transaction.amount).toFixed(2)}
+                            </td>
+                            <td className="px-3 py-2 whitespace-nowrap">
+                              <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold ${
+                                transaction.status === "APPROVED" || transaction.status === "SUCCESS"
+                                  ? "bg-emerald-500/10 text-emerald-400"
+                                  : transaction.status === "PENDING"
+                                    ? "bg-amber-500/10 text-amber-400"
+                                    : "bg-rose-500/10 text-rose-400"
+                              }`}>
+                                {transaction.status}
+                              </span>
+                            </td>
+                            <td className="px-3 py-2 text-slate-500 whitespace-nowrap">
+                              {new Date(transaction.createdAt).toLocaleDateString("en-GB")}
+                            </td>
+                          </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            </div>
+          </section>
+        )}
       </main>
     </div>
   );

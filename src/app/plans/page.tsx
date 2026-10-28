@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import InvestModal from "@/components/InvestModal";
 import DepositModal from "@/components/DepositModal";
@@ -9,6 +10,7 @@ import { Check, Sparkles, Shield, Clock, ChevronRight, Calculator, TrendingUp } 
 import { InvestmentPlan, User } from "@/lib/db";
 
 export default function PlansPage() {
+  const router = useRouter();
   const [plans, setPlans] = useState<InvestmentPlan[]>([]);
   const [user, setUser] = useState<User | null>(null);
   const [currentBalance, setCurrentBalance] = useState(0);
@@ -17,32 +19,42 @@ export default function PlansPage() {
   const [depositOpen, setDepositOpen] = useState(false);
   const [withdrawOpen, setWithdrawOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
   const [calculatorPlanId, setCalculatorPlanId] = useState("");
   const [calculatorAmount, setCalculatorAmount] = useState("");
   const [investAmount, setInvestAmount] = useState("");
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
+    setLoadError("");
     try {
-      const authRes = await fetch("/api/auth/me");
-      if (authRes.ok) {
-        const authData = await authRes.json();
-        setUser(authData.user);
-        setCurrentBalance(authData.wallet?.currentBalance || 0);
+      const authRes = await fetch("/api/auth/me", { cache: "no-store" });
+      if (!authRes.ok) {
+        router.replace("/login");
+        return;
       }
 
-      const plansRes = await fetch("/api/investments/plans");
+      const authData = await authRes.json();
+      setUser(authData.user);
+      setCurrentBalance(authData.wallet?.currentBalance || 0);
+
+      const plansRes = await fetch("/api/investments/plans", { cache: "no-store" });
+      if (!plansRes.ok) throw new Error("Unable to load investment plans.");
       const plansData = await plansRes.json();
-      setPlans(plansData.plans || []);
+      if (!Array.isArray(plansData.plans) || plansData.plans.length === 0) {
+        throw new Error("No investment plans are currently available.");
+      }
+      setPlans(plansData.plans);
     } catch (err) {
       console.error(err);
+      setLoadError(err instanceof Error ? err.message : "Unable to load investment plans.");
     } finally {
       setLoading(false);
     }
-  };
+  }, [router]);
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [loadData]);
 
   useEffect(() => {
     if (!plans.length) return;
@@ -73,6 +85,38 @@ export default function PlansPage() {
     !!calculatorPlan &&
     calculatorValue >= calculatorPlan.minAmount &&
     calculatorValue <= calculatorPlan.maxAmount;
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#080C15]">
+        <div className="w-10 h-10 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (!user) return null;
+
+  if (loadError) {
+    return (
+      <div className="min-h-screen bg-[#080C15]">
+        <Navbar user={user} />
+        <main className="max-w-3xl mx-auto px-4 py-20 text-center">
+          <h1 className="text-2xl font-bold text-white">Plans could not be loaded</h1>
+          <p className="mt-2 text-sm text-slate-400">{loadError}</p>
+          <button
+            type="button"
+            onClick={() => {
+              setLoading(true);
+              loadData();
+            }}
+            className="mt-6 px-5 py-2.5 rounded-xl bg-emerald-500 text-slate-950 text-sm font-bold"
+          >
+            Retry
+          </button>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#080C15] pb-28 lg:pb-12">

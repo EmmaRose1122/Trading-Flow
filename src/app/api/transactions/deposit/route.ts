@@ -13,12 +13,21 @@ export async function POST(req: Request) {
     const user = db.findUserById(session.userId);
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const { amount, method, txHash, proofUrl } = await req.json();
+    const { amount, depositAccountId, txHash, proofUrl } = await req.json();
     const depositAmount = parseMoney(amount);
     const normalizedHash = typeof txHash === "string" ? txHash.trim() : "";
 
     if (depositAmount === null || depositAmount < 10) {
       return NextResponse.json({ error: "Enter a valid deposit of at least $10 with up to 2 decimals" }, { status: 400 });
+    }
+    if (typeof depositAccountId !== "string" || !depositAccountId) {
+      return NextResponse.json({ error: "Select an active deposit account" }, { status: 400 });
+    }
+    const depositAccount = db
+      .getDepositAccounts()
+      .find((account) => account.id === depositAccountId && account.isActive);
+    if (!depositAccount) {
+      return NextResponse.json({ error: "Selected deposit account is unavailable" }, { status: 400 });
     }
     if (normalizedHash.length < 6 || normalizedHash.length > 128) {
       return NextResponse.json({ error: "A valid transaction hash or reference is required" }, { status: 400 });
@@ -39,10 +48,12 @@ export async function POST(req: Request) {
       amount: depositAmount,
       fee: 0,
       status: "PENDING",
-      method: typeof method === "string" && method.trim() ? method.trim() : "USDT (TRC20)",
+      method: `${depositAccount.method}${depositAccount.network ? ` · ${depositAccount.network}` : ""}`,
       txHash: normalizedHash,
+      destination: depositAccount.address,
       proofUrl: typeof proofUrl === "string" ? proofUrl : undefined,
-      note: "Deposit submitted for admin confirmation",
+      depositAccountId: depositAccount.id,
+      note: `Deposit to ${depositAccount.label}`,
       createdAt: new Date().toISOString(),
     });
 

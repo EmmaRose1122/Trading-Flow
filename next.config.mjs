@@ -50,7 +50,7 @@ const nextConfig = {
         source: "/api/:path*",
         headers: privateNoStore,
       },
-      ...["/dashboard", "/admin", "/plans", "/transactions", "/referrals", "/login", "/register"].map(
+      ...["/dashboard", "/admin", "/plans", "/transactions", "/referrals", "/profile", "/settings", "/login", "/register"].map(
         (source) => ({ source, headers: privateNoStore })
       ),
       {

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { randomBytes } from "crypto";
 import { db } from "@/lib/db";
 import { hashPassword, setSessionCookie } from "@/lib/auth";
+import { PLATFORM_REFERRAL_CODE, normalizeReferralCode } from "@/lib/referral";
 
 export async function POST(req: Request) {
   try {
@@ -12,7 +13,9 @@ export async function POST(req: Request) {
     }
     const normalizedEmail = email.trim().toLowerCase();
     const normalizedName = name.trim();
-    const referral = typeof referredBy === "string" ? referredBy.trim().toUpperCase() : "";
+    const referral =
+      normalizeReferralCode(typeof referredBy === "string" ? referredBy : "") ||
+      PLATFORM_REFERRAL_CODE;
 
     if (!/^\S+@\S+\.\S+$/.test(normalizedEmail) || !normalizedName) {
       return NextResponse.json({ error: "A valid name and email are required" }, { status: 400 });
@@ -20,10 +23,9 @@ export async function POST(req: Request) {
     if (password.length < 6 || password.length > 72) {
       return NextResponse.json({ error: "Password must be between 6 and 72 characters" }, { status: 400 });
     }
-    if (!referral) {
-      return NextResponse.json({ error: "A valid Referral / Sponsor Code is required to register." }, { status: 400 });
-    }
-    const sponsor = db.getUsers().find((user) => user.referralCode === referral);
+    const sponsor = db
+      .getUsers()
+      .find((user) => normalizeReferralCode(user.referralCode) === referral);
     if (!sponsor) {
       return NextResponse.json({ error: "Invalid referral code. Please check with your sponsor or upline." }, { status: 400 });
     }

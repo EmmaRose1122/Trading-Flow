@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { verifyPassword, setSessionCookie } from "@/lib/auth";
+import { verifyPassword, setSessionCookie, signTwoFactorChallenge } from "@/lib/auth";
 
 export async function POST(req: Request) {
   try {
@@ -45,6 +45,16 @@ export async function POST(req: Request) {
     const valid = await verifyPassword(password, user.passwordHash);
     if (!valid) {
       return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
+    }
+
+    if (user.twoFactorEnabled && user.twoFactorSecret) {
+      const challengeToken = await signTwoFactorChallenge(user.id);
+      return NextResponse.json({
+        success: true,
+        requiresTwoFactor: true,
+        challengeToken,
+        message: "Enter the 6-digit code from your authenticator app.",
+      });
     }
 
     await setSessionCookie({
