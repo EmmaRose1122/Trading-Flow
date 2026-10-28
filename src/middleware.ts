@@ -15,7 +15,7 @@ export async function middleware(req: NextRequest) {
       audience: "trading-flow-app",
     });
     if (req.nextUrl.pathname === "/admin" && payload.role !== "ADMIN") {
-      return NextResponse.redirect(new URL("/", req.url));
+      return NextResponse.redirect(new URL("/dashboard", req.url));
     }
     return NextResponse.next();
   } catch {
@@ -24,5 +24,5 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/", "/plans", "/transactions", "/referrals", "/admin"],
+  matcher: ["/dashboard", "/plans", "/transactions", "/referrals", "/admin"],
 };

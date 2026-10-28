@@ -40,7 +40,7 @@ export default function Navbar({ user, onOpenDeposit, onOpenWithdraw }: NavbarPr
   };
 
   const navLinks = [
-    { name: "Overview", href: "/", icon: LayoutDashboard },
+    { name: "Overview", href: "/dashboard", icon: LayoutDashboard },
     { name: "Plans", href: "/plans", icon: Layers },
     { name: "Transactions", href: "/transactions", icon: Receipt },
     { name: "Referrals", href: "/referrals", icon: Users },
@@ -56,7 +56,7 @@ export default function Navbar({ user, onOpenDeposit, onOpenWithdraw }: NavbarPr
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2.5 group">
+          <Link href="/dashboard" className="flex items-center gap-2.5 group">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400 to-cyan-500 flex items-center justify-center shadow-lg shadow-emerald-500/20 group-hover:scale-105 transition-transform">
               <TrendingUp className="w-5 h-5 text-slate-950 font-bold" />
             </div>

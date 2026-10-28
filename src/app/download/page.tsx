@@ -40,7 +40,7 @@ export default function DownloadPage() {
             className="flex items-center gap-1.5 text-xs font-semibold text-slate-400 hover:text-white transition"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
-            Back to dashboard
+            Back to home
           </Link>
         </div>
       </header>

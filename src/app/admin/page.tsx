@@ -71,7 +71,7 @@ export default function AdminPage() {
       }
       const authData = await authRes.json();
       if (authData.user.role !== "ADMIN") {
-        router.push("/");
+        router.push("/dashboard");
         return;
       }
       setCurrentUser(authData.user);
@@ -198,7 +198,7 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#080C15] pb-16">
+    <div className="min-h-screen bg-[#080C15] pb-28 lg:pb-12">
       <Navbar user={currentUser} />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 space-y-8">

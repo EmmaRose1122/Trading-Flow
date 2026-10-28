@@ -116,7 +116,7 @@ export default function DashboardPage() {
     .reduce((acc, t) => acc + t.amount, 0);
 
   return (
-    <div className="min-h-screen bg-[#080C15] pb-16">
+    <div className="min-h-screen bg-[#080C15] pb-28 lg:pb-12">
       <Navbar
         user={user}
         onOpenDeposit={() => setDepositOpen(true)}

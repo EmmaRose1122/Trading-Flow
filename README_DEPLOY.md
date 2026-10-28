@@ -9,9 +9,12 @@
    - `JWT_SECRET` - random value, at least 32 characters
    - `CRON_SECRET` - random value, at least 32 characters
    - `NEXT_PUBLIC_APP_NAME=Trading Flow`
-   - `NEXT_PUBLIC_APP_URL=https://your-production-domain`
+   - `NEXT_PUBLIC_APP_URL=https://your-production-domain` (used for canonical URLs, sitemap and Open Graph)
    - `ENABLE_DEMO_ACCOUNTS=false`
+   - Optional: `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION`
    - `ADMIN_EMAIL` and `ADMIN_PASSWORD` (12+ characters) for the first admin
+   - `GEMINI_API_KEY` for the AI support assistant
+   - Optional: `GEMINI_MODEL` (defaults to `gemini-3.8-flash`)
    - Optional: `ADMIN_NAME`, `ADMIN_REFERRAL_CODE`
 4. Deploy. The daily ROI cron is configured in `vercel.json` and calls
    `/api/cron/accrue-profits` every day at `00:00` UTC.
@@ -31,6 +34,21 @@ The current data layer stores users and ledgers in a JSON file. On Vercel it aut
 This is not durable production storage. Before accepting real registrations or money movements,
 connect PostgreSQL (Neon/Supabase), add `DATABASE_URL`, and migrate the data layer. This migration
 is not included yet.
+
+## AI support assistant
+
+The support widget calls `POST /api/support/chat`, which uses Gemini server-side. The API key is
+never sent to the browser. Add `GEMINI_API_KEY` to `.env.local` or Vercel; optionally override
+`GEMINI_MODEL` (default `gemini-3.8-flash`).
+
+The assistant is grounded with the application's plans, profit formula, account workflows, security
+details, legal pages and contact information in `src/lib/support-knowledge.ts`. This is
+retrieval-style grounding rather than custom model fine-tuning. Update that file whenever product
+terms change.
+
+AI chat requests are rate-limited per serverless instance, enforce message length/history limits,
+and are not written to the investment ledger. If the key is missing, the widget directs users to
+the support email instead of failing silently.
 
 ## Real accounts
 
