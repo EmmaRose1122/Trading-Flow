@@ -14,14 +14,27 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Email and password are required" }, { status: 400 });
     }
     const normalizedEmail = email.trim().toLowerCase();
-    const isDemoAccount =
-      normalizedEmail === "admin@tradingflow.com" || normalizedEmail === "user@tradingflow.com";
+    const configuredAdminEmail = (process.env.ADMIN_EMAIL || "").trim().toLowerCase();
+    const hasConfiguredAdminPassword = Boolean(
+      process.env.ADMIN_PASSWORD && process.env.ADMIN_PASSWORD.trim().length >= 6
+    );
+
+    // In production with demo accounts disabled, ensure demo accounts cannot be logged into
+    // unless this email is the explicitly configured ADMIN_EMAIL with an ADMIN_PASSWORD.
     if (
       process.env.NODE_ENV === "production" &&
-      isDemoAccount &&
       process.env.ENABLE_DEMO_ACCOUNTS !== "true"
     ) {
-      return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
+      if (normalizedEmail === "user@tradingflow.com") {
+        return NextResponse.json({ error: "Demo investor account is disabled in production" }, { status: 401 });
+      }
+      if (
+        normalizedEmail === "admin@tradingflow.com" &&
+        !hasConfiguredAdminPassword &&
+        configuredAdminEmail !== "admin@tradingflow.com"
+      ) {
+        return NextResponse.json({ error: "Demo admin is disabled in production" }, { status: 401 });
+      }
     }
 
     const user = db.findUserByEmail(normalizedEmail);

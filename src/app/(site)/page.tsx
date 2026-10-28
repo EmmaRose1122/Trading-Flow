@@ -18,6 +18,7 @@ import {
   Wallet,
 } from "lucide-react";
 import DemoActivityCarousel from "@/components/site/DemoActivityCarousel";
+import FloatingBitcoin from "@/components/site/FloatingBitcoin";
 import Hero3D from "@/components/site/Hero3D";
 import { createPageMetadata } from "@/lib/seo";
 import { SITE_PLANS } from "@/lib/site";
@@ -181,8 +182,24 @@ export default function HomePage() {
           <div className="absolute -top-32 left-1/4 w-[32rem] h-[32rem] rounded-full bg-emerald-500/10 blur-3xl" />
           <div className="absolute top-24 right-0 w-[28rem] h-[28rem] rounded-full bg-cyan-500/10 blur-3xl" />
         </div>
+        <FloatingBitcoin
+          className="left-[4%] top-[24%] hidden xl:block"
+          size={44}
+          delay={1.4}
+          duration={9}
+          spinDuration={18}
+          opacity={0.3}
+        />
+        <FloatingBitcoin
+          className="right-[2%] bottom-[13%] hidden md:block"
+          size={64}
+          delay={3.2}
+          duration={11}
+          spinDuration={21}
+          opacity={0.24}
+        />
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
           <div className="grid grid-cols-1 lg:grid-cols-[1.05fr_0.95fr] gap-10 lg:gap-8 items-center">
           <div className="max-w-3xl hero-copy">
             <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 mb-6">
@@ -243,8 +260,24 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section id="why" className="py-20 sm:py-24">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section id="why" className="relative overflow-hidden py-20 sm:py-24">
+        <FloatingBitcoin
+          className="right-[2%] top-14 hidden sm:block"
+          size={50}
+          delay={0.6}
+          duration={10}
+          spinDuration={17}
+          opacity={0.28}
+        />
+        <FloatingBitcoin
+          className="left-[1.5%] bottom-10 hidden lg:block"
+          size={38}
+          delay={4}
+          duration={12}
+          spinDuration={23}
+          opacity={0.2}
+        />
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-2xl">
             <p className="text-xs font-bold uppercase tracking-[0.2em] text-emerald-400 mb-3">
               Why Trading Flow
@@ -278,8 +311,24 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section id="plans" className="py-20 sm:py-24 bg-[#060A12] border-y border-white/5">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section id="plans" className="relative overflow-hidden py-20 sm:py-24 bg-[#060A12] border-y border-white/5">
+        <FloatingBitcoin
+          className="left-[2%] top-20 hidden sm:block"
+          size={70}
+          delay={2.2}
+          duration={13}
+          spinDuration={24}
+          opacity={0.22}
+        />
+        <FloatingBitcoin
+          className="right-[4%] bottom-16 hidden lg:block"
+          size={46}
+          delay={1}
+          duration={9.5}
+          spinDuration={16}
+          opacity={0.26}
+        />
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
             <div className="max-w-2xl">
               <p className="text-xs font-bold uppercase tracking-[0.2em] text-cyan-400 mb-3">
@@ -453,8 +502,16 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section id="activity" className="py-20 sm:py-24">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section id="activity" className="relative overflow-hidden py-20 sm:py-24">
+        <FloatingBitcoin
+          className="right-4 top-8 sm:right-[4%] sm:top-12"
+          size={40}
+          delay={2.8}
+          duration={8.5}
+          spinDuration={15}
+          opacity={0.22}
+        />
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-5">
             <div className="max-w-2xl">
               <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-cyan-500/10 text-cyan-300 border border-cyan-500/20 mb-4">
@@ -533,8 +590,16 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section id="faq" className="py-20 sm:py-24">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section id="faq" className="relative overflow-hidden py-20 sm:py-24">
+        <FloatingBitcoin
+          className="left-[2%] bottom-24 hidden lg:block"
+          size={56}
+          delay={3.6}
+          duration={11.5}
+          spinDuration={19}
+          opacity={0.24}
+        />
+        <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-2xl">
             <p className="text-xs font-bold uppercase tracking-[0.2em] text-cyan-400 mb-3">
               Frequently asked questions
@@ -570,7 +635,23 @@ export default function HomePage() {
 
       <section className="relative overflow-hidden py-20 sm:py-24 bg-[#060A12] border-t border-white/5">
         <div className="absolute -top-24 left-1/3 w-96 h-96 rounded-full bg-emerald-500/10 blur-3xl pointer-events-none" />
-        <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <FloatingBitcoin
+          className="left-3 top-10 sm:left-[8%] sm:top-16"
+          size={48}
+          delay={1.8}
+          duration={10.5}
+          spinDuration={20}
+          opacity={0.22}
+        />
+        <FloatingBitcoin
+          className="right-[5%] bottom-10 hidden md:block"
+          size={76}
+          delay={4.4}
+          duration={14}
+          spinDuration={26}
+          opacity={0.18}
+        />
+        <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 mb-5">
             <CheckCircle2 className="w-3 h-3" />
             Clear reporting from day one

@@ -19,6 +19,7 @@ import {
   Coins,
   Link as LinkIcon,
   Sparkles,
+  KeyRound,
 } from "lucide-react";
 import { Transaction, User } from "@/lib/db";
 
@@ -61,6 +62,11 @@ export default function AdminPage() {
   const [newUserNote, setNewUserNote] = useState("");
   const [createMsg, setCreateMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [createLoading, setCreateLoading] = useState(false);
+
+  // Admin password change form
+  const [adminNewPassword, setAdminNewPassword] = useState("");
+  const [adminPasswordMsg, setAdminPasswordMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [adminPasswordLoading, setAdminPasswordLoading] = useState(false);
 
   const fetchAdminData = useCallback(async () => {
     try {
@@ -186,6 +192,30 @@ export default function AdminPage() {
       setCreateMsg({ type: "error", text: err.message });
     } finally {
       setCreateLoading(false);
+    }
+  };
+
+  const handleAdminPasswordSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAdminPasswordMsg(null);
+    setAdminPasswordLoading(true);
+
+    try {
+      const res = await fetch("/api/admin/password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ newPassword: adminNewPassword }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to update admin password");
+      }
+      setAdminPasswordMsg({ type: "success", text: data.message });
+      setAdminNewPassword("");
+    } catch (err: any) {
+      setAdminPasswordMsg({ type: "error", text: err.message });
+    } finally {
+      setAdminPasswordLoading(false);
     }
   };
 
@@ -636,6 +666,60 @@ export default function AdminPage() {
                   className="w-full mt-2 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs uppercase tracking-wider transition shadow-lg shadow-emerald-500/20 active:scale-95 disabled:opacity-50"
                 >
                   {adjustLoading ? "Applying Adjustment..." : "Apply Adjustment"}
+                </button>
+              </form>
+            </div>
+
+            {/* Admin Security: Change Password */}
+            <div className="glass-card rounded-2xl p-6 border border-amber-500/20 shadow-xl">
+              <div className="flex items-center gap-2 mb-1">
+                <KeyRound className="w-5 h-5 text-amber-400" />
+                <h3 className="font-bold text-white text-base">Admin Security & Password</h3>
+              </div>
+              <p className="text-xs text-slate-400 mb-4">
+                Update your administrator access password at any time.
+              </p>
+
+              {adminPasswordMsg && (
+                <div
+                  className={`mb-4 p-3 rounded-xl text-xs flex items-center gap-2 border ${
+                    adminPasswordMsg.type === "success"
+                      ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
+                      : "bg-rose-500/10 border-rose-500/20 text-rose-400"
+                  }`}
+                >
+                  {adminPasswordMsg.type === "success" ? (
+                    <CheckCircle2 className="w-4 h-4 shrink-0" />
+                  ) : (
+                    <AlertCircle className="w-4 h-4 shrink-0" />
+                  )}
+                  <span>{adminPasswordMsg.text}</span>
+                </div>
+              )}
+
+              <form onSubmit={handleAdminPasswordSubmit} className="space-y-3.5">
+                <div>
+                  <label className="block text-[11px] font-semibold uppercase text-slate-400 mb-1">
+                    New Admin Password
+                  </label>
+                  <input
+                    type="password"
+                    required
+                    minLength={6}
+                    value={adminNewPassword}
+                    onChange={(e) => setAdminNewPassword(e.target.value)}
+                    placeholder="Enter at least 6 characters"
+                    className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white placeholder-slate-500 text-xs focus:outline-none focus:border-amber-400"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={adminPasswordLoading}
+                  className="w-full mt-2 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs uppercase tracking-wider transition shadow-lg shadow-amber-500/20 active:scale-95 disabled:opacity-50 flex items-center justify-center gap-1.5"
+                >
+                  <KeyRound className="w-4 h-4" />
+                  {adminPasswordLoading ? "Updating Password..." : "Update Admin Password"}
                 </button>
               </form>
             </div>

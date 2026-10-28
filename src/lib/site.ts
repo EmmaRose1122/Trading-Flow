@@ -1,5 +1,5 @@
 export const SITE_URL = (
-  process.env.NEXT_PUBLIC_APP_URL || "https://trading-flow.vercel.app"
+  process.env.NEXT_PUBLIC_APP_URL || "https://trading-flow-capital.vercel.app"
 ).replace(/\/$/, "");
 
 export const COMPANY = {

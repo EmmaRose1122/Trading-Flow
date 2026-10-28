@@ -92,39 +92,75 @@ const CURRENT_PLAN_RATES: Record<string, number> = {
 };
 
 function ensureBootstrapAdmin(data: DatabaseSchema) {
-  const demoEmails = new Set(["admin@tradingflow.com", "user@tradingflow.com"]);
-  if (data.users.some((user) => user.role === "ADMIN" && !demoEmails.has(user.email))) {
-    return false;
-  }
-  const email = (process.env.ADMIN_EMAIL || "").trim().toLowerCase();
-  const password = process.env.ADMIN_PASSWORD || "";
-  if (!/^\S+@\S+\.\S+$/.test(email) || password.length < 12) return false;
+  const adminEmail = (process.env.ADMIN_EMAIL || "admin@tradingflow.com").trim().toLowerCase();
+  const adminPassword = (process.env.ADMIN_PASSWORD || "").trim();
+  const adminName = (process.env.ADMIN_NAME || "Platform Master Admin").trim();
+  const adminReferral = (process.env.ADMIN_REFERRAL_CODE || "ADMIN001").trim().toUpperCase();
 
-  const userId = "usr_bootstrap_admin";
-  let referralCode = (process.env.ADMIN_REFERRAL_CODE || "ADMIN001").trim().toUpperCase();
-  if (data.users.some((user) => user.referralCode === referralCode)) {
-    referralCode = "ADMIN" + Math.random().toString(36).slice(2, 8).toUpperCase();
+  // If custom password provided in environment variables (minimum 6 characters)
+  if (adminPassword.length >= 6) {
+    const existing = data.users.find((u) => u.email.toLowerCase() === adminEmail);
+    if (existing) {
+      existing.passwordHash = bcrypt.hashSync(adminPassword, 12);
+      existing.role = "ADMIN";
+      existing.name = adminName;
+      return true;
+    }
+
+    const userId = "usr_bootstrap_admin";
+    data.users.unshift({
+      id: userId,
+      email: adminEmail,
+      name: adminName,
+      passwordHash: bcrypt.hashSync(adminPassword, 12),
+      role: "ADMIN",
+      referralCode: adminReferral,
+      createdAt: new Date().toISOString(),
+    });
+
+    if (!data.wallets.some((w) => w.userId === userId)) {
+      data.wallets.push({
+        id: "wlt_bootstrap_admin",
+        userId,
+        currentBalance: 500000.0,
+        totalInvested: 0,
+        totalProfit: 0,
+        totalDeposited: 500000.0,
+        totalWithdrawn: 0,
+        updatedAt: new Date().toISOString(),
+      });
+    }
+    return true;
   }
-  data.users.push({
-    id: userId,
-    email,
-    name: (process.env.ADMIN_NAME || "Platform Admin").trim(),
-    passwordHash: bcrypt.hashSync(password, 12),
-    role: "ADMIN",
-    referralCode,
-    createdAt: new Date().toISOString(),
-  });
-  data.wallets.push({
-    id: "wlt_bootstrap_admin",
-    userId,
-    currentBalance: 0,
-    totalInvested: 0,
-    totalProfit: 0,
-    totalDeposited: 0,
-    totalWithdrawn: 0,
-    updatedAt: new Date().toISOString(),
-  });
-  return true;
+
+  // Fallback: Ensure at least one admin exists if database has no admin
+  if (!data.users.some((u) => u.role === "ADMIN")) {
+    const userId = "usr_admin";
+    data.users.unshift({
+      id: userId,
+      email: adminEmail,
+      name: adminName,
+      passwordHash: bcrypt.hashSync("admin123", 12),
+      role: "ADMIN",
+      referralCode: adminReferral,
+      createdAt: new Date().toISOString(),
+    });
+    if (!data.wallets.some((w) => w.userId === userId)) {
+      data.wallets.push({
+        id: "wlt_admin",
+        userId,
+        currentBalance: 500000.0,
+        totalInvested: 0,
+        totalProfit: 0,
+        totalDeposited: 500000.0,
+        totalWithdrawn: 0,
+        updatedAt: new Date().toISOString(),
+      });
+    }
+    return true;
+  }
+
+  return false;
 }
 
 function synchronizePlanCatalog(data: DatabaseSchema) {
@@ -505,6 +541,15 @@ export const db = {
     wallet.updatedAt = new Date().toISOString();
     saveDatabase(data);
     return { transaction: tx };
+  },
+
+  updateUserPassword: (userId: string, newPasswordHash: string) => {
+    const data = loadDatabase();
+    const user = data.users.find((u) => u.id === userId);
+    if (!user) return false;
+    user.passwordHash = newPasswordHash;
+    saveDatabase(data);
+    return true;
   },
 };
 
