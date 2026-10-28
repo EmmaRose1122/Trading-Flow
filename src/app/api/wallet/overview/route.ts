@@ -9,11 +9,11 @@ export async function GET() {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const user = db.findUserById(session.userId);
+  const user = await db.findUserById(session.userId);
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  const wallet = db.getWalletByUserId(user.id);
-  const investments = db.getInvestmentsByUserId(user.id);
-  const transactions = db.getTransactions(user.id);
+  const wallet = await db.getWalletByUserId(user.id);
+  const investments = await db.getInvestmentsByUserId(user.id);
+  const transactions = await db.getTransactions(user.id);
 
   const pendingWithdrawal = transactions
     .filter((t) => t.type === "WITHDRAWAL" && t.status === "PENDING")

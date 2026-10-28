@@ -4,15 +4,15 @@ import { db } from "@/lib/db";
 import { calculateDailyProfit, roundMoney } from "@/lib/money";
 import { summarizeReferralNetwork } from "@/lib/referral";
 
-function profileResponse(userId: string) {
-  const user = db.findUserById(userId);
+async function profileResponse(userId: string) {
+  const user = await db.findUserById(userId);
   if (!user) return null;
 
-  const wallet = db.getWalletByUserId(user.id);
-  const investments = [...db.getInvestmentsByUserId(user.id)].sort(
+  const wallet = await db.getWalletByUserId(user.id);
+  const investments = [...(await db.getInvestmentsByUserId(user.id))].sort(
     (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   );
-  const transactions = [...db.getTransactions(user.id)].sort(
+  const transactions = [...(await db.getTransactions(user.id))].sort(
     (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   );
   const activeInvestments = investments.filter((investment) => investment.status === "ACTIVE");
@@ -43,8 +43,8 @@ function profileResponse(userId: string) {
     investmentProfits,
     dailyProfit,
     transactions,
-    payoutWallets: db.getPayoutWalletsByUserId(user.id),
-    referralSummary: summarizeReferralNetwork(user.id, db.getUsers(), transactions),
+    payoutWallets: await db.getPayoutWalletsByUserId(user.id),
+    referralSummary: summarizeReferralNetwork(user.id, await db.getUsers(), transactions),
     metrics: {
       activeInvestmentCount: activeInvestments.length,
       completedInvestmentCount: investments.filter((investment) => investment.status === "COMPLETED").length,
@@ -56,7 +56,7 @@ function profileResponse(userId: string) {
 export async function GET() {
   const session = await getSession();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  const profile = profileResponse(session.userId);
+  const profile = await profileResponse(session.userId);
   if (!profile) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   return NextResponse.json(profile);
 }
@@ -65,7 +65,7 @@ export async function PATCH(request: Request) {
   try {
     const session = await getSession();
     if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    const user = db.findUserById(session.userId);
+    const user = await db.findUserById(session.userId);
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const body = (await request.json()) as { name?: unknown; email?: unknown };
@@ -82,12 +82,12 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ error: "Enter a valid email address" }, { status: 400 });
     }
 
-    const existing = db.findUserByEmail(email);
+    const existing = await db.findUserByEmail(email);
     if (existing && existing.id !== user.id) {
       return NextResponse.json({ error: "Email is already registered" }, { status: 409 });
     }
 
-    const updated = db.updateUserProfile(user.id, { name, email });
+    const updated = await db.updateUserProfile(user.id, { name, email });
     if (!updated) return NextResponse.json({ error: "Unable to update profile" }, { status: 500 });
 
     await setSessionCookie({

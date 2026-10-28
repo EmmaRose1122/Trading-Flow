@@ -14,6 +14,7 @@
    - `ENABLE_DEMO_ACCOUNTS=false`
    - Optional: `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION`
    - `ADMIN_EMAIL` and `ADMIN_PASSWORD` (12+ characters) for the first admin
+   - `DATABASE_URL` - Supabase PostgreSQL Session Pooler connection string
    - `GEMINI_API_KEY` for the AI support assistant
    - Optional: `GEMINI_MODEL` (defaults to `gemini-3.8-flash`)
    - Optional: `ADMIN_NAME`
@@ -31,11 +32,16 @@ node -e "console.log(require('crypto').randomBytes(48).toString('base64url'))"
 
 ## Production persistence
 
-The current data layer stores users and ledgers in a JSON file. On Vercel it automatically uses
-`/tmp`, which keeps the preview functional but is reset when a serverless instance is recycled.
-This is not durable production storage. Before accepting real registrations or money movements,
-connect PostgreSQL (Neon/Supabase), add `DATABASE_URL`, and migrate the data layer. This migration
-is not included yet.
+When `DATABASE_URL` is set, the application stores its full state in a PostgreSQL
+`public.app_state` JSONB row. The table is created automatically on first connection and row-level
+locking serialises writes across serverless instances. Supabase Session Pooler (port 5432) is
+recommended because direct database hosts may be IPv6-only.
+
+If `DATABASE_URL` is not set, the app falls back to the local JSON file (`.data/db.json`, or
+`/tmp` on Vercel). That fallback is for local development only and is not durable.
+
+On first PostgreSQL startup, the app seeds the configured admin account, the plan catalogue and
+default deposit accounts. Demo users are not seeded when `ENABLE_DEMO_ACCOUNTS=false`.
 
 ## AI support assistant
 

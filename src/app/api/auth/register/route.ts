@@ -23,27 +23,27 @@ export async function POST(req: Request) {
     if (password.length < 6 || password.length > 72) {
       return NextResponse.json({ error: "Password must be between 6 and 72 characters" }, { status: 400 });
     }
-    const sponsor = db
-      .getUsers()
-      .find((user) => normalizeReferralCode(user.referralCode) === referral);
+    const sponsor = (await db.getUsers()).find(
+      (user) => normalizeReferralCode(user.referralCode) === referral
+    );
     if (!sponsor) {
       return NextResponse.json({ error: "Invalid referral code. Please check with your sponsor or upline." }, { status: 400 });
     }
-    if (db.findUserByEmail(normalizedEmail)) {
+    if (await db.findUserByEmail(normalizedEmail)) {
       return NextResponse.json({ error: "Email is already registered" }, { status: 409 });
     }
 
     const passwordHash = await hashPassword(password);
-    if (db.findUserByEmail(normalizedEmail)) {
+    if (await db.findUserByEmail(normalizedEmail)) {
       return NextResponse.json({ error: "Email is already registered" }, { status: 409 });
     }
     const userId = "usr_" + randomBytes(12).toString("hex");
     let referralCode = "";
     do {
       referralCode = "TF" + randomBytes(5).toString("hex").toUpperCase();
-    } while (db.getUsers().some((user) => user.referralCode === referralCode));
+    } while ((await db.getUsers()).some((user) => user.referralCode === referralCode));
 
-    const newUser = db.createUser({
+    const newUser = await db.createUser({
       id: userId,
       email: normalizedEmail,
       name: normalizedName,

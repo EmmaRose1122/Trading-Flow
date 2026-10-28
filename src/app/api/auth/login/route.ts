@@ -37,7 +37,7 @@ export async function POST(req: Request) {
       }
     }
 
-    const user = db.findUserByEmail(normalizedEmail);
+    const user = await db.findUserByEmail(normalizedEmail);
     if (!user) {
       return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
     }

@@ -10,7 +10,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const user = db.findUserById(session.userId);
+    const user = await db.findUserById(session.userId);
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const { planId, amount } = await req.json();
@@ -20,7 +20,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Invalid plan or amount" }, { status: 400 });
     }
 
-    const plan = db.getPlanById(planId);
+    const plan = await db.getPlanById(planId);
     if (!plan || !plan.isActive) {
       return NextResponse.json({ error: "Selected plan is unavailable" }, { status: 404 });
     }
@@ -32,17 +32,17 @@ export async function POST(req: Request) {
       );
     }
 
-    const wallet = db.getWalletByUserId(user.id);
+    const wallet = await db.getWalletByUserId(user.id);
     if (!wallet || wallet.currentBalance < investAmount) {
       return NextResponse.json({ error: "Insufficient wallet balance" }, { status: 400 });
     }
 
-    db.updateWallet(user.id, {
+    await db.updateWallet(user.id, {
       currentBalance: roundMoney(wallet.currentBalance - investAmount),
       totalInvested: roundMoney(wallet.totalInvested + investAmount),
     });
 
-    const investment = db.createInvestment({
+    const investment = await db.createInvestment({
       id: "inv_" + Math.random().toString(36).substring(2, 9),
       userId: user.id,
       planId: plan.id,
@@ -55,7 +55,7 @@ export async function POST(req: Request) {
       createdAt: new Date().toISOString(),
     });
 
-    db.createTransaction({
+    await db.createTransaction({
       id: "TX-" + Math.floor(1000000 + Math.random() * 9000000),
       userId: user.id,
       userEmail: user.email,
@@ -71,7 +71,7 @@ export async function POST(req: Request) {
 
     let referralCommissions: { credited: number; total: number } = { credited: 0, total: 0 };
     try {
-      const distribution = db.distributeReferralCommissions(investment);
+      const distribution = await db.distributeReferralCommissions(investment);
       referralCommissions = { credited: distribution.credited, total: distribution.total };
     } catch (commissionError) {
       console.error("Referral commission error:", commissionError);

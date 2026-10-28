@@ -8,9 +8,9 @@ export async function GET() {
     return NextResponse.json({ authenticated: false }, { status: 401 });
   }
 
-  const user = db.findUserById(session.userId);
+  const user = await db.findUserById(session.userId);
   if (!user) return NextResponse.json({ authenticated: false }, { status: 401 });
-  const wallet = db.getWalletByUserId(user.id);
+  const wallet = await db.getWalletByUserId(user.id);
 
   return NextResponse.json({
     authenticated: true,

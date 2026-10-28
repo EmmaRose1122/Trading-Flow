@@ -7,20 +7,20 @@ const MAX_WALLETS = 10;
 
 async function currentUser() {
   const session = await getSession();
-  return session ? db.findUserById(session.userId) : null;
+  return session ? await db.findUserById(session.userId) : null;
 }
 
 export async function GET() {
   const user = await currentUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  return NextResponse.json({ wallets: db.getPayoutWalletsByUserId(user.id) });
+  return NextResponse.json({ wallets: await db.getPayoutWalletsByUserId(user.id) });
 }
 
 export async function POST(request: Request) {
   try {
     const user = await currentUser();
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    const existing = db.getPayoutWalletsByUserId(user.id);
+    const existing = await db.getPayoutWalletsByUserId(user.id);
     if (existing.length >= MAX_WALLETS) {
       return NextResponse.json(
         { error: `You can save up to ${MAX_WALLETS} payout wallets` },
@@ -59,7 +59,7 @@ export async function POST(request: Request) {
       isProfitDestination: body.isProfitDestination === true,
       createdAt: new Date().toISOString(),
     };
-    db.createPayoutWallet(wallet);
+    await db.createPayoutWallet(wallet);
     return NextResponse.json({ success: true, wallet });
   } catch (error) {
     console.error("Create payout wallet error:", error);
@@ -72,7 +72,7 @@ export async function PATCH(request: Request) {
     const user = await currentUser();
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     const body = (await request.json()) as { id?: unknown };
-    if (typeof body.id !== "string" || !db.setProfitDestinationWallet(user.id, body.id)) {
+    if (typeof body.id !== "string" || !(await db.setProfitDestinationWallet(user.id, body.id))) {
       return NextResponse.json({ error: "Payout wallet not found" }, { status: 404 });
     }
     return NextResponse.json({ success: true });
@@ -87,7 +87,7 @@ export async function DELETE(request: Request) {
     const user = await currentUser();
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     const id = new URL(request.url).searchParams.get("id");
-    if (!id || !db.deletePayoutWallet(user.id, id)) {
+    if (!id || !(await db.deletePayoutWallet(user.id, id))) {
       return NextResponse.json({ error: "Payout wallet not found" }, { status: 404 });
     }
     return NextResponse.json({ success: true });

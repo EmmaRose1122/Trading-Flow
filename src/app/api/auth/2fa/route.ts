@@ -25,15 +25,15 @@ function safeEqual(a: string, b: string) {
   return left.length === right.length && timingSafeEqual(left, right);
 }
 
-function consumeRecoveryCode(userId: string, code: string) {
-  const user = db.findUserById(userId);
+async function consumeRecoveryCode(userId: string, code: string) {
+  const user = await db.findUserById(userId);
   if (!user?.twoFactorRecoveryHashes?.length) return false;
   const hash = hashRecoveryCode(code);
   const matchIndex = user.twoFactorRecoveryHashes.findIndex((stored) => safeEqual(stored, hash));
   if (matchIndex === -1) return false;
 
   const remaining = user.twoFactorRecoveryHashes.filter((_, index) => index !== matchIndex);
-  db.updateUserSecurity(userId, { twoFactorRecoveryHashes: remaining });
+  await db.updateUserSecurity(userId, { twoFactorRecoveryHashes: remaining });
   return true;
 }
 
@@ -57,7 +57,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const user = db.findUserById(userId);
+    const user = await db.findUserById(userId);
     if (!user?.twoFactorEnabled || !user.twoFactorSecret) {
       return NextResponse.json({ error: "Two-factor authentication is not enabled" }, { status: 400 });
     }
@@ -65,7 +65,7 @@ export async function POST(request: Request) {
     const code = body.code.trim();
     const valid = /^\d{6}$/.test(code)
       ? verifyTotpCode(user.twoFactorSecret, code)
-      : consumeRecoveryCode(userId, code);
+      : await consumeRecoveryCode(userId, code);
 
     if (!valid) {
       return NextResponse.json({ error: "Invalid authentication code" }, { status: 401 });

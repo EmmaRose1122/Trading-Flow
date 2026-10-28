@@ -14,7 +14,7 @@ export async function POST(request: Request) {
   try {
     const session = await getSession();
     if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    const user = db.findUserById(session.userId);
+    const user = await db.findUserById(session.userId);
     if (!user?.twoFactorEnabled || !user.twoFactorSecret) {
       return NextResponse.json({ error: "Two-factor authentication is not enabled" }, { status: 400 });
     }
@@ -37,7 +37,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Invalid authentication code" }, { status: 400 });
     }
 
-    db.updateUserSecurity(user.id, {
+    await db.updateUserSecurity(user.id, {
       twoFactorEnabled: false,
       twoFactorSecret: undefined,
       twoFactorPendingSecret: undefined,

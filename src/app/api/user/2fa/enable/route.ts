@@ -7,7 +7,7 @@ export async function POST(request: Request) {
   try {
     const session = await getSession();
     if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    const user = db.findUserById(session.userId);
+    const user = await db.findUserById(session.userId);
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     if (!user.twoFactorPendingSecret) {
       return NextResponse.json({ error: "Start two-factor setup first" }, { status: 400 });
@@ -19,7 +19,7 @@ export async function POST(request: Request) {
     }
 
     const recoveryCodes = generateRecoveryCodes();
-    db.updateUserSecurity(user.id, {
+    await db.updateUserSecurity(user.id, {
       twoFactorEnabled: true,
       twoFactorSecret: user.twoFactorPendingSecret,
       twoFactorPendingSecret: undefined,

@@ -9,12 +9,13 @@ import {
 export async function GET() {
   const session = await getSession();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  const user = db.findUserById(session.userId);
+  const user = await db.findUserById(session.userId);
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const summary = summarizeReferralNetwork(user.id, db.getUsers(), db.getTransactions());
-  const commissions = db
-    .getTransactions(user.id)
+  const users = await db.getUsers();
+  const userTransactions = await db.getTransactions(user.id);
+  const summary = summarizeReferralNetwork(user.id, users, await db.getTransactions());
+  const commissions = userTransactions
     .filter((tx) => tx.type === "REFERRAL")
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
     .slice(0, 25)

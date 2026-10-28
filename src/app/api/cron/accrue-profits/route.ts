@@ -18,7 +18,7 @@ async function handler(req: Request) {
   }
 
   try {
-    const summary = db.accrueProfits();
+    const summary = await db.accrueProfits();
     return NextResponse.json({ success: true, ...summary });
   } catch (error) {
     console.error("Profit accrual error:", error);

@@ -10,7 +10,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const user = db.findUserById(session.userId);
+    const user = await db.findUserById(session.userId);
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const { amount, method, destination, payoutWalletId } = await req.json();
@@ -31,9 +31,9 @@ export async function POST(req: Request) {
     let savedWalletId: string | undefined;
 
     if (typeof payoutWalletId === "string" && payoutWalletId) {
-      const savedWallet = db
-        .getPayoutWalletsByUserId(user.id)
-        .find((wallet) => wallet.id === payoutWalletId);
+      const savedWallet = (await db.getPayoutWalletsByUserId(user.id)).find(
+        (wallet) => wallet.id === payoutWalletId
+      );
       if (!savedWallet) {
         return NextResponse.json({ error: "Payout wallet not found" }, { status: 400 });
       }
@@ -51,7 +51,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Payout method is too long" }, { status: 400 });
     }
 
-    const wallet = db.getWalletByUserId(user.id);
+    const wallet = await db.getWalletByUserId(user.id);
     const fee = roundMoney(withdrawAmount * 0.02);
     const totalDeduction = roundMoney(withdrawAmount + fee);
 
@@ -62,11 +62,11 @@ export async function POST(req: Request) {
       );
     }
 
-    db.updateWallet(user.id, {
+    await db.updateWallet(user.id, {
       currentBalance: roundMoney(wallet.currentBalance - totalDeduction),
     });
 
-    const tx = db.createTransaction({
+    const tx = await db.createTransaction({
       id: "TX-" + Math.floor(1000000 + Math.random() * 9000000),
       userId: user.id,
       userEmail: user.email,

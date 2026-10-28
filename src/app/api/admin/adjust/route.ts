@@ -6,7 +6,7 @@ import { parseMoney, roundMoney } from "@/lib/money";
 export async function POST(req: Request) {
   try {
     const session = await getSession();
-    const admin = session ? db.findUserById(session.userId) : null;
+    const admin = session ? await db.findUserById(session.userId) : null;
     if (!admin || admin.role !== "ADMIN") {
       return NextResponse.json({ error: "Forbidden: Admin access required" }, { status: 403 });
     }
@@ -22,12 +22,12 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "An audit reason is required" }, { status: 400 });
     }
 
-    const targetUser = db.findUserById(userId);
+    const targetUser = await db.findUserById(userId);
     if (!targetUser) {
       return NextResponse.json({ error: "Target user not found" }, { status: 404 });
     }
 
-    const wallet = db.getWalletByUserId(userId);
+    const wallet = await db.getWalletByUserId(userId);
     if (!wallet) {
       return NextResponse.json({ error: "Target wallet not found" }, { status: 404 });
     }
@@ -44,9 +44,9 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Type must be CREDIT or DEBIT" }, { status: 400 });
     }
 
-    db.updateWallet(userId, { currentBalance: newBalance });
+    await db.updateWallet(userId, { currentBalance: newBalance });
 
-    const tx = db.createTransaction({
+    const tx = await db.createTransaction({
       id: "TX-ADJ-" + Math.floor(100000 + Math.random() * 900000),
       userId,
       userEmail: targetUser.email,

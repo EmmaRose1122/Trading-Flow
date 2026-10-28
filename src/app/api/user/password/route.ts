@@ -6,7 +6,7 @@ export async function POST(request: Request) {
   try {
     const session = await getSession();
     if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    const user = db.findUserById(session.userId);
+    const user = await db.findUserById(session.userId);
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const body = (await request.json()) as {
@@ -35,7 +35,7 @@ export async function POST(request: Request) {
     }
 
     const passwordHash = await hashPassword(body.newPassword);
-    const updated = db.updateUserPassword(user.id, passwordHash);
+    const updated = await db.updateUserPassword(user.id, passwordHash);
     if (!updated) {
       return NextResponse.json({ error: "Unable to update password" }, { status: 500 });
     }

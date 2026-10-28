@@ -8,7 +8,7 @@ import { PLATFORM_REFERRAL_CODE, normalizeReferralCode } from "@/lib/referral";
 export async function POST(req: Request) {
   try {
     const session = await getSession();
-    const admin = session ? db.findUserById(session.userId) : null;
+    const admin = session ? await db.findUserById(session.userId) : null;
     if (!admin || admin.role !== "ADMIN") {
       return NextResponse.json({ error: "Forbidden: Admin access required" }, { status: 403 });
     }
@@ -29,7 +29,7 @@ export async function POST(req: Request) {
     const normalizedName = name.trim();
     const assignedRole: "USER" | "ADMIN" = role === "ADMIN" ? "ADMIN" : "USER";
 
-    if (db.findUserByEmail(normalizedEmail)) {
+    if (await db.findUserByEmail(normalizedEmail)) {
       return NextResponse.json({ error: "Email is already registered" }, { status: 409 });
     }
 
@@ -37,9 +37,9 @@ export async function POST(req: Request) {
     let validReferral: string = PLATFORM_REFERRAL_CODE;
     if (typeof referredBy === "string" && referredBy.trim()) {
       const code = normalizeReferralCode(referredBy);
-      const sponsor = db
-        .getUsers()
-        .find((u) => normalizeReferralCode(u.referralCode) === code);
+      const sponsor = (await db.getUsers()).find(
+        (u) => normalizeReferralCode(u.referralCode) === code
+      );
       if (!sponsor) {
         return NextResponse.json({ error: `Sponsor with referral code "${code}" does not exist` }, { status: 400 });
       }
@@ -62,9 +62,9 @@ export async function POST(req: Request) {
     let referralCode = "";
     do {
       referralCode = "TF" + randomBytes(5).toString("hex").toUpperCase();
-    } while (db.getUsers().some((u) => u.referralCode === referralCode));
+    } while ((await db.getUsers()).some((u) => u.referralCode === referralCode));
 
-    const newUser = db.createUser(
+    const newUser = await db.createUser(
       {
         id: userId,
         email: normalizedEmail,
@@ -80,7 +80,7 @@ export async function POST(req: Request) {
 
     // If initial balance was granted, record transaction
     if (balanceToAdd > 0) {
-      db.createTransaction({
+      await db.createTransaction({
         id: "TX-BONUS-" + Math.floor(100000 + Math.random() * 900000),
         userId: newUser.id,
         userEmail: newUser.email,

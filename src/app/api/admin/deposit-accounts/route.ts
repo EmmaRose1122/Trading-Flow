@@ -5,7 +5,7 @@ import { db, type DepositAccount } from "@/lib/db";
 
 async function requireAdmin() {
   const session = await getSession();
-  const admin = session ? db.findUserById(session.userId) : null;
+  const admin = session ? await db.findUserById(session.userId) : null;
   return admin?.role === "ADMIN" ? admin : null;
 }
 
@@ -27,7 +27,7 @@ export async function GET() {
   if (!(await requireAdmin())) {
     return NextResponse.json({ error: "Forbidden: Admin access required" }, { status: 403 });
   }
-  return NextResponse.json({ accounts: db.getDepositAccounts() });
+  return NextResponse.json({ accounts: await db.getDepositAccounts() });
 }
 
 export async function POST(request: Request) {
@@ -55,7 +55,7 @@ export async function POST(request: Request) {
       isActive: body.isActive !== false,
       createdAt: new Date().toISOString(),
     };
-    db.createDepositAccount(account);
+    await db.createDepositAccount(account);
     return NextResponse.json({ success: true, account });
   } catch (error) {
     console.error("Create deposit account error:", error);
@@ -88,7 +88,7 @@ export async function PATCH(request: Request) {
     if (fields.instructions !== undefined) update.instructions = fields.instructions;
     if (typeof body.isActive === "boolean") update.isActive = body.isActive;
 
-    const account = db.updateDepositAccount(body.id, update);
+    const account = await db.updateDepositAccount(body.id, update);
     if (!account) return NextResponse.json({ error: "Deposit account not found" }, { status: 404 });
     return NextResponse.json({ success: true, account });
   } catch (error) {
@@ -103,7 +103,7 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: "Forbidden: Admin access required" }, { status: 403 });
     }
     const id = new URL(request.url).searchParams.get("id");
-    if (!id || !db.deleteDepositAccount(id)) {
+    if (!id || !(await db.deleteDepositAccount(id))) {
       return NextResponse.json({ error: "Deposit account not found" }, { status: 404 });
     }
     return NextResponse.json({ success: true });

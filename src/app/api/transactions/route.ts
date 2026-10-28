@@ -14,11 +14,11 @@ export async function GET(req: Request) {
   const status = searchParams.get("status")?.toUpperCase() || "ALL";
   const page = Math.max(1, Number.parseInt(searchParams.get("page") || "1", 10) || 1);
   const limit = Math.min(100, Math.max(1, Number.parseInt(searchParams.get("limit") || "50", 10) || 50));
-  const currentUser = db.findUserById(session.userId);
+  const currentUser = await db.findUserById(session.userId);
   if (!currentUser) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const isGlobal = currentUser.role === "ADMIN" && searchParams.get("scope") === "all";
-  let txs = db.getTransactions(isGlobal ? undefined : currentUser.id);
+  let txs = await db.getTransactions(isGlobal ? undefined : currentUser.id);
 
   if (type !== "ALL") txs = txs.filter((t) => t.type === type);
   if (status !== "ALL") txs = txs.filter((t) => t.status === status);

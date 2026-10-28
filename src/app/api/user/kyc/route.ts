@@ -17,7 +17,7 @@ function ageFromDate(dateOfBirth: string) {
 export async function GET() {
   const session = await getSession();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  const user = db.findUserById(session.userId);
+  const user = await db.findUserById(session.userId);
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   return NextResponse.json({
     status: user.kycStatus || "NOT_STARTED",
@@ -29,7 +29,7 @@ export async function POST(request: Request) {
   try {
     const session = await getSession();
     if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    const user = db.findUserById(session.userId);
+    const user = await db.findUserById(session.userId);
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     if (user.kycStatus === "APPROVED" || user.kycStatus === "PENDING") {
       return NextResponse.json({ error: "A KYC application is already active" }, { status: 409 });
@@ -71,7 +71,7 @@ export async function POST(request: Request) {
       documentReference,
       submittedAt: new Date().toISOString(),
     };
-    db.updateUserSecurity(user.id, { kycStatus: "PENDING", kycDetails: details });
+    await db.updateUserSecurity(user.id, { kycStatus: "PENDING", kycDetails: details });
     return NextResponse.json({ success: true, status: "PENDING", details });
   } catch (error) {
     console.error("KYC submission error:", error);

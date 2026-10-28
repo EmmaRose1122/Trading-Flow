@@ -10,7 +10,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const user = db.findUserById(session.userId);
+    const user = await db.findUserById(session.userId);
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const { amount, depositAccountId, txHash, proofUrl } = await req.json();
@@ -23,23 +23,23 @@ export async function POST(req: Request) {
     if (typeof depositAccountId !== "string" || !depositAccountId) {
       return NextResponse.json({ error: "Select an active deposit account" }, { status: 400 });
     }
-    const depositAccount = db
-      .getDepositAccounts()
-      .find((account) => account.id === depositAccountId && account.isActive);
+    const depositAccount = (await db.getDepositAccounts()).find(
+      (account) => account.id === depositAccountId && account.isActive
+    );
     if (!depositAccount) {
       return NextResponse.json({ error: "Selected deposit account is unavailable" }, { status: 400 });
     }
     if (normalizedHash.length < 6 || normalizedHash.length > 128) {
       return NextResponse.json({ error: "A valid transaction hash or reference is required" }, { status: 400 });
     }
-    const duplicate = db.getTransactions().some(
+    const duplicate = (await db.getTransactions()).some(
       (entry) => entry.type === "DEPOSIT" && entry.txHash?.toLowerCase() === normalizedHash.toLowerCase()
     );
     if (duplicate) {
       return NextResponse.json({ error: "This transaction reference has already been submitted" }, { status: 409 });
     }
 
-    const tx = db.createTransaction({
+    const tx = await db.createTransaction({
       id: "TX-" + Math.floor(1000000 + Math.random() * 9000000),
       userId: user.id,
       userEmail: user.email,

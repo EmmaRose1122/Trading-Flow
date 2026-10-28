@@ -4,10 +4,10 @@ import { db } from "@/lib/db";
 
 export async function GET() {
   const session = await getSession();
-  if (!session || !db.findUserById(session.userId)) {
+  if (!session || !(await db.findUserById(session.userId))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  const plans = db.getPlans().filter((plan) => plan.isActive);
+  const plans = (await db.getPlans()).filter((plan) => plan.isActive);
   return NextResponse.json({ plans });
 }
 

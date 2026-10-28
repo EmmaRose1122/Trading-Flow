@@ -4,12 +4,12 @@ import { db } from "@/lib/db";
 
 export async function GET() {
   const session = await getSession();
-  const admin = session ? db.findUserById(session.userId) : null;
+  const admin = session ? await db.findUserById(session.userId) : null;
   if (!admin || admin.role !== "ADMIN") {
     return NextResponse.json({ error: "Forbidden: Admin access required" }, { status: 403 });
   }
 
-  const users = db.getUsers().filter((user) => user.role !== "ADMIN");
+  const users = (await db.getUsers()).filter((user) => user.role !== "ADMIN");
   return NextResponse.json({
     pendingKyc: users.filter((user) => user.kycStatus === "PENDING"),
     kycUsers: users.map((user) => ({
@@ -25,7 +25,7 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const session = await getSession();
-    const admin = session ? db.findUserById(session.userId) : null;
+    const admin = session ? await db.findUserById(session.userId) : null;
     if (!admin || admin.role !== "ADMIN") {
       return NextResponse.json({ error: "Forbidden: Admin access required" }, { status: 403 });
     }
@@ -38,7 +38,7 @@ export async function POST(request: Request) {
     if (typeof body.userId !== "string" || (body.action !== "APPROVE" && body.action !== "REJECT")) {
       return NextResponse.json({ error: "Invalid KYC review request" }, { status: 400 });
     }
-    const user = db.findUserById(body.userId);
+    const user = await db.findUserById(body.userId);
     if (!user || user.role === "ADMIN" || !user.kycDetails) {
       return NextResponse.json({ error: "KYC application not found" }, { status: 404 });
     }
@@ -52,7 +52,7 @@ export async function POST(request: Request) {
       reviewedAt: new Date().toISOString(),
       rejectionReason: body.action === "REJECT" ? reason || "Verification requirements not met" : undefined,
     };
-    db.updateUserSecurity(user.id, {
+    await db.updateUserSecurity(user.id, {
       kycStatus: body.action === "APPROVE" ? "APPROVED" : "REJECTED",
       kycDetails,
     });

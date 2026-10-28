@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 import bcrypt from "bcryptjs";
+import { Pool } from "pg";
 import { calculateDailyProfit } from "./money";
 import {
   PLATFORM_REFERRAL_CODE,
@@ -549,273 +550,420 @@ function saveDatabase(data: DatabaseSchema) {
   inMemoryData = data;
 }
 
+const POSTGRES_URL = (process.env.DATABASE_URL || "").trim();
+const USE_POSTGRES = /^postgres(ql)?:\/\//i.test(POSTGRES_URL);
+
+let pool: Pool | null = null;
+let readyPromise: Promise<void> | null = null;
+
+function getPool() {
+  if (!pool) {
+    pool = new Pool({
+      connectionString: POSTGRES_URL,
+      ssl: /localhost|127\.0\.0\.1/i.test(POSTGRES_URL) ? undefined : { rejectUnauthorized: false },
+      max: 4,
+      idleTimeoutMillis: 15_000,
+      connectionTimeoutMillis: 10_000,
+    });
+  }
+  return pool;
+}
+
+function migrateState(data: DatabaseSchema) {
+  const plansChanged = synchronizePlanCatalog(data);
+  const adminCreated = ensureBootstrapAdmin(data);
+  const featuresInitialized = ensureFeatureCollections(data);
+  const platformReferralChanged = ensurePlatformReferralCode(data);
+  return plansChanged || adminCreated || featuresInitialized || platformReferralChanged;
+}
+
+function getInitialPostgresData() {
+  const demoFlag = process.env.ENABLE_DEMO_ACCOUNTS;
+  process.env.ENABLE_DEMO_ACCOUNTS = "false";
+  try {
+    const data = getDefaultData();
+    migrateState(data);
+    return data;
+  } finally {
+    if (demoFlag === undefined) delete process.env.ENABLE_DEMO_ACCOUNTS;
+    else process.env.ENABLE_DEMO_ACCOUNTS = demoFlag;
+  }
+}
+
+async function initializePostgres() {
+  const client = await getPool().connect();
+  try {
+    await client.query("BEGIN");
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS public.app_state (
+        id text PRIMARY KEY,
+        data jsonb NOT NULL,
+        updated_at timestamptz NOT NULL DEFAULT now()
+      )
+    `);
+    await client
+      .query("REVOKE ALL ON TABLE public.app_state FROM anon, authenticated")
+      .catch(() => undefined);
+
+    let result = await client.query(
+      "SELECT data FROM public.app_state WHERE id = $1 FOR UPDATE",
+      ["main"]
+    );
+    if (result.rowCount === 0) {
+      const initial = getInitialPostgresData();
+      await client.query(
+        "INSERT INTO public.app_state (id, data) VALUES ($1, $2) ON CONFLICT (id) DO NOTHING",
+        ["main", JSON.stringify(initial)]
+      );
+      result = await client.query(
+        "SELECT data FROM public.app_state WHERE id = $1 FOR UPDATE",
+        ["main"]
+      );
+    }
+
+    const data = result.rows[0].data as DatabaseSchema;
+    if (migrateState(data)) {
+      await client.query(
+        "UPDATE public.app_state SET data = $1, updated_at = now() WHERE id = $2",
+        [JSON.stringify(data), "main"]
+      );
+    }
+    await client.query("COMMIT");
+  } catch (error) {
+    await client.query("ROLLBACK").catch(() => undefined);
+    throw error;
+  } finally {
+    client.release();
+  }
+}
+
+function ensurePostgresReady() {
+  if (!readyPromise) {
+    readyPromise = initializePostgres().catch((error) => {
+      readyPromise = null;
+      throw error;
+    });
+  }
+  return readyPromise;
+}
+
+async function readData<T>(reader: (data: DatabaseSchema) => T): Promise<T> {
+  if (!USE_POSTGRES) return reader(loadDatabase());
+  await ensurePostgresReady();
+  const result = await getPool().query(
+    "SELECT data FROM public.app_state WHERE id = $1",
+    ["main"]
+  );
+  if (result.rowCount === 0) throw new Error("PostgreSQL state is unavailable");
+  return reader(result.rows[0].data as DatabaseSchema);
+}
+
+async function mutateData<T>(mutator: (data: DatabaseSchema) => T): Promise<T> {
+  if (!USE_POSTGRES) {
+    const data = loadDatabase();
+    const result = mutator(data);
+    saveDatabase(data);
+    return result;
+  }
+
+  await ensurePostgresReady();
+  const client = await getPool().connect();
+  try {
+    await client.query("BEGIN");
+    const result = await client.query(
+      "SELECT data FROM public.app_state WHERE id = $1 FOR UPDATE",
+      ["main"]
+    );
+    if (result.rowCount === 0) throw new Error("PostgreSQL state is unavailable");
+    const data = result.rows[0].data as DatabaseSchema;
+    const value = mutator(data);
+    await client.query(
+      "UPDATE public.app_state SET data = $1, updated_at = now() WHERE id = $2",
+      [JSON.stringify(data), "main"]
+    );
+    await client.query("COMMIT");
+    return value;
+  } catch (error) {
+    await client.query("ROLLBACK").catch(() => undefined);
+    throw error;
+  } finally {
+    client.release();
+  }
+}
+
 // Database helper functions
 export const db = {
-  getUsers: () => loadDatabase().users,
+  getUsers: () => readData((data) => data.users),
   findUserByEmail: (email: string) =>
-    loadDatabase().users.find((u) => u.email.toLowerCase() === email.toLowerCase()),
-  findUserById: (id: string) => loadDatabase().users.find((u) => u.id === id),
-  createUser: (user: User, initialBalance: number = 0) => {
-    const data = loadDatabase();
-    if (data.users.some((entry) => entry.email.toLowerCase() === user.email.toLowerCase())) {
-      throw new Error("DUPLICATE_EMAIL");
-    }
-    if (
-      data.users.some(
-        (entry) =>
-          normalizeReferralCode(entry.referralCode) === normalizeReferralCode(user.referralCode)
-      )
-    ) {
-      throw new Error("DUPLICATE_REFERRAL_CODE");
-    }
-    data.users.push(user);
-    const balance = Math.max(0, initialBalance);
-    data.wallets.push({
-      id: "wlt_" + Math.random().toString(36).substring(2, 9),
-      userId: user.id,
-      currentBalance: balance,
-      totalInvested: 0.0,
-      totalProfit: 0.0,
-      totalDeposited: balance,
-      totalWithdrawn: 0.0,
-      totalReferralEarnings: 0.0,
-      updatedAt: new Date().toISOString(),
-    });
-    saveDatabase(data);
-    return user;
-  },
+    readData((data) =>
+      data.users.find((u) => u.email.toLowerCase() === email.toLowerCase())
+    ),
+  findUserById: (id: string) =>
+    readData((data) => data.users.find((u) => u.id === id)),
 
-  getWalletByUserId: (userId: string) => {
-    const data = loadDatabase();
-    return data.wallets.find((w) => w.userId === userId);
-  },
+  createUser: (user: User, initialBalance: number = 0) =>
+    mutateData((data) => {
+      if (data.users.some((entry) => entry.email.toLowerCase() === user.email.toLowerCase())) {
+        throw new Error("DUPLICATE_EMAIL");
+      }
+      if (
+        data.users.some(
+          (entry) =>
+            normalizeReferralCode(entry.referralCode) ===
+            normalizeReferralCode(user.referralCode)
+        )
+      ) {
+        throw new Error("DUPLICATE_REFERRAL_CODE");
+      }
+      data.users.push(user);
+      const balance = Math.max(0, initialBalance);
+      data.wallets.push({
+        id: "wlt_" + Math.random().toString(36).substring(2, 9),
+        userId: user.id,
+        currentBalance: balance,
+        totalInvested: 0.0,
+        totalProfit: 0.0,
+        totalDeposited: balance,
+        totalWithdrawn: 0.0,
+        totalReferralEarnings: 0.0,
+        updatedAt: new Date().toISOString(),
+      });
+      return user;
+    }),
 
-  updateWallet: (userId: string, partial: Partial<Wallet>) => {
-    const data = loadDatabase();
-    const idx = data.wallets.findIndex((w) => w.userId === userId);
-    if (idx !== -1) {
-      data.wallets[idx] = { ...data.wallets[idx], ...partial, updatedAt: new Date().toISOString() };
-      saveDatabase(data);
+  getWalletByUserId: (userId: string) =>
+    readData((data) => data.wallets.find((w) => w.userId === userId)),
+
+  updateWallet: (userId: string, partial: Partial<Wallet>) =>
+    mutateData((data) => {
+      const idx = data.wallets.findIndex((w) => w.userId === userId);
+      if (idx === -1) return null;
+      data.wallets[idx] = {
+        ...data.wallets[idx],
+        ...partial,
+        updatedAt: new Date().toISOString(),
+      };
       return data.wallets[idx];
-    }
-    return null;
-  },
+    }),
 
-  getPlans: () => loadDatabase().plans,
-  getPlanById: (planId: string) => loadDatabase().plans.find((p) => p.id === planId),
+  getPlans: () => readData((data) => data.plans),
+  getPlanById: (planId: string) =>
+    readData((data) => data.plans.find((p) => p.id === planId)),
 
   getInvestmentsByUserId: (userId: string) =>
-    loadDatabase().investments.filter((inv) => inv.userId === userId),
+    readData((data) => data.investments.filter((inv) => inv.userId === userId)),
 
-  createInvestment: (investment: Investment) => {
-    const data = loadDatabase();
-    data.investments.push(investment);
-    saveDatabase(data);
-    return investment;
-  },
+  createInvestment: (investment: Investment) =>
+    mutateData((data) => {
+      data.investments.push(investment);
+      return investment;
+    }),
 
-  distributeReferralCommissions: (investment: Investment) => {
-    const data = loadDatabase();
-    const investor = data.users.find((user) => user.id === investment.userId);
-    if (!investor || investment.investedAmount <= 0) {
-      return { credited: 0, total: 0, entries: [] as Transaction[] };
-    }
-
-    const alreadyCredited = new Set(
-      data.transactions
-        .filter((tx) => tx.type === "REFERRAL" && tx.investmentId === investment.id)
-        .map((tx) => tx.userId)
-    );
-
-    let current = investor;
-    const seen = new Set<string>([investor.id]);
-    const entries: Transaction[] = [];
-    let total = 0;
-
-    for (let level = 1; level <= REFERRAL_LEVEL_RATES.length; level += 1) {
-      const sponsorCode = normalizeReferralCode(current.referredBy);
-      if (!sponsorCode) break;
-      const sponsor = data.users.find(
-        (user) => normalizeReferralCode(user.referralCode) === sponsorCode
-      );
-      if (!sponsor || seen.has(sponsor.id)) break;
-      seen.add(sponsor.id);
-
-      const rate = REFERRAL_LEVEL_RATES[level - 1];
-      const amount = Math.round(investment.investedAmount * rate) / 100;
-      if (amount > 0 && !alreadyCredited.has(sponsor.id)) {
-        const wallet = data.wallets.find((entry) => entry.userId === sponsor.id);
-        if (wallet) {
-          wallet.currentBalance = Math.round((wallet.currentBalance + amount) * 100) / 100;
-          wallet.totalReferralEarnings =
-            Math.round(((wallet.totalReferralEarnings || 0) + amount) * 100) / 100;
-          wallet.updatedAt = new Date().toISOString();
-
-          const transaction: Transaction = {
-            id: `TX-REF-${investment.id}-L${level}-${sponsor.id}`,
-            userId: sponsor.id,
-            userEmail: sponsor.email,
-            userName: sponsor.name,
-            type: "REFERRAL",
-            amount,
-            fee: 0,
-            status: "SUCCESS",
-            method: `Referral Commission · Level ${level}`,
-            referralLevel: level,
-            sourceUserId: investor.id,
-            sourceUserName: investor.name,
-            investmentId: investment.id,
-            previousBalance: Math.round((wallet.currentBalance - amount) * 100) / 100,
-            newBalance: wallet.currentBalance,
-            note: `Level ${level} commission from ${investor.name} · ${investment.planName}`,
-            createdAt: new Date().toISOString(),
-          };
-          data.transactions.unshift(transaction);
-          entries.push(transaction);
-          total = Math.round((total + amount) * 100) / 100;
-        }
+  distributeReferralCommissions: (investment: Investment) =>
+    mutateData((data) => {
+      const investor = data.users.find((user) => user.id === investment.userId);
+      if (!investor || investment.investedAmount <= 0) {
+        return { credited: 0, total: 0, entries: [] as Transaction[] };
       }
 
-      current = sponsor;
-    }
-
-    if (entries.length > 0) saveDatabase(data);
-    return { credited: entries.length, total, entries };
-  },
-
-  getTransactions: (userId?: string) => {
-    const data = loadDatabase();
-    if (userId) {
-      return data.transactions.filter((tx) => tx.userId === userId);
-    }
-    return data.transactions;
-  },
-
-  createTransaction: (tx: Transaction) => {
-    const data = loadDatabase();
-    data.transactions.unshift(tx);
-    saveDatabase(data);
-    return tx;
-  },
-
-  accrueProfits: (date = new Date()) => {
-    const data = loadDatabase();
-    const accrualDate = date.toISOString().slice(0, 10);
-    let processed = 0;
-    let distributed = 0;
-
-    for (const investment of data.investments) {
-      if (investment.status !== "ACTIVE" || investment.remainingDays <= 0) continue;
-      if (investment.lastAccruedAt === accrualDate) continue;
-      const wallet = data.wallets.find((entry) => entry.userId === investment.userId);
-      const user = data.users.find((entry) => entry.id === investment.userId);
-      if (!wallet || !user) continue;
-
-      const profit = calculateDailyProfit(investment.investedAmount, investment.dailyPercentage);
-      const payoutWallet = data.payoutWallets?.find(
-        (entry) => entry.userId === user.id && entry.isProfitDestination
+      const alreadyCredited = new Set(
+        data.transactions
+          .filter((tx) => tx.type === "REFERRAL" && tx.investmentId === investment.id)
+          .map((tx) => tx.userId)
       );
-      wallet.currentBalance = Math.round((wallet.currentBalance + profit) * 100) / 100;
-      wallet.totalProfit = Math.round((wallet.totalProfit + profit) * 100) / 100;
-      investment.remainingDays -= 1;
-      investment.lastAccruedAt = accrualDate;
-      data.transactions.unshift({
-        id: `TX-PROFIT-${investment.id}-${accrualDate}`,
-        userId: user.id,
-        userEmail: user.email,
-        userName: user.name,
-        type: "PROFIT",
-        amount: profit,
-        fee: 0,
-        status: "SUCCESS",
-        method: "Automated Daily ROI",
-        destination: payoutWallet?.address,
-        payoutWalletId: payoutWallet?.id,
-        note: payoutWallet
-          ? `Daily profit for ${investment.planName} · payout destination: ${payoutWallet.label}`
-          : `Daily profit for ${investment.planName}`,
-        createdAt: date.toISOString(),
-      });
-      processed += 1;
-      distributed += profit;
 
-      if (investment.remainingDays === 0) {
-        investment.status = "COMPLETED";
-        wallet.totalInvested = Math.max(0, Math.round((wallet.totalInvested - investment.investedAmount) * 100) / 100);
-        const plan = data.plans.find((entry) => entry.id === investment.planId);
-        if (plan?.capitalBack) {
-          wallet.currentBalance = Math.round((wallet.currentBalance + investment.investedAmount) * 100) / 100;
-          data.transactions.unshift({
-            id: `TX-CAPITAL-${investment.id}`,
-            userId: user.id,
-            userEmail: user.email,
-            userName: user.name,
-            type: "CAPITAL_RETURN",
-            amount: investment.investedAmount,
-            fee: 0,
-            status: "SUCCESS",
-            method: "Internal Balance",
-            note: `Principal returned for ${investment.planName}`,
-            createdAt: date.toISOString(),
-          });
+      let current = investor;
+      const seen = new Set<string>([investor.id]);
+      const entries: Transaction[] = [];
+      let total = 0;
+
+      for (let level = 1; level <= REFERRAL_LEVEL_RATES.length; level += 1) {
+        const sponsorCode = normalizeReferralCode(current.referredBy);
+        if (!sponsorCode) break;
+        const sponsor = data.users.find(
+          (user) => normalizeReferralCode(user.referralCode) === sponsorCode
+        );
+        if (!sponsor || seen.has(sponsor.id)) break;
+        seen.add(sponsor.id);
+
+        const rate = REFERRAL_LEVEL_RATES[level - 1];
+        const amount = Math.round(investment.investedAmount * rate) / 100;
+        if (amount > 0 && !alreadyCredited.has(sponsor.id)) {
+          const wallet = data.wallets.find((entry) => entry.userId === sponsor.id);
+          if (wallet) {
+            wallet.currentBalance = Math.round((wallet.currentBalance + amount) * 100) / 100;
+            wallet.totalReferralEarnings =
+              Math.round(((wallet.totalReferralEarnings || 0) + amount) * 100) / 100;
+            wallet.updatedAt = new Date().toISOString();
+
+            const transaction: Transaction = {
+              id: `TX-REF-${investment.id}-L${level}-${sponsor.id}`,
+              userId: sponsor.id,
+              userEmail: sponsor.email,
+              userName: sponsor.name,
+              type: "REFERRAL",
+              amount,
+              fee: 0,
+              status: "SUCCESS",
+              method: `Referral Commission · Level ${level}`,
+              referralLevel: level,
+              sourceUserId: investor.id,
+              sourceUserName: investor.name,
+              investmentId: investment.id,
+              previousBalance: Math.round((wallet.currentBalance - amount) * 100) / 100,
+              newBalance: wallet.currentBalance,
+              note: `Level ${level} commission from ${investor.name} · ${investment.planName}`,
+              createdAt: new Date().toISOString(),
+            };
+            data.transactions.unshift(transaction);
+            entries.push(transaction);
+            total = Math.round((total + amount) * 100) / 100;
+          }
         }
+
+        current = sponsor;
       }
-      wallet.updatedAt = date.toISOString();
-    }
 
-    if (processed > 0) saveDatabase(data);
-    return { processed, distributed: Math.round(distributed * 100) / 100, accrualDate };
-  },
+      return { credited: entries.length, total, entries };
+    }),
 
-  updateTransactionStatus: (txId: string, status: "APPROVED" | "REJECTED") => {
-    const data = loadDatabase();
-    const tx = data.transactions.find((t) => t.id === txId);
-    if (!tx) return { error: "Transaction not found", status: 404 };
-    if (tx.type !== "DEPOSIT" && tx.type !== "WITHDRAWAL") {
-      return { error: "Only deposit and withdrawal requests can be reviewed", status: 400 };
-    }
-    if (tx.status !== "PENDING") {
-      return { error: "Request has already been processed", status: 409 };
-    }
+  getTransactions: (userId?: string) =>
+    readData((data) =>
+      userId ? data.transactions.filter((tx) => tx.userId === userId) : data.transactions
+    ),
 
-    const wallet = data.wallets.find((w) => w.userId === tx.userId);
-    if (!wallet) return { error: "User wallet not found", status: 404 };
+  createTransaction: (tx: Transaction) =>
+    mutateData((data) => {
+      data.transactions.unshift(tx);
+      return tx;
+    }),
 
-    if (tx.type === "DEPOSIT" && status === "APPROVED") {
-      wallet.currentBalance = Math.round((wallet.currentBalance + tx.amount) * 100) / 100;
-      wallet.totalDeposited = Math.round((wallet.totalDeposited + tx.amount) * 100) / 100;
-    }
-    if (tx.type === "WITHDRAWAL" && status === "APPROVED") {
-      wallet.totalWithdrawn = Math.round((wallet.totalWithdrawn + tx.amount) * 100) / 100;
-    }
-    if (tx.type === "WITHDRAWAL" && status === "REJECTED") {
-      wallet.currentBalance = Math.round((wallet.currentBalance + tx.amount + tx.fee) * 100) / 100;
-    }
+  accrueProfits: (date = new Date()) =>
+    mutateData((data) => {
+      const accrualDate = date.toISOString().slice(0, 10);
+      let processed = 0;
+      let distributed = 0;
 
-    tx.status = status;
-    wallet.updatedAt = new Date().toISOString();
-    saveDatabase(data);
-    return { transaction: tx };
-  },
+      for (const investment of data.investments) {
+        if (investment.status !== "ACTIVE" || investment.remainingDays <= 0) continue;
+        if (investment.lastAccruedAt === accrualDate) continue;
+        const wallet = data.wallets.find((entry) => entry.userId === investment.userId);
+        const user = data.users.find((entry) => entry.id === investment.userId);
+        if (!wallet || !user) continue;
 
-  updateUserPassword: (userId: string, newPasswordHash: string) => {
-    const data = loadDatabase();
-    const user = data.users.find((u) => u.id === userId);
-    if (!user) return false;
-    user.passwordHash = newPasswordHash;
-    saveDatabase(data);
-    return true;
-  },
+        const profit = calculateDailyProfit(
+          investment.investedAmount,
+          investment.dailyPercentage
+        );
+        const payoutWallet = data.payoutWallets?.find(
+          (entry) => entry.userId === user.id && entry.isProfitDestination
+        );
+        wallet.currentBalance = Math.round((wallet.currentBalance + profit) * 100) / 100;
+        wallet.totalProfit = Math.round((wallet.totalProfit + profit) * 100) / 100;
+        investment.remainingDays -= 1;
+        investment.lastAccruedAt = accrualDate;
+        data.transactions.unshift({
+          id: `TX-PROFIT-${investment.id}-${accrualDate}`,
+          userId: user.id,
+          userEmail: user.email,
+          userName: user.name,
+          type: "PROFIT",
+          amount: profit,
+          fee: 0,
+          status: "SUCCESS",
+          method: "Automated Daily ROI",
+          destination: payoutWallet?.address,
+          payoutWalletId: payoutWallet?.id,
+          note: payoutWallet
+            ? `Daily profit for ${investment.planName} · payout destination: ${payoutWallet.label}`
+            : `Daily profit for ${investment.planName}`,
+          createdAt: date.toISOString(),
+        });
+        processed += 1;
+        distributed += profit;
 
-  updateUserProfile: (userId: string, partial: Pick<User, "name" | "email">) => {
-    const data = loadDatabase();
-    const user = data.users.find((u) => u.id === userId);
-    if (!user) return null;
-    user.name = partial.name;
-    user.email = partial.email;
-    saveDatabase(data);
-    return user;
-  },
+        if (investment.remainingDays === 0) {
+          investment.status = "COMPLETED";
+          wallet.totalInvested = Math.max(
+            0,
+            Math.round((wallet.totalInvested - investment.investedAmount) * 100) / 100
+          );
+          const plan = data.plans.find((entry) => entry.id === investment.planId);
+          if (plan?.capitalBack) {
+            wallet.currentBalance =
+              Math.round((wallet.currentBalance + investment.investedAmount) * 100) / 100;
+            data.transactions.unshift({
+              id: `TX-CAPITAL-${investment.id}`,
+              userId: user.id,
+              userEmail: user.email,
+              userName: user.name,
+              type: "CAPITAL_RETURN",
+              amount: investment.investedAmount,
+              fee: 0,
+              status: "SUCCESS",
+              method: "Internal Balance",
+              note: `Principal returned for ${investment.planName}`,
+              createdAt: date.toISOString(),
+            });
+          }
+        }
+        wallet.updatedAt = date.toISOString();
+      }
+
+      return {
+        processed,
+        distributed: Math.round(distributed * 100) / 100,
+        accrualDate,
+      };
+    }),
+
+  updateTransactionStatus: (txId: string, status: "APPROVED" | "REJECTED") =>
+    mutateData((data) => {
+      const tx = data.transactions.find((t) => t.id === txId);
+      if (!tx) return { error: "Transaction not found", status: 404 };
+      if (tx.type !== "DEPOSIT" && tx.type !== "WITHDRAWAL") {
+        return { error: "Only deposit and withdrawal requests can be reviewed", status: 400 };
+      }
+      if (tx.status !== "PENDING") {
+        return { error: "Request has already been processed", status: 409 };
+      }
+
+      const wallet = data.wallets.find((w) => w.userId === tx.userId);
+      if (!wallet) return { error: "User wallet not found", status: 404 };
+
+      if (tx.type === "DEPOSIT" && status === "APPROVED") {
+        wallet.currentBalance = Math.round((wallet.currentBalance + tx.amount) * 100) / 100;
+        wallet.totalDeposited = Math.round((wallet.totalDeposited + tx.amount) * 100) / 100;
+      }
+      if (tx.type === "WITHDRAWAL" && status === "APPROVED") {
+        wallet.totalWithdrawn = Math.round((wallet.totalWithdrawn + tx.amount) * 100) / 100;
+      }
+      if (tx.type === "WITHDRAWAL" && status === "REJECTED") {
+        wallet.currentBalance =
+          Math.round((wallet.currentBalance + tx.amount + tx.fee) * 100) / 100;
+      }
+
+      tx.status = status;
+      wallet.updatedAt = new Date().toISOString();
+      return { transaction: tx };
+    }),
+
+  updateUserPassword: (userId: string, newPasswordHash: string) =>
+    mutateData((data) => {
+      const user = data.users.find((u) => u.id === userId);
+      if (!user) return false;
+      user.passwordHash = newPasswordHash;
+      return true;
+    }),
+
+  updateUserProfile: (userId: string, partial: Pick<User, "name" | "email">) =>
+    mutateData((data) => {
+      const user = data.users.find((u) => u.id === userId);
+      if (!user) return null;
+      user.name = partial.name;
+      user.email = partial.email;
+      return user;
+    }),
 
   updateUserSecurity: (
     userId: string,
@@ -828,83 +976,82 @@ export const db = {
       | "kycStatus"
       | "kycDetails"
     >
-  ) => {
-    const data = loadDatabase();
-    const user = data.users.find((u) => u.id === userId);
-    if (!user) return null;
-    Object.assign(user, partial);
-    saveDatabase(data);
-    return user;
-  },
+  ) =>
+    mutateData((data) => {
+      const user = data.users.find((u) => u.id === userId);
+      if (!user) return null;
+      Object.assign(user, partial);
+      return user;
+    }),
 
-  getAllInvestments: () => loadDatabase().investments,
+  getAllInvestments: () => readData((data) => data.investments),
 
-  getDepositAccounts: () => loadDatabase().depositAccounts || [],
+  getDepositAccounts: () => readData((data) => data.depositAccounts || []),
 
-  createDepositAccount: (account: DepositAccount) => {
-    const data = loadDatabase();
-    data.depositAccounts = data.depositAccounts || [];
-    data.depositAccounts.unshift(account);
-    saveDatabase(data);
-    return account;
-  },
+  createDepositAccount: (account: DepositAccount) =>
+    mutateData((data) => {
+      data.depositAccounts = data.depositAccounts || [];
+      data.depositAccounts.unshift(account);
+      return account;
+    }),
 
-  updateDepositAccount: (id: string, partial: Partial<DepositAccount>) => {
-    const data = loadDatabase();
-    const account = data.depositAccounts?.find((entry) => entry.id === id);
-    if (!account) return null;
-    Object.assign(account, partial, { id: account.id, createdAt: account.createdAt });
-    saveDatabase(data);
-    return account;
-  },
+  updateDepositAccount: (id: string, partial: Partial<DepositAccount>) =>
+    mutateData((data) => {
+      const account = data.depositAccounts?.find((entry) => entry.id === id);
+      if (!account) return null;
+      Object.assign(account, partial, { id: account.id, createdAt: account.createdAt });
+      return account;
+    }),
 
-  deleteDepositAccount: (id: string) => {
-    const data = loadDatabase();
-    const initialLength = data.depositAccounts?.length || 0;
-    data.depositAccounts = (data.depositAccounts || []).filter((entry) => entry.id !== id);
-    if (data.depositAccounts.length === initialLength) return false;
-    saveDatabase(data);
-    return true;
-  },
+  deleteDepositAccount: (id: string) =>
+    mutateData((data) => {
+      const initialLength = data.depositAccounts?.length || 0;
+      data.depositAccounts = (data.depositAccounts || []).filter((entry) => entry.id !== id);
+      return data.depositAccounts.length !== initialLength;
+    }),
 
   getPayoutWalletsByUserId: (userId: string) =>
-    loadDatabase().payoutWallets?.filter((wallet) => wallet.userId === userId) || [],
+    readData(
+      (data) => data.payoutWallets?.filter((wallet) => wallet.userId === userId) || []
+    ),
 
-  createPayoutWallet: (wallet: PayoutWallet) => {
-    const data = loadDatabase();
-    data.payoutWallets = data.payoutWallets || [];
-    const userWallets = data.payoutWallets.filter((entry) => entry.userId === wallet.userId);
-    if (wallet.isProfitDestination || userWallets.length === 0) {
-      for (const entry of userWallets) entry.isProfitDestination = false;
-      wallet.isProfitDestination = true;
-    }
-    data.payoutWallets.push(wallet);
-    saveDatabase(data);
-    return wallet;
-  },
+  createPayoutWallet: (wallet: PayoutWallet) =>
+    mutateData((data) => {
+      data.payoutWallets = data.payoutWallets || [];
+      const userWallets = data.payoutWallets.filter(
+        (entry) => entry.userId === wallet.userId
+      );
+      if (wallet.isProfitDestination || userWallets.length === 0) {
+        for (const entry of userWallets) entry.isProfitDestination = false;
+        wallet.isProfitDestination = true;
+      }
+      data.payoutWallets.push(wallet);
+      return wallet;
+    }),
 
-  setProfitDestinationWallet: (userId: string, walletId: string) => {
-    const data = loadDatabase();
-    const wallets = data.payoutWallets?.filter((wallet) => wallet.userId === userId) || [];
-    if (!wallets.some((wallet) => wallet.id === walletId)) return false;
-    for (const wallet of wallets) wallet.isProfitDestination = wallet.id === walletId;
-    saveDatabase(data);
-    return true;
-  },
+  setProfitDestinationWallet: (userId: string, walletId: string) =>
+    mutateData((data) => {
+      const wallets =
+        data.payoutWallets?.filter((wallet) => wallet.userId === userId) || [];
+      if (!wallets.some((wallet) => wallet.id === walletId)) return false;
+      for (const wallet of wallets) wallet.isProfitDestination = wallet.id === walletId;
+      return true;
+    }),
 
-  deletePayoutWallet: (userId: string, walletId: string) => {
-    const data = loadDatabase();
-    const wallet = data.payoutWallets?.find(
-      (entry) => entry.id === walletId && entry.userId === userId
-    );
-    if (!wallet) return false;
-    data.payoutWallets = (data.payoutWallets || []).filter((entry) => entry.id !== walletId);
-    if (wallet.isProfitDestination) {
-      const remaining = data.payoutWallets.find((entry) => entry.userId === userId);
-      if (remaining) remaining.isProfitDestination = true;
-    }
-    saveDatabase(data);
-    return true;
-  },
+  deletePayoutWallet: (userId: string, walletId: string) =>
+    mutateData((data) => {
+      const wallet = data.payoutWallets?.find(
+        (entry) => entry.id === walletId && entry.userId === userId
+      );
+      if (!wallet) return false;
+      data.payoutWallets = (data.payoutWallets || []).filter(
+        (entry) => entry.id !== walletId
+      );
+      if (wallet.isProfitDestination) {
+        const remaining = data.payoutWallets.find((entry) => entry.userId === userId);
+        if (remaining) remaining.isProfitDestination = true;
+      }
+      return true;
+    }),
 };
 

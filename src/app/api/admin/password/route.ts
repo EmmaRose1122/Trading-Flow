@@ -5,7 +5,7 @@ import { db } from "@/lib/db";
 export async function POST(req: Request) {
   try {
     const session = await getSession();
-    const admin = session ? db.findUserById(session.userId) : null;
+    const admin = session ? await db.findUserById(session.userId) : null;
     if (!admin || admin.role !== "ADMIN") {
       return NextResponse.json({ error: "Forbidden: Admin access required" }, { status: 403 });
     }
@@ -20,7 +20,7 @@ export async function POST(req: Request) {
     }
 
     const newHash = await hashPassword(newPassword);
-    const updated = db.updateUserPassword(admin.id, newHash);
+    const updated = await db.updateUserPassword(admin.id, newHash);
 
     if (!updated) {
       return NextResponse.json({ error: "Failed to update password" }, { status: 500 });
