@@ -1,0 +1,51 @@
+name: Build Android APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - "android-webview/**"
+      - "scripts/build-apk.sh"
+      - ".github/workflows/android-apk.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android platform and tools
+        run: sdkmanager "platforms;android-36" "build-tools;36.0.0"
+
+      - name: Build APK
+        env:
+          APP_URL: ${{ vars.APP_URL || 'https://trading-flow.vercel.app' }}
+          VERSION_NAME: ${{ vars.ANDROID_VERSION_NAME || '1.0.0' }}
+        run: bash scripts/build-apk.sh
+
+      - name: Commit updated APK
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/downloads/trading-flow.apk public/downloads/app-version.json
+          if git diff --cached --quiet; then
+            echo "APK unchanged"
+          else
+            git commit -m "build: update Android APK"
+            git push
+          fi

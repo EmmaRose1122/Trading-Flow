@@ -1,0 +1,13 @@
+node_modules/
+.next*/
+out/
+.apk-build/
+.toolchain/
+.data/
+scratch/
+.user_uploaded/
+.system_generated/
+.env*.local
+.env
+*.tsbuildinfo
+android-webview/signing/
