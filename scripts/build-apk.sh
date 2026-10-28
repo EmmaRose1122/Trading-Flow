@@ -5,7 +5,7 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 ANDROID_SRC="$ROOT/android-webview"
 BUILD_DIR="$ROOT/.apk-build"
 OUTPUT_DIR="$ROOT/public/downloads"
-APP_URL="${APP_URL:-https://trading-flow.vercel.app}"
+APP_URL="${APP_URL:-https://trading-flow-capital.vercel.app}"
 VERSION_NAME="${VERSION_NAME:-1.0.0}"
 VERSION_CODE="${VERSION_CODE:-$(date +%y%m%d%H)}"
 

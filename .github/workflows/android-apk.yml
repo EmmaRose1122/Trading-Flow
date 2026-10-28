@@ -34,7 +34,7 @@ jobs:
 
       - name: Build APK
         env:
-          APP_URL: ${{ vars.APP_URL || 'https://trading-flow.vercel.app' }}
+          APP_URL: ${{ vars.APP_URL || 'https://trading-flow-capital.vercel.app' }}
           VERSION_NAME: ${{ vars.ANDROID_VERSION_NAME || '1.0.0' }}
         run: bash scripts/build-apk.sh
 

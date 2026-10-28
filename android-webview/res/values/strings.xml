@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_url">https://trading-flow.vercel.app</string>
+    <string name="app_url">https://trading-flow-capital.vercel.app</string>
     <string name="connection_title">Unable to connect</string>
     <string name="connection_error">Check your internet connection and make sure the Trading Flow server URL is correct.</string>
     <string name="server_error">The Trading Flow server returned an error. Please retry or update the server address.</string>

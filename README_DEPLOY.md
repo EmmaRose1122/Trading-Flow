@@ -3,8 +3,9 @@
 ## Vercel
 
 1. Push this project to a GitHub repository.
-2. Import the repository in Vercel and keep the project name `trading-flow` if you want the
-   current APK default URL (`https://trading-flow.vercel.app`) to work.
+2. Import the repository in Vercel. The configured production URL is
+   `https://trading-flow-capital.vercel.app`; use that value for `NEXT_PUBLIC_APP_URL` and
+   `APP_URL`.
 3. Add these environment variables in Vercel:
    - `JWT_SECRET` - random value, at least 32 characters
    - `CRON_SECRET` - random value, at least 32 characters
@@ -18,8 +19,8 @@
    - Optional: `ADMIN_NAME`, `ADMIN_REFERRAL_CODE`
 4. Deploy. The daily ROI cron is configured in `vercel.json` and calls
    `/api/cron/accrue-profits` every day at `00:00` UTC.
-5. If the production domain is not `trading-flow.vercel.app`, add a GitHub repository variable
-   named `APP_URL` with the real HTTPS URL and run the Android workflow.
+5. If the production domain changes, update the `APP_URL` GitHub repository variable and the
+   Vercel `NEXT_PUBLIC_APP_URL`, then run the Android workflow.
 
 Generate secrets with:
 
