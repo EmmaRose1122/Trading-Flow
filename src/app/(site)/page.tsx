@@ -1,18 +1,24 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import {
+  ArrowDownLeft,
   ArrowRight,
+  ArrowUpRight,
   BarChart3,
   CalendarDays,
   CheckCircle2,
+  CircleDollarSign,
   Clock,
   Layers,
   Lock,
+  Plus,
   ShieldCheck,
   TrendingUp,
   Users,
   Wallet,
 } from "lucide-react";
+import DemoActivityCarousel from "@/components/site/DemoActivityCarousel";
+import Hero3D from "@/components/site/Hero3D";
 import { createPageMetadata } from "@/lib/seo";
 import { SITE_PLANS } from "@/lib/site";
 
@@ -76,17 +82,109 @@ const steps = [
   },
 ];
 
+const homeFaqs = [
+  {
+    question: "What is Trading Flow Capital?",
+    answer:
+      "Trading Flow Capital is a UK-focused investment dashboard demonstration. It shows how investment plans, projected daily profit, deposits, withdrawals and ledger records can be presented in one account.",
+  },
+  {
+    question: "Which investment plans are available?",
+    answer:
+      "The dashboard includes Starter at 1.5% daily for 15 days, Premium Growth at 2.0% daily for 30 days, and VIP Capital at 3.0% daily for 60 days. Minimum allocations are $100, $1,000 and $10,000 respectively. Plan figures are illustrative, not guaranteed.",
+  },
+  {
+    question: "How is daily profit calculated?",
+    answer:
+      "Projected daily profit is the investment amount multiplied by the daily percentage and divided by 100. For example, $5,000 in Premium Growth at 2.0% projects $100 per day before applicable terms.",
+  },
+  {
+    question: "When are daily profits credited?",
+    answer:
+      "The automated ROI process is scheduled for 00:00 UTC. It is designed to credit each active contract once per day and reduce the remaining term, subject to the platform being available and the contract remaining active.",
+  },
+  {
+    question: "How do deposits and withdrawals work?",
+    answer:
+      "Deposits start at $10 and remain pending until human review. Withdrawals start at $20 and include a 2% handling fee added to the requested amount. Withdrawal requests are also reviewed before processing.",
+  },
+  {
+    question: "Is Trading Flow Capital regulated by the FCA?",
+    answer:
+      "No. The website is a demonstration and Trading Flow Capital Ltd is not authorised or regulated by the Financial Conduct Authority. It does not offer regulated investment services. Capital is at risk and nothing on the site is financial advice.",
+  },
+  {
+    question: "How can I access the investor dashboard?",
+    answer:
+      "Access is invitation-only. Registration requires a valid sponsor referral code. Once registered, you can sign in to view plans, the profit calculator, deposits, withdrawals and transaction history.",
+  },
+];
+
+const faqStructuredData = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: homeFaqs.map((faq) => ({
+    "@type": "Question",
+    name: faq.question,
+    acceptedAnswer: {
+      "@type": "Answer",
+      text: faq.answer,
+    },
+  })),
+};
+
+const platformFacts = [
+  { value: "3", label: "Defined plan tiers" },
+  { value: "24h", label: "Reporting cycle" },
+  { value: "4", label: "Activity categories" },
+  { value: "UK", label: "Support hours" },
+];
+
+const moneyMovements = [
+  {
+    icon: TrendingUp,
+    title: "Daily investments",
+    text: "Review each contract's amount, daily rate, remaining term and capital-return terms.",
+    tag: "Investment",
+  },
+  {
+    icon: CircleDollarSign,
+    title: "Daily profits",
+    text: "See projected daily profit per active contract and profit already recorded in the ledger.",
+    tag: "Profit",
+  },
+  {
+    icon: ArrowDownLeft,
+    title: "Deposits",
+    text: "Follow deposit requests from pending review through to an approved wallet credit.",
+    tag: "Deposit",
+  },
+  {
+    icon: ArrowUpRight,
+    title: "Withdrawals",
+    text: "Check pending requests, the 2% handling fee and the net amount requested for payout.",
+    tag: "Withdrawal",
+  },
+];
+
 export default function HomePage() {
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(faqStructuredData).replace(/</g, "\\u003c"),
+        }}
+      />
       <section className="relative overflow-hidden border-b border-white/5">
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute -top-32 left-1/4 w-[32rem] h-[32rem] rounded-full bg-emerald-500/10 blur-3xl" />
           <div className="absolute top-24 right-0 w-[28rem] h-[28rem] rounded-full bg-cyan-500/10 blur-3xl" />
         </div>
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-28">
-          <div className="max-w-3xl">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
+          <div className="grid grid-cols-1 lg:grid-cols-[1.05fr_0.95fr] gap-10 lg:gap-8 items-center">
+          <div className="max-w-3xl hero-copy">
             <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 mb-6">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
               UK-focused investment platform
@@ -124,6 +222,23 @@ export default function HomePage() {
                 )
               )}
             </div>
+          </div>
+          <div className="hero-visual relative mt-8 lg:mt-0">
+            <Hero3D />
+          </div>
+          </div>
+        </div>
+      </section>
+
+      <section aria-label="Platform overview" className="border-b border-white/5 bg-[#060A12]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            {platformFacts.map((fact) => (
+              <div key={fact.label} className="rounded-xl border border-white/5 bg-[#0B1320] px-4 py-4">
+                <p className="text-2xl font-extrabold tracking-tight text-white">{fact.value}</p>
+                <p className="mt-0.5 text-[11px] text-slate-500">{fact.label}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -335,21 +450,156 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="mt-12 rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-5">
-            <div>
-              <h3 className="text-xl font-bold text-white">Ready to view your portfolio?</h3>
-              <p className="mt-1 text-xs sm:text-sm text-slate-400">
-                Sign in to review plans, projected daily profit and account activity.
+        </div>
+      </section>
+
+      <section id="activity" className="py-20 sm:py-24">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-5">
+            <div className="max-w-2xl">
+              <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-cyan-500/10 text-cyan-300 border border-cyan-500/20 mb-4">
+                <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
+                Interactive demo ledger
+              </span>
+              <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
+                A day on the platform, slide by slide
+              </h2>
+              <p className="mt-4 text-sm sm:text-base text-slate-400 leading-relaxed">
+                Explore 24 simulated records across daily investments, profit credits, deposits and
+                withdrawals. Every slide includes a demo record ID, member name, amount and status.
               </p>
             </div>
+            <div className="rounded-xl border border-white/10 bg-slate-900/60 px-4 py-3 text-xs text-slate-400">
+              <span className="block font-semibold text-white">How to read the feed</span>
+              <span className="mt-1 block">Auto-slides every 4.2s · Pause or browse manually</span>
+            </div>
+          </div>
+
+          <div className="mt-9 rounded-3xl border border-white/8 bg-gradient-to-br from-[#0C1524] via-[#0A111D] to-[#0B1820] p-4 sm:p-6 shadow-2xl shadow-black/30">
+            <DemoActivityCarousel />
+          </div>
+        </div>
+      </section>
+
+      <section id="tracking" className="py-20 sm:py-24 bg-[#060A12] border-y border-white/5">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-[0.8fr_1.2fr] gap-10 lg:gap-14 items-start">
+            <div className="lg:sticky lg:top-24">
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-emerald-400 mb-3">
+                Daily money flow
+              </p>
+              <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
+                Every money movement, in one clear view
+              </h2>
+              <p className="mt-4 text-sm text-slate-400 leading-relaxed">
+                Investments, projected profit, deposits and withdrawals each have a dedicated place
+                in the dashboard, with an amount, status and record reference you can review.
+              </p>
+              <Link
+                href="/login"
+                className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-emerald-400 hover:text-emerald-300"
+              >
+                Open the investor portal
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {moneyMovements.map((movement, index) => {
+                const Icon = movement.icon;
+                return (
+                  <article
+                    key={movement.title}
+                    className="group rounded-2xl border border-white/5 bg-[#0A111D] p-5 transition-all duration-300 hover:-translate-y-1 hover:border-emerald-500/25 hover:bg-[#0C1724]"
+                  >
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+                        <Icon className="w-4 h-4" />
+                      </span>
+                      <span className="text-[9px] uppercase tracking-[0.14em] font-bold text-slate-600">
+                        0{index + 1} · {movement.tag}
+                      </span>
+                    </div>
+                    <h3 className="mt-5 text-base font-bold text-white">{movement.title}</h3>
+                    <p className="mt-2 text-xs text-slate-400 leading-relaxed">{movement.text}</p>
+                    <div className="mt-5 h-1 rounded-full bg-white/5 overflow-hidden">
+                      <div className="h-full w-2/3 rounded-full bg-gradient-to-r from-emerald-500/60 to-cyan-500/30 transition-all duration-500 group-hover:w-full" />
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="faq" className="py-20 sm:py-24">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-2xl">
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-cyan-400 mb-3">
+              Frequently asked questions
+            </p>
+            <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
+              Questions before you open the dashboard
+            </h2>
+            <p className="mt-4 text-sm text-slate-400 leading-relaxed">
+              Clear answers about plans, reporting, access and platform status.
+            </p>
+          </div>
+
+          <div className="mt-8 space-y-3">
+            {homeFaqs.map((faq) => (
+              <details
+                key={faq.question}
+                className="group rounded-2xl border border-white/8 bg-[#0A111D] open:border-emerald-500/25 open:bg-[#0C1724] transition-colors"
+              >
+                <summary className="cursor-pointer list-none p-5 flex items-center justify-between gap-4">
+                  <span className="text-sm font-semibold text-slate-200 group-open:text-white">
+                    {faq.question}
+                  </span>
+                  <Plus className="w-4 h-4 shrink-0 text-slate-500 transition-transform duration-300 group-open:rotate-45 group-open:text-emerald-400" />
+                </summary>
+                <p className="px-5 pb-5 text-xs sm:text-sm text-slate-400 leading-relaxed">
+                  {faq.answer}
+                </p>
+              </details>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="relative overflow-hidden py-20 sm:py-24 bg-[#060A12] border-t border-white/5">
+        <div className="absolute -top-24 left-1/3 w-96 h-96 rounded-full bg-emerald-500/10 blur-3xl pointer-events-none" />
+        <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 mb-5">
+            <CheckCircle2 className="w-3 h-3" />
+            Clear reporting from day one
+          </span>
+          <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
+            Ready to see your numbers clearly?
+          </h2>
+          <p className="mt-4 text-sm sm:text-base text-slate-400 leading-relaxed max-w-2xl mx-auto">
+            Sign in to review plans, calculate projected daily profit and follow every deposit,
+            withdrawal and investment in your ledger.
+          </p>
+          <div className="mt-7 flex flex-col sm:flex-row justify-center gap-3">
             <Link
               href="/login"
-              className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-sm font-bold whitespace-nowrap"
+              className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-sm font-bold transition shadow-lg shadow-emerald-500/20"
             >
               Investor login
               <ArrowRight className="w-4 h-4" />
             </Link>
+            <Link
+              href="/contact"
+              className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-slate-900 border border-white/10 hover:border-emerald-500/30 text-slate-200 text-sm font-semibold transition"
+            >
+              Contact the team
+            </Link>
           </div>
+          <p className="mt-5 text-[10px] text-slate-600">
+            Capital at risk. Demonstration platform. Not authorised or regulated by the FCA.
+          </p>
         </div>
       </section>
     </>

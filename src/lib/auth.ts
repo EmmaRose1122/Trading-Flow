@@ -2,11 +2,13 @@ import { SignJWT, jwtVerify } from "jose";
 import bcrypt from "bcryptjs";
 import { cookies } from "next/headers";
 
-const jwtSecret = process.env.JWT_SECRET;
-if (!jwtSecret || jwtSecret.length < 32) {
-  throw new Error("JWT_SECRET must be configured with at least 32 characters");
+function getJwtSecret() {
+  const jwtSecret = process.env.JWT_SECRET;
+  if (!jwtSecret || jwtSecret.length < 32) {
+    throw new Error("JWT_SECRET must be configured with at least 32 characters");
+  }
+  return new TextEncoder().encode(jwtSecret);
 }
-const SECRET = new TextEncoder().encode(jwtSecret);
 
 const TOKEN_NAME = "tf_session";
 const TOKEN_ISSUER = "trading-flow";
@@ -34,12 +36,12 @@ export async function signToken(payload: SessionPayload): Promise<string> {
     .setAudience(TOKEN_AUDIENCE)
     .setIssuedAt()
     .setExpirationTime("7d")
-    .sign(SECRET);
+    .sign(getJwtSecret());
 }
 
 export async function verifyToken(token: string): Promise<SessionPayload | null> {
   try {
-    const { payload } = await jwtVerify(token, SECRET, {
+    const { payload } = await jwtVerify(token, getJwtSecret(), {
       issuer: TOKEN_ISSUER,
       audience: TOKEN_AUDIENCE,
     });
