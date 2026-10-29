@@ -119,13 +119,31 @@ export async function POST(request: Request) {
     );
   }
 
-  const model = (process.env.GEMINI_MODEL || "gemini-3.8-flash").replace(/[^a-zA-Z0-9._-]/g, "");
-  if (!model) {
+  const configuredModel = (process.env.GEMINI_MODEL || "gemini-3-flash-preview").replace(
+    /[^a-zA-Z0-9._-]/g,
+    ""
+  );
+  if (!configuredModel) {
     return NextResponse.json(
       { error: "AI support configuration is invalid. Please contact support." },
       { status: 503 }
     );
   }
+  // 3.8/3.6/3.5 flash can be intermittently unavailable or spend too long
+  // thinking; the preview flash model currently responds reliably.
+  const unstableModels = new Set([
+    "gemini-3.8-flash",
+    "gemini-3.7-flash",
+    "gemini-3.6-flash",
+    "gemini-3.5-flash",
+    "gemini-flash-latest",
+  ]);
+  const primaryModel = unstableModels.has(configuredModel)
+    ? "gemini-3-flash-preview"
+    : configuredModel;
+  const models = Array.from(
+    new Set([primaryModel, "gemini-3-flash-preview", "gemini-3.1-flash-lite"])
+  ).filter(Boolean);
 
   const contents: Array<{ role: "user" | "model"; parts: Array<{ text: string }> }> = [];
   for (const message of conversation) {
@@ -139,85 +157,91 @@ export async function POST(request: Request) {
   }
 
   const page = typeof body.page === "string" ? body.page : undefined;
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 25_000);
+  let lastStatus = 0;
+  let lastError: unknown = null;
 
-  try {
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-goog-api-key": apiKey,
-        },
-        body: JSON.stringify({
-          systemInstruction: {
-            parts: [{ text: buildSupportSystemPrompt(page) }],
+  for (const model of models) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 15_000);
+    try {
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(
+          model
+        )}:generateContent`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-goog-api-key": apiKey,
           },
-          contents,
-          generationConfig: {
-            temperature: 0.35,
-            topP: 0.9,
-            maxOutputTokens: 700,
-          },
-        }),
-        signal: controller.signal,
-        cache: "no-store",
+          body: JSON.stringify({
+            systemInstruction: {
+              parts: [{ text: buildSupportSystemPrompt(page) }],
+            },
+            contents,
+            generationConfig: {
+              temperature: 0.35,
+              topP: 0.9,
+              maxOutputTokens: 900,
+            },
+          }),
+          signal: controller.signal,
+          cache: "no-store",
+        }
+      );
+
+      if (!response.ok) {
+        lastStatus = response.status;
+        console.error("Gemini support request failed", model, response.status);
+        if ([400, 401, 403].includes(response.status)) break;
+        continue;
       }
-    );
 
-    if (!response.ok) {
-      console.error("Gemini support request failed with status", response.status);
-      if (response.status === 429) {
+      const data = (await response.json()) as GeminiResponse;
+      const reply = (data.candidates?.[0]?.content?.parts || [])
+        .filter((part) => part.thought !== true && typeof part.text === "string")
+        .map((part) => part.text?.trim())
+        .filter(Boolean)
+        .join("\n\n");
+
+      if (reply) {
         return NextResponse.json(
-          { error: "The AI service is busy. Please try again in a minute." },
-          { status: 429 }
+          { reply },
+          { headers: { "Cache-Control": "no-store" } }
         );
       }
-      return NextResponse.json(
-        {
-          error:
-            "AI support is temporarily unavailable. Please email tradingflow.demo@gmail.com.",
-        },
-        { status: 502 }
-      );
-    }
 
-    const data = (await response.json()) as GeminiResponse;
-    const reply = (data.candidates?.[0]?.content?.parts || [])
-      .filter((part) => part.thought !== true && typeof part.text === "string")
-      .map((part) => part.text?.trim())
-      .filter(Boolean)
-      .join("\n\n");
-
-    if (!reply) {
-      return NextResponse.json(
-        {
-          error:
-            "I couldn't answer that safely. Please rephrase your question or email tradingflow.demo@gmail.com.",
-        },
-        { status: 422 }
+      console.error("Gemini support returned an empty reply", model);
+    } catch (error) {
+      lastError = error;
+      console.error(
+        "Gemini support request error",
+        model,
+        error instanceof Error ? error.name : "unknown"
       );
+    } finally {
+      clearTimeout(timeout);
     }
-
-    return NextResponse.json(
-      { reply },
-      { headers: { "Cache-Control": "no-store" } }
-    );
-  } catch (error) {
-    if (error instanceof Error && error.name === "AbortError") {
-      return NextResponse.json(
-        { error: "AI support timed out. Please try again or email tradingflow.demo@gmail.com." },
-        { status: 504 }
-      );
-    }
-    console.error("Gemini support request error");
-    return NextResponse.json(
-      { error: "AI support is temporarily unavailable. Please email tradingflow.demo@gmail.com." },
-      { status: 502 }
-    );
-  } finally {
-    clearTimeout(timeout);
   }
+
+  if (lastStatus === 429) {
+    return NextResponse.json(
+      { error: "The AI service is busy. Please try again in a minute." },
+      { status: 429 }
+    );
+  }
+  if (lastError instanceof Error && lastError.name === "AbortError") {
+    return NextResponse.json(
+      { error: "AI support timed out. Please try again or email tradingflow.demo@gmail.com." },
+      { status: 504 }
+    );
+  }
+
+  return NextResponse.json(
+    {
+      error:
+        "AI support is temporarily unavailable. Please email tradingflow.demo@gmail.com.",
+    },
+    { status: 502 }
+  );
 }

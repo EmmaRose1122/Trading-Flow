@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="Chatbot">
+  <defs>
+    <linearGradient id="botWhite" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#EEF3F8"/>
+    </linearGradient>
+    <linearGradient id="botBubble" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#67E8F9"/>
+      <stop offset="1" stop-color="#22D3EE"/>
+    </linearGradient>
+  </defs>
+
+  <path d="M76 208c0-28 23-46 52-46s52 18 52 46z" fill="url(#botWhite)" stroke="#0B1B3A" stroke-width="7" stroke-linejoin="round"/>
+  <rect x="36" y="120" width="24" height="52" rx="12" fill="#DCE6EF" stroke="#0B1B3A" stroke-width="6"/>
+  <rect x="196" y="120" width="24" height="52" rx="12" fill="#DCE6EF" stroke="#0B1B3A" stroke-width="6"/>
+  <rect x="52" y="84" width="152" height="110" rx="44" fill="url(#botWhite)" stroke="#0B1B3A" stroke-width="8"/>
+  <rect x="81" y="116" width="94" height="54" rx="27" fill="#0B1B3A"/>
+  <circle cx="108" cy="143" r="7" fill="#22D3EE"/>
+  <circle cx="148" cy="143" r="7" fill="#22D3EE"/>
+  <path d="M128 84V66" stroke="#0B1B3A" stroke-width="8" stroke-linecap="round"/>
+  <circle cx="128" cy="55" r="10" fill="url(#botWhite)" stroke="#0B1B3A" stroke-width="7"/>
+
+  <path d="M169 100l-9 18 21-8z" fill="url(#botBubble)" stroke="#0B1B3A" stroke-width="6" stroke-linejoin="round"/>
+  <rect x="153" y="42" width="82" height="60" rx="20" fill="url(#botBubble)" stroke="#0B1B3A" stroke-width="6"/>
+  <text x="194" y="83" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="30" font-weight="900" fill="#0B1B3A">HI!</text>
+</svg>

@@ -364,48 +364,53 @@ export default function HomePage() {
             {SITE_PLANS.map((plan) => (
               <article
                 key={plan.name}
-                className={`relative rounded-2xl p-6 border flex flex-col ${
-                  plan.featured
-                    ? "bg-red-100 border-red-500/50 shadow-2xl shadow-red-900/10"
-                    : "bg-white border-red-900/20"
-                }`}
+                className="relative rounded-3xl border border-yellow-400/35 bg-[#0B0B0C] p-5 pt-12 sm:p-7 sm:pt-14 flex flex-col shadow-2xl shadow-yellow-500/10"
               >
-                {plan.featured && (
-                  <span className="absolute -top-3 left-6 px-3 py-1 rounded-full bg-red-700 text-white text-[10px] font-bold uppercase tracking-wider">
-                    Most popular
-                  </span>
-                )}
-                <h3 className="text-lg font-bold text-[#2B0B0E]">{plan.name}</h3>
-                <p className="mt-2 text-xs text-[#5B1B1B] leading-relaxed">{plan.description}</p>
-                <div className="mt-6 flex items-baseline gap-1.5">
-                  <span className="text-4xl font-extrabold text-[#2B0B0E]">
+                <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-3xl">
+                  <div className="absolute -right-16 -top-20 h-56 w-56 rounded-full bg-yellow-400/10 blur-3xl" />
+                </div>
+                <span className="absolute top-4 left-5 sm:left-7 px-3 py-1 rounded-full bg-yellow-400 text-black text-[10px] font-extrabold uppercase tracking-wider shadow-lg shadow-yellow-500/20">
+                  Most popular
+                </span>
+                <h3 className="relative text-lg sm:text-xl font-extrabold text-white">{plan.name}</h3>
+                <p className="relative mt-2 text-xs text-neutral-300 leading-relaxed">
+                  {plan.description}
+                </p>
+                <div className="relative mt-6 flex items-baseline gap-1.5">
+                  <span className="text-4xl sm:text-5xl font-black text-yellow-300">
                     {plan.rate.toFixed(1)}%
                   </span>
-                  <span className="text-xs text-[#5B1B1B] font-semibold uppercase">daily</span>
+                  <span className="text-xs text-yellow-500 font-bold uppercase tracking-wider">
+                    daily
+                  </span>
                 </div>
-                <dl className="mt-6 pt-5 border-t border-red-900/20 space-y-3 text-xs">
+                <div className="relative mt-4 flex flex-wrap gap-2">
+                  <span className="rounded-full border border-yellow-400/30 bg-yellow-400/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-yellow-300">
+                    24h activation
+                  </span>
+                  <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-neutral-300">
+                    No lock-in
+                  </span>
+                </div>
+                <dl className="relative mt-6 pt-5 border-t border-yellow-400/15 space-y-3 text-xs">
                   <div className="flex justify-between gap-3">
-                    <dt className="text-[#6B1D1D]">Payout schedule</dt>
-                    <dd className="font-semibold text-[#2B0B0E]">Every 24 hours</dd>
+                    <dt className="text-neutral-400">Payout schedule</dt>
+                    <dd className="font-semibold text-white">Every 24 hours</dd>
                   </div>
                   <div className="flex justify-between gap-3">
-                    <dt className="text-[#6B1D1D]">Minimum</dt>
-                    <dd className="font-semibold text-[#2B0B0E]">
+                    <dt className="text-neutral-400">Minimum</dt>
+                    <dd className="font-bold text-white">
                       ${plan.minimum.toLocaleString("en-GB")}
                     </dd>
                   </div>
                   <div className="flex justify-between gap-3">
-                    <dt className="text-[#6B1D1D]">Maximum</dt>
-                    <dd className="font-semibold text-red-800">Unlimited</dd>
+                    <dt className="text-neutral-400">Maximum</dt>
+                    <dd className="font-bold text-yellow-300">Unlimited</dd>
                   </div>
                 </dl>
                 <Link
                   href="/login"
-                  className={`mt-7 inline-flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-xs font-bold transition ${
-                    plan.featured
-                      ? "bg-red-700 hover:bg-red-800 text-white"
-                      : "bg-rose-50 hover:bg-rose-100 text-[#2B0B0E]"
-                  }`}
+                  className="relative mt-7 inline-flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-yellow-400 hover:bg-yellow-300 text-black text-xs font-extrabold uppercase tracking-wider transition shadow-lg shadow-yellow-500/20"
                 >
                   View in dashboard
                   <ArrowRight className="w-3.5 h-3.5" />

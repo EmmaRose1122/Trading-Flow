@@ -1,9 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { Mail, MessageCircle, RotateCcw, Send, ShieldAlert, Sparkles, UserRound, X } from "lucide-react";
+import { Mail, RotateCcw, Send, ShieldAlert, Sparkles, UserRound, X } from "lucide-react";
 import { COMPANY } from "@/lib/site";
 
 type ChatRole = "user" | "assistant";
@@ -147,12 +146,12 @@ export default function SupportChat() {
         >
           <header className="flex items-center justify-between gap-3 px-4 py-3 border-b border-red-900/20 bg-white">
             <div className="flex items-center gap-2.5 min-w-0">
-              <Image
-                src="/brand/app-icon.png"
+              <img
+                src="/brand/chatbot-icon.svg"
                 alt=""
-                width={36}
-                height={36}
-                className="w-9 h-9 rounded-xl shrink-0"
+                width={40}
+                height={40}
+                className="w-10 h-10 shrink-0"
               />
               <div className="min-w-0">
                 <h2 className="text-sm font-bold text-[#2B0B0E] truncate">{COMPANY.name}</h2>
@@ -309,7 +308,17 @@ export default function SupportChat() {
         aria-label={open ? "Close AI support chat" : "Open AI support chat"}
         className="relative w-14 h-14 rounded-full bg-gradient-to-br from-red-700 to-red-800 text-white shadow-xl shadow-red-900/20 flex items-center justify-center hover:scale-105 active:scale-95 transition-transform"
       >
-        {open ? <X className="w-6 h-6" /> : <MessageCircle className="w-6 h-6" />}
+        {open ? (
+          <X className="w-6 h-6" />
+        ) : (
+          <img
+            src="/brand/chatbot-icon.svg"
+            alt=""
+            width={44}
+            height={44}
+            className="w-11 h-11"
+          />
+        )}
         {!open && (
           <span className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-red-500 border-2 border-rose-100" />
         )}

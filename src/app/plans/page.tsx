@@ -186,47 +186,52 @@ export default function PlansPage() {
 
         {plan && (
           <div className="max-w-xl mx-auto">
-            <div className="relative rounded-2xl p-6 glass-card border-red-400/50 bg-gradient-to-b from-red-50 via-white to-rose-50">
-              <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full bg-red-700 text-white text-[11px] font-bold uppercase tracking-wider shadow-md">
+            <div className="relative rounded-3xl border border-yellow-400/35 bg-[#0B0B0C] p-5 pt-12 sm:p-7 sm:pt-14 shadow-2xl shadow-yellow-500/10">
+              <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-3xl">
+                <div className="absolute -right-16 -top-20 h-56 w-56 rounded-full bg-yellow-400/10 blur-3xl" />
+              </div>
+              <div className="absolute top-4 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full bg-yellow-400 text-black text-[11px] font-extrabold uppercase tracking-wider shadow-md">
                 Active Plan
               </div>
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-bold text-[#2B0B0E]">{plan.name}</h3>
-                <Wallet className="w-5 h-5 text-red-800" />
+              <div className="relative flex items-center justify-between mb-4">
+                <h3 className="text-lg sm:text-xl font-extrabold text-white">{plan.name}</h3>
+                <Wallet className="w-5 h-5 text-yellow-300" />
               </div>
-              <div className="mb-6 pb-6 border-b border-red-900/20">
+              <div className="relative mb-6 pb-6 border-b border-yellow-400/15">
                 <div className="flex items-baseline gap-1">
-                  <span className="text-4xl font-extrabold text-[#2B0B0E]">
+                  <span className="text-4xl sm:text-5xl font-black text-yellow-300">
                     {plan.dailyPercentage.toFixed(1)}%
                   </span>
-                  <span className="text-xs text-[#5B1B1B] font-semibold uppercase">/ daily</span>
+                  <span className="text-xs text-yellow-500 font-bold uppercase tracking-wider">
+                    / daily
+                  </span>
                 </div>
-                <span className="text-xs text-red-800 font-medium block mt-1">
+                <span className="text-xs text-neutral-300 font-medium block mt-1">
                   Paid every 24 hours after deposit approval
                 </span>
               </div>
-              <ul className="space-y-3 text-xs text-[#3F1414] mb-8">
+              <ul className="relative space-y-3 text-xs text-neutral-300 mb-8">
                 <li className="flex items-center gap-2.5">
-                  <Check className="w-4 h-4 text-red-800 shrink-0" />
-                  <span>Minimum deposit: <strong>${plan.minAmount}</strong></span>
+                  <Check className="w-4 h-4 text-yellow-300 shrink-0" />
+                  <span>Minimum deposit: <strong className="text-white">${plan.minAmount}</strong></span>
                 </li>
                 <li className="flex items-center gap-2.5">
-                  <Check className="w-4 h-4 text-red-800 shrink-0" />
-                  <span>Maximum deposit: <strong>Unlimited</strong></span>
+                  <Check className="w-4 h-4 text-yellow-300 shrink-0" />
+                  <span>Maximum deposit: <strong className="text-yellow-300">Unlimited</strong></span>
                 </li>
                 <li className="flex items-center gap-2.5">
-                  <Clock className="w-4 h-4 text-red-800 shrink-0" />
-                  <span>First payout: <strong>After 24 hours</strong></span>
+                  <Clock className="w-4 h-4 text-yellow-300 shrink-0" />
+                  <span>First payout: <strong className="text-white">After 24 hours</strong></span>
                 </li>
                 <li className="flex items-center gap-2.5">
-                  <Shield className="w-4 h-4 text-red-800 shrink-0" />
+                  <Shield className="w-4 h-4 text-yellow-300 shrink-0" />
                   <span>Add more deposits at any time</span>
                 </li>
               </ul>
               <button
                 type="button"
                 onClick={() => setDepositOpen(true)}
-                className="w-full py-3 rounded-xl font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 bg-red-700 hover:bg-red-800 text-white shadow-lg shadow-red-900/20 transition active:scale-95"
+                className="relative w-full py-3 rounded-xl font-extrabold text-xs uppercase tracking-wider flex items-center justify-center gap-2 bg-yellow-400 hover:bg-yellow-300 text-black shadow-lg shadow-yellow-500/20 transition active:scale-95"
               >
                 Add Deposit
               </button>
