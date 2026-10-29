@@ -158,6 +158,7 @@ export async function POST(request: Request) {
 
   const page = typeof body.page === "string" ? body.page : undefined;
   let lastStatus = 0;
+  let lastCode = "";
   let lastError: unknown = null;
 
   for (const model of models) {
@@ -192,7 +193,15 @@ export async function POST(request: Request) {
 
       if (!response.ok) {
         lastStatus = response.status;
-        console.error("Gemini support request failed", model, response.status);
+        try {
+          const errorBody = (await response.json()) as {
+            error?: { status?: string };
+          };
+          lastCode = errorBody.error?.status || "";
+        } catch {
+          lastCode = "";
+        }
+        console.error("Gemini support request failed", model, response.status, lastCode);
         if ([400, 401, 403].includes(response.status)) break;
         continue;
       }
@@ -241,6 +250,8 @@ export async function POST(request: Request) {
     {
       error:
         "AI support is temporarily unavailable. Please email tradingflow.demo@gmail.com.",
+      upstreamStatus: lastStatus || undefined,
+      upstreamCode: lastCode || undefined,
     },
     { status: 502 }
   );
