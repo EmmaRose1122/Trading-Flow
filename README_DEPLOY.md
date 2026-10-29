@@ -19,7 +19,7 @@
    - Optional: `GEMINI_MODEL` (defaults to `gemini-3.8-flash`)
    - Optional: `ADMIN_NAME`
    - The platform referral code is fixed to `trading flow` (stored as `TRADING FLOW`). No environment variable is required.
-4. Deploy. The daily ROI cron is configured in `vercel.json` and calls
+4. Deploy. The daily 2% deposit-profit cron is configured in `vercel.json` and calls
    `/api/cron/accrue-profits` every day at `00:00` UTC.
 5. If the production domain changes, update the `APP_URL` GitHub repository variable and the
    Vercel `NEXT_PUBLIC_APP_URL`, then run the Android workflow.

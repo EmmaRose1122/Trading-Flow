@@ -105,8 +105,8 @@ export default function TransactionsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#080C15]">
-        <div className="w-10 h-10 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen flex items-center justify-center bg-[#FFFFFF]">
+        <div className="w-10 h-10 border-2 border-red-400 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -115,18 +115,18 @@ export default function TransactionsPage() {
 
   if (loadError) {
     return (
-      <div className="min-h-screen bg-[#080C15]">
+      <div className="min-h-screen bg-[#FFFFFF]">
         <Navbar user={user} />
         <main className="max-w-3xl mx-auto px-4 py-20 text-center">
-          <h1 className="text-2xl font-bold text-white">Ledger could not be loaded</h1>
-          <p className="mt-2 text-sm text-slate-400">{loadError}</p>
+          <h1 className="text-2xl font-bold text-[#2B0B0E]">Ledger could not be loaded</h1>
+          <p className="mt-2 text-sm text-[#5B1B1B]">{loadError}</p>
           <button
             type="button"
             onClick={() => {
               setLoading(true);
               fetchTxs();
             }}
-            className="mt-6 px-5 py-2.5 rounded-xl bg-emerald-500 text-slate-950 text-sm font-bold"
+            className="mt-6 px-5 py-2.5 rounded-xl bg-red-700 text-white text-sm font-bold"
           >
             Retry
           </button>
@@ -136,7 +136,7 @@ export default function TransactionsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#080C15] pb-28 lg:pb-12">
+    <div className="min-h-screen bg-[#FFFFFF] pb-28 lg:pb-12">
       <Navbar
         user={user}
         onOpenDeposit={() => setDepositOpen(true)}
@@ -146,15 +146,15 @@ export default function TransactionsPage() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 space-y-8">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-white tracking-tight">Audit & Transaction Ledger</h1>
-            <p className="text-xs text-slate-400">
+            <h1 className="text-2xl font-bold text-[#2B0B0E] tracking-tight">Audit & Transaction Ledger</h1>
+            <p className="text-xs text-[#5B1B1B]">
               Verified on-chain and internal ledger history with cryptographic reference tags
             </p>
           </div>
 
           <button
             onClick={exportCSV}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-900 border border-white/10 hover:bg-slate-800 text-slate-200 text-xs font-semibold transition"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-red-900/20 hover:bg-rose-50 text-[#2B0B0E] text-xs font-semibold transition"
           >
             <Download className="w-3.5 h-3.5" />
             Export CSV
@@ -164,13 +164,13 @@ export default function TransactionsPage() {
         {/* Search & Filter Toolbar */}
         <div className="glass-card rounded-2xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="relative flex-1">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+            <Search className="w-4 h-4 text-[#5B1B1B] absolute left-3 top-3" />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search by TxID, amount, status, method..."
-              className="w-full pl-9 pr-4 py-2 rounded-xl bg-slate-900 border border-white/10 text-white placeholder-slate-500 text-xs focus:outline-none focus:border-emerald-500"
+              className="w-full pl-9 pr-4 py-2 rounded-xl bg-white border border-red-900/20 text-[#2B0B0E] placeholder-[#8A4A4A] text-xs focus:outline-none focus:border-red-700"
             />
           </div>
 
@@ -181,8 +181,8 @@ export default function TransactionsPage() {
                 onClick={() => setType(t)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition whitespace-nowrap ${
                   type === t
-                    ? "bg-emerald-500 text-slate-950 shadow-sm"
-                    : "text-slate-400 hover:text-white bg-slate-900/60"
+                    ? "bg-red-700 text-white shadow-sm"
+                    : "text-[#5B1B1B] hover:text-[#2B0B0E] bg-rose-50"
                 }`}
               >
                 {t}
@@ -192,10 +192,10 @@ export default function TransactionsPage() {
         </div>
 
         {/* Transactions Table */}
-        <div className="glass-card rounded-2xl overflow-hidden border border-white/5">
+        <div className="glass-card rounded-2xl overflow-hidden border border-red-900/20">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-slate-900/80 border-b border-white/5 text-slate-400 uppercase text-[10px] tracking-wider font-semibold">
+              <thead className="bg-rose-50 border-b border-red-900/20 text-[#5B1B1B] uppercase text-[10px] tracking-wider font-semibold">
                 <tr>
                   <th className="py-3.5 px-4">Date & Time</th>
                   <th className="py-3.5 px-4">Transaction ID</th>
@@ -206,10 +206,10 @@ export default function TransactionsPage() {
                   <th className="py-3.5 px-4">Status</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/5 text-slate-300">
+              <tbody className="divide-y divide-red-900/10 text-[#3F1414]">
                 {filtered.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="py-12 text-center text-slate-500">
+                    <td colSpan={7} className="py-12 text-center text-[#6B1D1D]">
                       No matching records located in the ledger.
                     </td>
                   </tr>
@@ -222,55 +222,55 @@ export default function TransactionsPage() {
                       tx.type === "REFERRAL" ||
                       (tx.type === "BONUS" && tx.amount >= 0);
                     return (
-                      <tr key={tx.id} className="hover:bg-white/[0.02] transition">
-                        <td className="py-3.5 px-4 text-slate-400 whitespace-nowrap">
+                      <tr key={tx.id} className="hover:bg-rose-50 transition">
+                        <td className="py-3.5 px-4 text-[#5B1B1B] whitespace-nowrap">
                           {new Date(tx.createdAt).toLocaleDateString()} {" "}
                           {new Date(tx.createdAt).toLocaleTimeString([], {
                             hour: "2-digit",
                             minute: "2-digit",
                           })}
                         </td>
-                        <td className="py-3.5 px-4 font-mono font-medium text-white whitespace-nowrap">
+                        <td className="py-3.5 px-4 font-mono font-medium text-[#2B0B0E] whitespace-nowrap">
                           {tx.id}
                         </td>
                         <td className="py-3.5 px-4">
                           <span
                             className={`px-2.5 py-1 rounded-md text-[10px] font-bold uppercase ${
                               tx.type === "PROFIT"
-                                ? "bg-indigo-500/15 text-indigo-400 border border-indigo-500/20"
+                                ? "bg-red-700/15 text-red-800 border border-red-400"
                                 : tx.type === "DEPOSIT"
-                                ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/20"
+                                ? "bg-red-100 text-red-800 border border-red-400"
                                 : tx.type === "WITHDRAWAL"
                                 ? "bg-amber-500/15 text-amber-400 border border-amber-500/20"
                                 : tx.type === "REFERRAL"
                                 ? "bg-fuchsia-500/15 text-fuchsia-400 border border-fuchsia-500/20"
-                                : "bg-cyan-500/15 text-cyan-400 border border-cyan-500/20"
+                                : "bg-red-700/15 text-red-800 border border-red-400"
                             }`}
                           >
                             {tx.type}
                           </span>
                         </td>
                         <td className="py-3.5 px-4 font-semibold whitespace-nowrap">
-                          <span className={isPositive ? "text-emerald-400" : "text-slate-200"}>
+                          <span className={isPositive ? "text-red-800" : "text-[#2B0B0E]"}>
                             {isPositive ? "+" : "-"}${Math.abs(tx.amount).toFixed(2)}
                           </span>
                           {tx.fee > 0 && (
-                            <span className="text-[10px] text-slate-500 block">
+                            <span className="text-[10px] text-[#6B1D1D] block">
                               Fee: ${tx.fee.toFixed(2)}
                             </span>
                           )}
                         </td>
-                        <td className="py-3.5 px-4 text-slate-300 whitespace-nowrap">
+                        <td className="py-3.5 px-4 text-[#3F1414] whitespace-nowrap">
                           {tx.method}
                         </td>
-                        <td className="py-3.5 px-4 font-mono text-[11px] text-slate-400 truncate max-w-xs">
+                        <td className="py-3.5 px-4 font-mono text-[11px] text-[#5B1B1B] truncate max-w-xs">
                           {tx.txHash || tx.destination || tx.note || "N/A"}
                         </td>
                         <td className="py-3.5 px-4 whitespace-nowrap">
                           <span
                             className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-semibold uppercase ${
                               tx.status === "APPROVED" || tx.status === "SUCCESS"
-                                ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/20"
+                                ? "bg-red-100 text-red-800 border border-red-400"
                                 : tx.status === "PENDING"
                                 ? "bg-amber-500/15 text-amber-400 border border-amber-500/20"
                                 : "bg-rose-500/15 text-rose-400 border border-rose-500/20"

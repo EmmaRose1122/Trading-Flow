@@ -12,7 +12,7 @@ export default function PublicHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-white/5 bg-[#080C15]/90 backdrop-blur-xl">
+    <header className="sticky top-0 z-50 border-b border-red-900/20 bg-[#FFFFFF]/90 backdrop-blur-xl">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="h-16 flex items-center justify-between">
           <Link
@@ -32,8 +32,8 @@ export default function PublicHeader() {
                   href={page.href}
                   className={`px-3.5 py-2 rounded-lg text-sm font-medium transition ${
                     active
-                      ? "text-emerald-400 bg-emerald-500/10"
-                      : "text-slate-300 hover:text-white hover:bg-slate-800/60"
+                      ? "text-red-800 bg-red-100"
+                      : "text-[#3F1414] hover:text-[#2B0B0E] hover:bg-rose-50"
                   }`}
                 >
                   {page.name}
@@ -45,14 +45,14 @@ export default function PublicHeader() {
           <div className="hidden lg:flex items-center gap-2">
             <Link
               href="/download"
-              className="p-2 rounded-lg text-slate-400 hover:text-emerald-400 hover:bg-emerald-500/10 transition"
+              className="p-2 rounded-lg text-[#5B1B1B] hover:text-red-900 hover:bg-red-200 transition"
               aria-label="Download Android app"
             >
               <Download className="w-4 h-4" />
             </Link>
             <Link
               href="/login"
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold transition shadow-lg shadow-emerald-500/20"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-red-700 hover:bg-red-800 text-white text-xs font-bold transition shadow-lg shadow-red-900/20"
             >
               Investor login
               <ArrowRight className="w-3.5 h-3.5" />
@@ -62,7 +62,7 @@ export default function PublicHeader() {
           <div className="lg:hidden flex items-center">
             <Link
               href="/download"
-              className="p-2 rounded-lg text-slate-400 hover:text-emerald-400"
+              className="p-2 rounded-lg text-[#5B1B1B] hover:text-red-900"
               aria-label="Download Android app"
             >
               <Download className="w-5 h-5" />
@@ -70,7 +70,7 @@ export default function PublicHeader() {
             <button
               type="button"
               onClick={() => setMenuOpen((open) => !open)}
-              className="p-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800"
+              className="p-2 rounded-lg text-[#3F1414] hover:text-[#2B0B0E] hover:bg-rose-50"
               aria-expanded={menuOpen}
               aria-controls="public-mobile-menu"
               aria-label={menuOpen ? "Close navigation menu" : "Open navigation menu"}
@@ -85,7 +85,7 @@ export default function PublicHeader() {
         <nav
           id="public-mobile-menu"
           aria-label="Mobile navigation"
-          className="lg:hidden border-t border-white/10 bg-[#0B0F19] px-4 py-4 space-y-1"
+          className="lg:hidden border-t border-red-900/20 bg-[#FFF7F7] px-4 py-4 space-y-1"
         >
           {PUBLIC_PAGES.map((page) => (
             <Link
@@ -94,20 +94,20 @@ export default function PublicHeader() {
               onClick={() => setMenuOpen(false)}
               className={`block px-3 py-2.5 rounded-lg text-sm font-medium ${
                 pathname === page.href
-                  ? "text-emerald-400 bg-emerald-500/10"
-                  : "text-slate-300 hover:bg-slate-800"
+                  ? "text-red-800 bg-red-100"
+                  : "text-[#3F1414] hover:bg-rose-50"
               }`}
             >
               {page.name}
             </Link>
           ))}
-          <div className="pt-3 mt-2 border-t border-white/10 grid grid-cols-2 gap-2">
+          <div className="pt-3 mt-2 border-t border-red-900/20 grid grid-cols-2 gap-2">
             {LEGAL_PAGES.map((page) => (
               <Link
                 key={page.href}
                 href={page.href}
                 onClick={() => setMenuOpen(false)}
-                className="px-3 py-2 text-xs text-slate-400 hover:text-white"
+                className="px-3 py-2 text-xs text-[#5B1B1B] hover:text-[#2B0B0E]"
               >
                 {page.name}
               </Link>
@@ -116,7 +116,7 @@ export default function PublicHeader() {
           <Link
             href="/login"
             onClick={() => setMenuOpen(false)}
-            className="mt-2 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-emerald-500 text-slate-950 text-sm font-bold"
+            className="mt-2 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-red-700 text-white text-sm font-bold"
           >
             Investor login
             <ArrowRight className="w-4 h-4" />

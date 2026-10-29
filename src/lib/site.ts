@@ -10,45 +10,28 @@ export const COMPANY = {
   description:
     "Trading Flow Capital is a UK-focused investment dashboard for tracking plans, daily profit, deposits, withdrawals and portfolio activity.",
   address: {
-    streetAddress: "Demo House, 1 Example Street",
-    addressLocality: "London",
-    postalCode: "EC1A 1AA",
+    streetAddress: "4 Andrews Close, Formby",
+    addressLocality: "Liverpool",
+    postalCode: "L37 2YH",
     addressCountry: "GB",
   },
-  addressLine: "Demo House, 1 Example Street, London, EC1A 1AA, United Kingdom",
+  addressLine: "4 Andrews Close, Formby, Liverpool, L37 2YH, United Kingdom",
   email: "tradingflow.demo@gmail.com",
-  // Ofcom reserves 020 7946 09xx numbers for fictional use.
-  phone: "+44 20 7946 0958",
-  phoneDisplay: "020 7946 0958",
+  phone: "+44 1704 834099",
+  phoneDisplay: "01704 834099",
   hours: "Monday to Friday, 09:00–17:00 GMT",
   effectiveDate: "28 October 2026",
 };
 
 export const SITE_PLANS = [
   {
-    name: "Starter",
-    rate: 1.5,
-    duration: 15,
-    minimum: 100,
-    maximum: 999,
-    description: "A short-term tier for learning how daily reporting works.",
-  },
-  {
-    name: "Premium Growth",
+    name: "Daily 2% Plan",
     rate: 2.0,
-    duration: 30,
-    minimum: 1000,
-    maximum: 9999,
-    description: "Our core tier with a balanced term and daily profit visibility.",
+    duration: 0,
+    minimum: 10,
+    maximum: null,
+    description: "One simple plan. Deposit from $10, add funds any time and earn 2% every 24 hours.",
     featured: true,
-  },
-  {
-    name: "VIP Capital",
-    rate: 3.0,
-    duration: 60,
-    minimum: 10000,
-    maximum: 100000,
-    description: "A longer-horizon tier for experienced, higher-value allocations.",
   },
 ];
 

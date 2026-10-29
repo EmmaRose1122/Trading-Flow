@@ -143,9 +143,9 @@ export default function SupportChat() {
           onKeyDown={(event) => {
             if (event.key === "Escape") setOpen(false);
           }}
-          className="w-[calc(100vw-1.5rem)] max-w-[390px] h-[min(70vh,620px)] max-h-[calc(100dvh-15rem)] rounded-2xl border border-white/10 bg-[#0C1320] shadow-2xl shadow-black/50 overflow-hidden flex flex-col"
+          className="w-[calc(100vw-1.5rem)] max-w-[390px] h-[min(70vh,620px)] max-h-[calc(100dvh-15rem)] rounded-2xl border border-red-900/20 bg-white shadow-2xl shadow-black/50 overflow-hidden flex flex-col"
         >
-          <header className="flex items-center justify-between gap-3 px-4 py-3 border-b border-white/10 bg-[#0F172A]">
+          <header className="flex items-center justify-between gap-3 px-4 py-3 border-b border-red-900/20 bg-white">
             <div className="flex items-center gap-2.5 min-w-0">
               <Image
                 src="/brand/app-icon.png"
@@ -155,14 +155,14 @@ export default function SupportChat() {
                 className="w-9 h-9 rounded-xl shrink-0"
               />
               <div className="min-w-0">
-                <h2 className="text-sm font-bold text-white truncate">{COMPANY.name}</h2>
+                <h2 className="text-sm font-bold text-[#2B0B0E] truncate">{COMPANY.name}</h2>
               </div>
             </div>
             <div className="flex items-center gap-1">
               <button
                 type="button"
                 onClick={resetChat}
-                className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-slate-800 transition"
+                className="p-2 rounded-lg text-[#6B1D1D] hover:text-[#2B0B0E] hover:bg-rose-50 transition"
                 aria-label="Start a new chat"
                 title="New chat"
               >
@@ -171,7 +171,7 @@ export default function SupportChat() {
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                className="p-2 rounded-lg text-slate-500 hover:text-white hover:bg-slate-800 transition"
+                className="p-2 rounded-lg text-[#6B1D1D] hover:text-[#2B0B0E] hover:bg-rose-50 transition"
                 aria-label="Close AI support"
               >
                 <X className="w-4 h-4" />
@@ -198,22 +198,22 @@ export default function SupportChat() {
                 className={`flex items-start gap-2 ${message.role === "user" ? "justify-end" : "justify-start"}`}
               >
                 {message.role === "assistant" && (
-                  <span className="w-6 h-6 rounded-full bg-emerald-500/15 flex items-center justify-center shrink-0 mt-0.5">
-                    <Sparkles className="w-3 h-3 text-emerald-400" />
+                  <span className="w-6 h-6 rounded-full bg-red-100 flex items-center justify-center shrink-0 mt-0.5">
+                    <Sparkles className="w-3 h-3 text-red-800" />
                   </span>
                 )}
                 <div
                   className={`max-w-[82%] rounded-2xl px-3.5 py-2.5 text-xs leading-relaxed whitespace-pre-wrap break-words ${
                     message.role === "user"
-                      ? "bg-emerald-500 text-slate-950 rounded-br-md"
-                      : "bg-slate-900 border border-white/5 text-slate-200 rounded-bl-md"
+                      ? "bg-red-700 text-white rounded-br-md"
+                      : "bg-white border border-red-900/20 text-[#2B0B0E] rounded-bl-md"
                   }`}
                 >
                   {message.content}
                 </div>
                 {message.role === "user" && (
-                  <span className="w-6 h-6 rounded-full bg-slate-800 flex items-center justify-center shrink-0 mt-0.5">
-                    <UserRound className="w-3 h-3 text-slate-400" />
+                  <span className="w-6 h-6 rounded-full bg-rose-50 flex items-center justify-center shrink-0 mt-0.5">
+                    <UserRound className="w-3 h-3 text-[#5B1B1B]" />
                   </span>
                 )}
               </div>
@@ -221,14 +221,14 @@ export default function SupportChat() {
 
             {loading && (
               <div className="flex items-center gap-2" aria-label="Assistant is typing">
-                <span className="w-6 h-6 rounded-full bg-emerald-500/15 flex items-center justify-center">
-                  <Sparkles className="w-3 h-3 text-emerald-400" />
+                <span className="w-6 h-6 rounded-full bg-red-100 flex items-center justify-center">
+                  <Sparkles className="w-3 h-3 text-red-800" />
                 </span>
-                <div className="rounded-2xl rounded-bl-md bg-slate-900 border border-white/5 px-3.5 py-3 flex items-center gap-1">
+                <div className="rounded-2xl rounded-bl-md bg-white border border-red-900/20 px-3.5 py-3 flex items-center gap-1">
                   {[0, 1, 2].map((index) => (
                     <span
                       key={index}
-                      className="w-1.5 h-1.5 rounded-full bg-slate-500 animate-pulse"
+                      className="w-1.5 h-1.5 rounded-full bg-rose-300 animate-pulse"
                       style={{ animationDelay: `${index * 150}ms` }}
                     />
                   ))}
@@ -238,7 +238,7 @@ export default function SupportChat() {
 
             {!hasUserMessage && !loading && (
               <div className="pt-1">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 mb-2">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-[#6B1D1D] mb-2">
                   Suggested questions
                 </p>
                 <div className="flex flex-wrap gap-2">
@@ -247,7 +247,7 @@ export default function SupportChat() {
                       key={suggestion}
                       type="button"
                       onClick={() => sendMessage(suggestion)}
-                      className="px-2.5 py-1.5 rounded-lg border border-white/10 bg-slate-900 hover:border-emerald-500/30 hover:text-emerald-400 text-[10px] text-slate-300 text-left transition"
+                      className="px-2.5 py-1.5 rounded-lg border border-red-900/20 bg-white hover:border-red-400 hover:text-red-900 text-[10px] text-[#3F1414] text-left transition"
                     >
                       {suggestion}
                     </button>
@@ -257,7 +257,7 @@ export default function SupportChat() {
             )}
           </div>
 
-          <footer className="border-t border-white/10 bg-[#0F172A] p-3">
+          <footer className="border-t border-red-900/20 bg-white p-3">
             <form
               onSubmit={(event) => {
                 event.preventDefault();
@@ -277,22 +277,22 @@ export default function SupportChat() {
                 maxLength={1500}
                 placeholder="Ask about plans, payments or security..."
                 autoComplete="off"
-                className="min-w-0 flex-1 px-3 py-2.5 rounded-xl bg-slate-900 border border-white/10 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500"
+                className="min-w-0 flex-1 px-3 py-2.5 rounded-xl bg-white border border-red-900/20 text-xs text-[#2B0B0E] placeholder-[#8A4A4A] focus:outline-none focus:border-red-700"
               />
               <button
                 type="submit"
                 disabled={loading || !input.trim()}
-                className="w-9 h-9 rounded-xl bg-emerald-500 hover:bg-emerald-400 disabled:opacity-40 disabled:cursor-not-allowed text-slate-950 flex items-center justify-center transition"
+                className="w-9 h-9 rounded-xl bg-red-700 hover:bg-red-800 disabled:opacity-40 disabled:cursor-not-allowed text-white flex items-center justify-center transition"
                 aria-label="Send message"
               >
                 <Send className="w-4 h-4" />
               </button>
             </form>
-            <div className="mt-2 flex items-center justify-between gap-2 text-[9px] text-slate-600">
+            <div className="mt-2 flex items-center justify-between gap-2 text-[9px] text-[#7F1D1D]">
               <span>AI-generated · Not financial advice</span>
               <a
                 href={`mailto:${supportEmail}`}
-                className="inline-flex items-center gap-1 hover:text-emerald-400 transition"
+                className="inline-flex items-center gap-1 hover:text-red-900 transition"
               >
                 <Mail className="w-2.5 h-2.5" />
                 Human support
@@ -307,11 +307,11 @@ export default function SupportChat() {
         onClick={() => setOpen((current) => !current)}
         aria-expanded={open}
         aria-label={open ? "Close AI support chat" : "Open AI support chat"}
-        className="relative w-14 h-14 rounded-full bg-gradient-to-br from-emerald-400 to-cyan-500 text-slate-950 shadow-xl shadow-emerald-500/25 flex items-center justify-center hover:scale-105 active:scale-95 transition-transform"
+        className="relative w-14 h-14 rounded-full bg-gradient-to-br from-red-700 to-red-800 text-white shadow-xl shadow-red-900/20 flex items-center justify-center hover:scale-105 active:scale-95 transition-transform"
       >
         {open ? <X className="w-6 h-6" /> : <MessageCircle className="w-6 h-6" />}
         {!open && (
-          <span className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-emerald-300 border-2 border-[#080C15]" />
+          <span className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-red-500 border-2 border-rose-100" />
         )}
       </button>
     </div>

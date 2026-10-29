@@ -6,10 +6,10 @@ export default function PublicSiteLayout({ children }: { children: React.ReactNo
   const structuredData = [organizationJsonLd(), websiteJsonLd()];
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#080C15]">
+    <div className="min-h-screen flex flex-col bg-[#FFFFFF]">
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[60] focus:px-4 focus:py-2 focus:rounded-lg focus:bg-emerald-500 focus:text-slate-950 focus:text-sm focus:font-bold"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[60] focus:px-4 focus:py-2 focus:rounded-lg focus:bg-red-700 focus:text-white focus:text-sm focus:font-bold"
       >
         Skip to content
       </a>

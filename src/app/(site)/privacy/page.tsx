@@ -20,12 +20,12 @@ export default function PrivacyPage() {
       path="/privacy"
     >
       <section>
-        <h2 className="text-xl font-bold text-white mb-3">1. Who we are</h2>
+        <h2 className="text-xl font-bold text-[#2B0B0E] mb-3">1. Who we are</h2>
         <p>
           {COMPANY.legalName} is the data controller for personal information processed through this
           website and investor dashboard. Our contact address is {COMPANY.addressLine}. You can
           contact us by email at{" "}
-          <a href={`mailto:${COMPANY.email}`} className="text-emerald-400 hover:underline">
+          <a href={`mailto:${COMPANY.email}`} className="text-red-800 hover:underline">
             {COMPANY.email}
           </a>{" "}
           or by telephone on {COMPANY.phoneDisplay}.
@@ -33,7 +33,7 @@ export default function PrivacyPage() {
       </section>
 
       <section>
-        <h2 className="text-xl font-bold text-white mb-3">2. Information we collect</h2>
+        <h2 className="text-xl font-bold text-[#2B0B0E] mb-3">2. Information we collect</h2>
         <p>Depending on how you use the service, we may collect:</p>
         <ul className="mt-3 space-y-2 list-disc pl-5">
           <li>Account information such as your name, email address, password hash and referral code.</li>
@@ -48,7 +48,7 @@ export default function PrivacyPage() {
       </section>
 
       <section>
-        <h2 className="text-xl font-bold text-white mb-3">3. How we use information</h2>
+        <h2 className="text-xl font-bold text-[#2B0B0E] mb-3">3. How we use information</h2>
         <p>We use personal information to:</p>
         <ul className="mt-3 space-y-2 list-disc pl-5">
           <li>create and secure user accounts;</li>
@@ -61,7 +61,7 @@ export default function PrivacyPage() {
       </section>
 
       <section>
-        <h2 className="text-xl font-bold text-white mb-3">4. Lawful basis</h2>
+        <h2 className="text-xl font-bold text-[#2B0B0E] mb-3">4. Lawful basis</h2>
         <p>
           We rely on one or more lawful bases under the UK GDPR, including performance of a
           contract with you, compliance with legal obligations, our legitimate interests in
@@ -71,7 +71,7 @@ export default function PrivacyPage() {
       </section>
 
       <section>
-        <h2 className="text-xl font-bold text-white mb-3">5. Sharing and international transfers</h2>
+        <h2 className="text-xl font-bold text-[#2B0B0E] mb-3">5. Sharing and international transfers</h2>
         <p>
           We may use service providers such as hosting, database, email and infrastructure
           providers to operate the platform. They may only process information as required to
@@ -81,7 +81,7 @@ export default function PrivacyPage() {
       </section>
 
       <section>
-        <h2 className="text-xl font-bold text-white mb-3">6. AI support chat</h2>
+        <h2 className="text-xl font-bold text-[#2B0B0E] mb-3">6. AI support chat</h2>
         <p>
           If you use the AI support assistant, the message content you submit is sent to Google&apos;s
           Gemini API so that a response can be generated. Google may process this content outside
@@ -90,7 +90,7 @@ export default function PrivacyPage() {
             href="https://policies.google.com/privacy"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-emerald-400 hover:underline"
+            className="text-red-800 hover:underline"
           >
             own privacy policy
           </a>
@@ -102,7 +102,7 @@ export default function PrivacyPage() {
       </section>
 
       <section>
-        <h2 className="text-xl font-bold text-white mb-3">7. Retention</h2>
+        <h2 className="text-xl font-bold text-[#2B0B0E] mb-3">7. Retention</h2>
         <p>
           We keep personal information only for as long as needed to provide the service, maintain
           accurate business and transaction records, resolve disputes, prevent misuse and meet legal
@@ -111,7 +111,7 @@ export default function PrivacyPage() {
       </section>
 
       <section>
-        <h2 className="text-xl font-bold text-white mb-3">8. Your rights</h2>
+        <h2 className="text-xl font-bold text-[#2B0B0E] mb-3">8. Your rights</h2>
         <p>
           Subject to applicable law, you may request access to your personal information, correction
           of inaccurate information, erasure, restriction, portability, or object to certain
@@ -121,7 +121,7 @@ export default function PrivacyPage() {
       </section>
 
       <section>
-        <h2 className="text-xl font-bold text-white mb-3">9. Security</h2>
+        <h2 className="text-xl font-bold text-[#2B0B0E] mb-3">9. Security</h2>
         <p>
           Passwords are hashed, sessions use signed HTTP-only cookies, access to administrator
           functions is restricted, and balance changes are recorded in the transaction ledger. No
@@ -131,11 +131,11 @@ export default function PrivacyPage() {
       </section>
 
       <section>
-        <h2 className="text-xl font-bold text-white mb-3">10. Cookies</h2>
+        <h2 className="text-xl font-bold text-[#2B0B0E] mb-3">10. Cookies</h2>
         <p>
           We use an essential authentication cookie to keep you signed in. More information is
           available in our{" "}
-          <Link href="/cookies" className="text-emerald-400 hover:underline">
+          <Link href="/cookies" className="text-red-800 hover:underline">
             cookie policy
           </Link>
           .
@@ -143,7 +143,7 @@ export default function PrivacyPage() {
       </section>
 
       <section>
-        <h2 className="text-xl font-bold text-white mb-3">11. Changes and contact</h2>
+        <h2 className="text-xl font-bold text-[#2B0B0E] mb-3">11. Changes and contact</h2>
         <p>
           We may update this policy to reflect changes to the service or applicable law. Contact us
           at {COMPANY.email} with any privacy question. Our postal address is {COMPANY.addressLine}.

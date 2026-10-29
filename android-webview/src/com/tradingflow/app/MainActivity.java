@@ -44,17 +44,20 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        getWindow().setStatusBarColor(Color.parseColor("#080C15"));
-        getWindow().setNavigationBarColor(Color.parseColor("#080C15"));
+        getWindow().setStatusBarColor(Color.parseColor("#B91C1C"));
+        getWindow().setNavigationBarColor(Color.parseColor("#B91C1C"));
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            getWindow().getDecorView().setSystemUiVisibility(0);
+        }
 
         preferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         appUrl = preferences.getString(SERVER_URL_KEY, getString(R.string.app_url));
 
         FrameLayout root = new FrameLayout(this);
-        root.setBackgroundColor(Color.parseColor("#080C15"));
+        root.setBackgroundColor(Color.parseColor("#FFFFFF"));
 
         webView = new WebView(this);
-        webView.setBackgroundColor(Color.parseColor("#080C15"));
+        webView.setBackgroundColor(Color.parseColor("#FFFFFF"));
         configureWebView();
         root.addView(webView, new FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
@@ -142,17 +145,17 @@ public class MainActivity extends Activity {
         container.setOrientation(LinearLayout.VERTICAL);
         container.setGravity(Gravity.CENTER_HORIZONTAL);
         container.setPadding(dp(24), dp(28), dp(24), dp(28));
-        container.setBackgroundColor(Color.parseColor("#0F172A"));
+        container.setBackgroundColor(Color.parseColor("#FFFFFF"));
         container.setVisibility(View.GONE);
 
         TextView title = new TextView(this);
         title.setText(R.string.connection_title);
-        title.setTextColor(Color.WHITE);
+        title.setTextColor(Color.parseColor("#2B0B0E"));
         title.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
         title.setGravity(Gravity.CENTER);
 
         errorMessage = new TextView(this);
-        errorMessage.setTextColor(Color.parseColor("#94A3B8"));
+        errorMessage.setTextColor(Color.parseColor("#7A5A5D"));
         errorMessage.setTextSize(TypedValue.COMPLEX_UNIT_SP, 13);
         errorMessage.setGravity(Gravity.CENTER);
         errorMessage.setPadding(0, dp(10), 0, dp(22));
@@ -160,6 +163,8 @@ public class MainActivity extends Activity {
         Button retryButton = new Button(this);
         retryButton.setText(R.string.retry);
         retryButton.setAllCaps(false);
+        retryButton.setBackgroundColor(Color.parseColor("#DC2626"));
+        retryButton.setTextColor(Color.WHITE);
         retryButton.setOnClickListener(view -> loadApp());
 
         Button serverButton = new Button(this);
@@ -272,8 +277,7 @@ public class MainActivity extends Activity {
     private boolean isValidServerUrl(String value) {
         try {
             Uri uri = Uri.parse(value);
-            return uri.getHost() != null
-                    && (uri.getScheme().equals("http") || uri.getScheme().equals("https"));
+            return uri.getHost() != null && uri.getScheme().equals("https");
         } catch (Exception ignored) {
             return false;
         }

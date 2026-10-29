@@ -47,7 +47,7 @@ const benefits = [
   {
     icon: Layers,
     title: "Defined plan terms",
-    text: "Compare rate, term, minimum allocation and capital-return terms before committing.",
+    text: "Deposit from $10 with no maximum, then earn a fixed 2% daily after each deposit's 24-hour wait.",
   },
   {
     icon: Clock,
@@ -74,7 +74,7 @@ const steps = [
   {
     number: "02",
     title: "Review your options",
-    text: "Compare the Starter, Premium Growth and VIP Capital tiers using the built-in calculator.",
+    text: "Start with the single 2% daily deposit plan using the built-in profit calculator.",
   },
   {
     number: "03",
@@ -97,17 +97,17 @@ const homeFaqs = [
   {
     question: "Which investment plans are available?",
     answer:
-      "The dashboard includes Starter at 1.5% daily for 15 days, Premium Growth at 2.0% daily for 30 days, and VIP Capital at 3.0% daily for 60 days. Minimum allocations are $100, $1,000 and $10,000 respectively. Plan figures are illustrative, not guaranteed.",
+      "There is one plan: the Daily 2% Plan. The minimum deposit is $10, there is no maximum, and approved deposits earn 2% every 24 hours after a 24-hour waiting period. Plan figures are illustrative, not guaranteed.",
   },
   {
     question: "How is daily profit calculated?",
     answer:
-      "Projected daily profit is the investment amount multiplied by the daily percentage and divided by 100. For example, $5,000 in Premium Growth at 2.0% projects $100 per day before applicable terms.",
+      "Daily profit is 2% of the total approved deposits that have passed the 24-hour waiting period. For example, $1,000 in eligible deposits projects $20 per day before applicable terms.",
   },
   {
     question: "When are daily profits credited?",
     answer:
-      "The automated ROI process is scheduled for 00:00 UTC. It is designed to credit each active contract once per day and reduce the remaining term, subject to the platform being available and the contract remaining active.",
+      "The 2% profit process runs hourly and credits each user at most once every 24 hours. Only approved deposits older than 24 hours are included in that day's eligible balance.",
   },
   {
     question: "How do deposits and withdrawals work?",
@@ -140,7 +140,7 @@ const faqStructuredData = {
 };
 
 const platformFacts = [
-  { value: "3", label: "Defined plan tiers" },
+  { value: "1", label: "Daily 2% plan" },
   { value: "24h", label: "Reporting cycle" },
   { value: "4", label: "Activity categories" },
   { value: "UK", label: "Support hours" },
@@ -150,7 +150,7 @@ const moneyMovements = [
   {
     icon: TrendingUp,
     title: "Daily investments",
-    text: "Review each contract's amount, daily rate, remaining term and capital-return terms.",
+    text: "Review each approved deposit's amount, 24-hour activation time and 2% daily earnings.",
     tag: "Investment",
   },
   {
@@ -182,10 +182,10 @@ export default function HomePage() {
           __html: JSON.stringify(faqStructuredData).replace(/</g, "\\u003c"),
         }}
       />
-      <section className="relative overflow-hidden border-b border-white/5">
+      <section className="relative overflow-hidden border-b border-red-900/20">
         <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute -top-32 left-1/4 w-[32rem] h-[32rem] rounded-full bg-emerald-500/10 blur-3xl" />
-          <div className="absolute top-24 right-0 w-[28rem] h-[28rem] rounded-full bg-cyan-500/10 blur-3xl" />
+          <div className="absolute -top-32 left-1/4 w-[32rem] h-[32rem] rounded-full bg-red-100 blur-3xl" />
+          <div className="absolute top-24 right-0 w-[28rem] h-[28rem] rounded-full bg-red-100 blur-3xl" />
         </div>
         <FloatingBitcoin
           className="left-[4%] top-[24%] hidden xl:block"
@@ -207,14 +207,14 @@ export default function HomePage() {
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
           <div className="grid grid-cols-1 lg:grid-cols-[1.05fr_0.95fr] gap-10 lg:gap-8 items-center">
           <div className="max-w-3xl hero-copy">
-            <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 mb-6">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+            <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-red-100 text-red-800 border border-red-400 mb-6">
+              <span className="w-1.5 h-1.5 rounded-full bg-red-700" />
               UK-focused investment platform
             </span>
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-[1.05]">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-[#2B0B0E] leading-[1.05]">
               A clearer way to invest, track and grow.
             </h1>
-            <p className="mt-6 text-base sm:text-lg text-slate-300 leading-relaxed max-w-2xl">
+            <p className="mt-6 text-base sm:text-lg text-[#3F1414] leading-relaxed max-w-2xl">
               Trading Flow Capital brings investment plans, projected daily profit and transaction
               reporting into one straightforward dashboard built for UK investors who value
               visibility.
@@ -222,27 +222,27 @@ export default function HomePage() {
             <div className="mt-8 flex flex-col sm:flex-row gap-3">
               <Link
                 href="/login"
-                className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-sm transition shadow-lg shadow-emerald-500/20"
+                className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-red-700 hover:bg-red-800 text-white font-bold text-sm transition shadow-lg shadow-red-900/20"
               >
                 Open investor portal
                 <ArrowRight className="w-4 h-4" />
               </Link>
               <a
                 href="#plans"
-                className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-slate-900 border border-white/10 hover:border-emerald-500/30 text-slate-200 font-semibold text-sm transition"
+                className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-white border border-red-900/20 hover:border-red-400 text-[#2B0B0E] font-semibold text-sm transition"
               >
-                View investment tiers
+                View daily plan
               </a>
             </div>
-            <div className="mt-9 flex flex-wrap gap-x-6 gap-y-3 text-xs text-slate-400">
+            <div className="mt-9 flex flex-wrap gap-x-6 gap-y-3 text-xs text-[#5B1B1B]">
               {[
                 "Transparent daily reporting",
-                "Three defined plan terms",
+                "One 2% daily plan",
                 `Invitation code: ${displayReferralCode(PLATFORM_REFERRAL_CODE)}`,
               ].map(
                 (item) => (
                   <span key={item} className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                    <CheckCircle2 className="w-4 h-4 text-red-800" />
                     {item}
                   </span>
                 )
@@ -256,13 +256,13 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section aria-label="Platform overview" className="border-b border-white/5 bg-[#060A12]">
+      <section aria-label="Platform overview" className="border-b border-red-900/20 bg-[#FFF5F5]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {platformFacts.map((fact) => (
-              <div key={fact.label} className="rounded-xl border border-white/5 bg-[#0B1320] px-4 py-4">
-                <p className="text-2xl font-extrabold tracking-tight text-white">{fact.value}</p>
-                <p className="mt-0.5 text-[11px] text-slate-500">{fact.label}</p>
+              <div key={fact.label} className="rounded-xl border border-red-900/20 bg-white px-4 py-4">
+                <p className="text-2xl font-extrabold tracking-tight text-[#2B0B0E]">{fact.value}</p>
+                <p className="mt-0.5 text-[11px] text-[#6B1D1D]">{fact.label}</p>
               </div>
             ))}
           </div>
@@ -288,13 +288,13 @@ export default function HomePage() {
         />
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-2xl">
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-emerald-400 mb-3">
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-red-800 mb-3">
               Why Trading Flow
             </p>
-            <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
+            <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#2B0B0E]">
               Designed to make investment details easier to understand
             </h2>
-            <p className="mt-4 text-sm sm:text-base text-slate-400 leading-relaxed">
+            <p className="mt-4 text-sm sm:text-base text-[#5B1B1B] leading-relaxed">
               A dashboard is only useful when the numbers are readable. We focus on plan clarity,
               daily reporting and a complete view of account activity.
             </p>
@@ -306,13 +306,13 @@ export default function HomePage() {
               return (
                 <article
                   key={benefit.title}
-                  className="glass-card rounded-2xl p-5 border border-white/5"
+                  className="glass-card rounded-2xl p-5 border border-red-900/20"
                 >
-                  <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 mb-4">
+                  <div className="w-10 h-10 rounded-xl bg-red-100 border border-red-400 flex items-center justify-center text-red-800 mb-4">
                     <Icon className="w-5 h-5" />
                   </div>
-                  <h3 className="font-bold text-white text-sm">{benefit.title}</h3>
-                  <p className="mt-2 text-xs text-slate-400 leading-relaxed">{benefit.text}</p>
+                  <h3 className="font-bold text-[#2B0B0E] text-sm">{benefit.title}</h3>
+                  <p className="mt-2 text-xs text-[#5B1B1B] leading-relaxed">{benefit.text}</p>
                 </article>
               );
             })}
@@ -320,7 +320,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section id="plans" className="relative overflow-hidden py-20 sm:py-24 bg-[#060A12] border-y border-white/5">
+      <section id="plans" className="relative overflow-hidden py-20 sm:py-24 bg-[#FFF5F5] border-y border-red-900/20">
         <FloatingBitcoin
           className="left-[2%] top-20 hidden sm:block"
           size={70}
@@ -340,71 +340,71 @@ export default function HomePage() {
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
             <div className="max-w-2xl">
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-cyan-400 mb-3">
-                Investment tiers
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-red-800 mb-3">
+                Daily plan
               </p>
-              <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
+              <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#2B0B0E]">
                 Defined terms before you commit
               </h2>
-              <p className="mt-4 text-sm sm:text-base text-slate-400 leading-relaxed">
-                Each tier shows its daily rate, fixed term, minimum allocation and capital-return
-                terms. Use the dashboard calculator to see projected profit for a specific amount.
+              <p className="mt-4 text-sm sm:text-base text-[#5B1B1B] leading-relaxed">
+                One simple plan: deposit from $10, no maximum, and earn 2% every 24 hours after
+                the deposit's activation wait. Use the dashboard calculator to see projected profit.
               </p>
             </div>
             <Link
               href="/login"
-              className="inline-flex items-center gap-2 text-sm font-semibold text-emerald-400 hover:text-emerald-300"
+              className="inline-flex items-center gap-2 text-sm font-semibold text-red-800 hover:text-red-900"
             >
               Open the calculator
               <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mt-10">
+          <div className="grid grid-cols-1 max-w-xl mx-auto gap-5 mt-10">
             {SITE_PLANS.map((plan) => (
               <article
                 key={plan.name}
                 className={`relative rounded-2xl p-6 border flex flex-col ${
                   plan.featured
-                    ? "bg-emerald-950/25 border-emerald-500/35 shadow-2xl shadow-emerald-500/10"
-                    : "bg-[#0C1320] border-white/8"
+                    ? "bg-red-100 border-red-500/50 shadow-2xl shadow-red-900/10"
+                    : "bg-white border-red-900/20"
                 }`}
               >
                 {plan.featured && (
-                  <span className="absolute -top-3 left-6 px-3 py-1 rounded-full bg-emerald-500 text-slate-950 text-[10px] font-bold uppercase tracking-wider">
+                  <span className="absolute -top-3 left-6 px-3 py-1 rounded-full bg-red-700 text-white text-[10px] font-bold uppercase tracking-wider">
                     Most popular
                   </span>
                 )}
-                <h3 className="text-lg font-bold text-white">{plan.name}</h3>
-                <p className="mt-2 text-xs text-slate-400 leading-relaxed">{plan.description}</p>
+                <h3 className="text-lg font-bold text-[#2B0B0E]">{plan.name}</h3>
+                <p className="mt-2 text-xs text-[#5B1B1B] leading-relaxed">{plan.description}</p>
                 <div className="mt-6 flex items-baseline gap-1.5">
-                  <span className="text-4xl font-extrabold text-white">
+                  <span className="text-4xl font-extrabold text-[#2B0B0E]">
                     {plan.rate.toFixed(1)}%
                   </span>
-                  <span className="text-xs text-slate-400 font-semibold uppercase">daily</span>
+                  <span className="text-xs text-[#5B1B1B] font-semibold uppercase">daily</span>
                 </div>
-                <dl className="mt-6 pt-5 border-t border-white/5 space-y-3 text-xs">
+                <dl className="mt-6 pt-5 border-t border-red-900/20 space-y-3 text-xs">
                   <div className="flex justify-between gap-3">
-                    <dt className="text-slate-500">Term</dt>
-                    <dd className="font-semibold text-slate-200">{plan.duration} days</dd>
+                    <dt className="text-[#6B1D1D]">Payout schedule</dt>
+                    <dd className="font-semibold text-[#2B0B0E]">Every 24 hours</dd>
                   </div>
                   <div className="flex justify-between gap-3">
-                    <dt className="text-slate-500">Minimum</dt>
-                    <dd className="font-semibold text-slate-200">
+                    <dt className="text-[#6B1D1D]">Minimum</dt>
+                    <dd className="font-semibold text-[#2B0B0E]">
                       ${plan.minimum.toLocaleString("en-GB")}
                     </dd>
                   </div>
                   <div className="flex justify-between gap-3">
-                    <dt className="text-slate-500">Capital return</dt>
-                    <dd className="font-semibold text-emerald-400">At maturity</dd>
+                    <dt className="text-[#6B1D1D]">Maximum</dt>
+                    <dd className="font-semibold text-red-800">Unlimited</dd>
                   </div>
                 </dl>
                 <Link
                   href="/login"
                   className={`mt-7 inline-flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-xs font-bold transition ${
                     plan.featured
-                      ? "bg-emerald-500 hover:bg-emerald-400 text-slate-950"
-                      : "bg-slate-800 hover:bg-slate-700 text-white"
+                      ? "bg-red-700 hover:bg-red-800 text-white"
+                      : "bg-rose-50 hover:bg-rose-100 text-[#2B0B0E]"
                   }`}
                 >
                   View in dashboard
@@ -413,7 +413,7 @@ export default function HomePage() {
               </article>
             ))}
           </div>
-          <p className="mt-5 text-[11px] text-slate-500">
+          <p className="mt-5 text-[11px] text-[#6B1D1D]">
             Plan rates are illustrative, not guaranteed, and do not represent a forecast. Capital
             is at risk.
           </p>
@@ -423,49 +423,49 @@ export default function HomePage() {
       <section id="how-it-works" className="py-20 sm:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-2xl">
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-emerald-400 mb-3">
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-red-800 mb-3">
               How it works
             </p>
-            <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
+            <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#2B0B0E]">
               Four steps from account to daily reporting
             </h2>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-10">
             {steps.map((step) => (
-              <article key={step.number} className="glass-card rounded-2xl p-5 border border-white/5">
-                <span className="text-xs font-bold text-emerald-400">{step.number}</span>
-                <h3 className="mt-3 font-bold text-white text-sm">{step.title}</h3>
-                <p className="mt-2 text-xs text-slate-400 leading-relaxed">{step.text}</p>
+              <article key={step.number} className="glass-card rounded-2xl p-5 border border-red-900/20">
+                <span className="text-xs font-bold text-red-800">{step.number}</span>
+                <h3 className="mt-3 font-bold text-[#2B0B0E] text-sm">{step.title}</h3>
+                <p className="mt-2 text-xs text-[#5B1B1B] leading-relaxed">{step.text}</p>
               </article>
             ))}
           </div>
         </div>
       </section>
 
-      <section id="security" className="py-20 sm:py-24 bg-[#060A12] border-y border-white/5">
+      <section id="security" className="py-20 sm:py-24 bg-[#FFF5F5] border-y border-red-900/20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
             <div>
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-cyan-400 mb-3">
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-red-800 mb-3">
                 Security & responsibility
               </p>
-              <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
+              <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#2B0B0E]">
                 Clear records, protected access and honest expectations
               </h2>
-              <p className="mt-4 text-sm text-slate-400 leading-relaxed">
+              <p className="mt-4 text-sm text-[#5B1B1B] leading-relaxed">
                 Access is protected with HTTP-only signed sessions, passwords are hashed before
                 storage, and every balance-changing action is written to the transaction ledger.
               </p>
               <div className="mt-7 flex flex-col sm:flex-row gap-3">
                 <Link
                   href="/about"
-                  className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-slate-900 border border-white/10 text-slate-200 text-xs font-semibold hover:border-emerald-500/30"
+                  className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-white border border-red-900/20 text-[#2B0B0E] text-xs font-semibold hover:border-red-400"
                 >
                   About our approach
                 </Link>
                 <Link
                   href="/contact"
-                  className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-emerald-500 text-slate-950 text-xs font-bold hover:bg-emerald-400"
+                  className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-red-700 text-white text-xs font-bold hover:bg-red-800"
                 >
                   Contact the team
                   <ArrowRight className="w-3.5 h-3.5" />
@@ -488,7 +488,7 @@ export default function HomePage() {
                 {
                   icon: CalendarDays,
                   title: "Daily accrual records",
-                  text: "The daily ROI process checks each active contract before crediting profit.",
+                  text: "The 2% daily process checks eligible approved deposits before crediting profit.",
                 },
                 {
                   icon: TrendingUp,
@@ -498,10 +498,10 @@ export default function HomePage() {
               ].map((item) => {
                 const Icon = item.icon;
                 return (
-                  <div key={item.title} className="rounded-2xl bg-[#0C1320] border border-white/5 p-5">
-                    <Icon className="w-5 h-5 text-emerald-400 mb-3" />
-                    <h3 className="text-sm font-bold text-white">{item.title}</h3>
-                    <p className="mt-2 text-xs text-slate-400 leading-relaxed">{item.text}</p>
+                  <div key={item.title} className="rounded-2xl bg-white border border-red-900/20 p-5">
+                    <Icon className="w-5 h-5 text-red-800 mb-3" />
+                    <h3 className="text-sm font-bold text-[#2B0B0E]">{item.title}</h3>
+                    <p className="mt-2 text-xs text-[#5B1B1B] leading-relaxed">{item.text}</p>
                   </div>
                 );
               })}
@@ -523,47 +523,47 @@ export default function HomePage() {
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-5">
             <div className="max-w-2xl">
-              <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-cyan-500/10 text-cyan-300 border border-cyan-500/20 mb-4">
-                <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
+              <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-yellow-300 text-black border border-yellow-400 mb-4">
+                <span className="w-1.5 h-1.5 rounded-full bg-red-700" />
                 Interactive activity ledger
               </span>
-              <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
+              <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#2B0B0E]">
                 A day on the platform, slide by slide
               </h2>
-              <p className="mt-4 text-sm sm:text-base text-slate-400 leading-relaxed">
+              <p className="mt-4 text-sm sm:text-base text-[#5B1B1B] leading-relaxed">
                 Explore 24 simulated records across daily investments, profit credits, deposits and
                 withdrawals. Every slide includes a record ID, member name, amount and status.
               </p>
             </div>
-            <div className="rounded-xl border border-white/10 bg-slate-900/60 px-4 py-3 text-xs text-slate-400">
-              <span className="block font-semibold text-white">How to read the feed</span>
+            <div className="rounded-xl border border-yellow-400/25 bg-black px-4 py-3 text-xs text-neutral-300">
+              <span className="block font-semibold text-yellow-300">How to read the feed</span>
               <span className="mt-1 block">Auto-slides every 4.2s · Pause or browse manually</span>
             </div>
           </div>
 
-          <div className="mt-9 rounded-3xl border border-white/8 bg-gradient-to-br from-[#0C1524] via-[#0A111D] to-[#0B1820] p-4 sm:p-6 shadow-2xl shadow-black/30">
+          <div className="mt-9 rounded-3xl border border-yellow-400/20 bg-[#0B0B0C] p-4 sm:p-6 shadow-2xl shadow-red-950/30">
             <DemoActivityCarousel />
           </div>
         </div>
       </section>
 
-      <section id="tracking" className="py-20 sm:py-24 bg-[#060A12] border-y border-white/5">
+      <section id="tracking" className="py-20 sm:py-24 bg-[#FFF5F5] border-y border-red-900/20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-[0.8fr_1.2fr] gap-10 lg:gap-14 items-start">
             <div className="lg:sticky lg:top-24">
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-emerald-400 mb-3">
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-red-800 mb-3">
                 Daily money flow
               </p>
-              <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
+              <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#2B0B0E]">
                 Every money movement, in one clear view
               </h2>
-              <p className="mt-4 text-sm text-slate-400 leading-relaxed">
+              <p className="mt-4 text-sm text-[#5B1B1B] leading-relaxed">
                 Investments, projected profit, deposits and withdrawals each have a dedicated place
                 in the dashboard, with an amount, status and record reference you can review.
               </p>
               <Link
                 href="/login"
-                className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-emerald-400 hover:text-emerald-300"
+                className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-red-800 hover:text-red-900"
               >
                 Open the investor portal
                 <ArrowRight className="w-4 h-4" />
@@ -576,20 +576,20 @@ export default function HomePage() {
                 return (
                   <article
                     key={movement.title}
-                    className="group rounded-2xl border border-white/5 bg-[#0A111D] p-5 transition-all duration-300 hover:-translate-y-1 hover:border-emerald-500/25 hover:bg-[#0C1724]"
+                    className="group rounded-2xl border border-red-900/20 bg-[#FFF7F7] p-5 transition-all duration-300 hover:-translate-y-1 hover:border-red-400 hover:bg-[#FFF7F7]"
                   >
                     <div className="flex items-center justify-between gap-3">
-                      <span className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+                      <span className="w-10 h-10 rounded-xl bg-red-100 border border-red-400 flex items-center justify-center text-red-800">
                         <Icon className="w-4 h-4" />
                       </span>
-                      <span className="text-[9px] uppercase tracking-[0.14em] font-bold text-slate-600">
+                      <span className="text-[9px] uppercase tracking-[0.14em] font-bold text-[#7F1D1D]">
                         0{index + 1} · {movement.tag}
                       </span>
                     </div>
-                    <h3 className="mt-5 text-base font-bold text-white">{movement.title}</h3>
-                    <p className="mt-2 text-xs text-slate-400 leading-relaxed">{movement.text}</p>
-                    <div className="mt-5 h-1 rounded-full bg-white/5 overflow-hidden">
-                      <div className="h-full w-2/3 rounded-full bg-gradient-to-r from-emerald-500/60 to-cyan-500/30 transition-all duration-500 group-hover:w-full" />
+                    <h3 className="mt-5 text-base font-bold text-[#2B0B0E]">{movement.title}</h3>
+                    <p className="mt-2 text-xs text-[#5B1B1B] leading-relaxed">{movement.text}</p>
+                    <div className="mt-5 h-1 rounded-full bg-rose-100 overflow-hidden">
+                      <div className="h-full w-2/3 rounded-full bg-gradient-to-r from-red-700/60 to-red-800/30 transition-all duration-500 group-hover:w-full" />
                     </div>
                   </article>
                 );
@@ -610,13 +610,13 @@ export default function HomePage() {
         />
         <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-2xl">
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-cyan-400 mb-3">
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-red-800 mb-3">
               Frequently asked questions
             </p>
-            <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
+            <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#2B0B0E]">
               Questions before you open the dashboard
             </h2>
-            <p className="mt-4 text-sm text-slate-400 leading-relaxed">
+            <p className="mt-4 text-sm text-[#5B1B1B] leading-relaxed">
               Clear answers about plans, reporting, access and platform status.
             </p>
           </div>
@@ -625,15 +625,15 @@ export default function HomePage() {
             {homeFaqs.map((faq) => (
               <details
                 key={faq.question}
-                className="group rounded-2xl border border-white/8 bg-[#0A111D] open:border-emerald-500/25 open:bg-[#0C1724] transition-colors"
+                className="group rounded-2xl border border-red-900/20 bg-[#FFF7F7] open:border-red-400 open:bg-[#FFF7F7] transition-colors"
               >
                 <summary className="cursor-pointer list-none p-5 flex items-center justify-between gap-4">
-                  <span className="text-sm font-semibold text-slate-200 group-open:text-white">
+                  <span className="text-sm font-semibold text-[#2B0B0E] group-open:text-[#2B0B0E]">
                     {faq.question}
                   </span>
-                  <Plus className="w-4 h-4 shrink-0 text-slate-500 transition-transform duration-300 group-open:rotate-45 group-open:text-emerald-400" />
+                  <Plus className="w-4 h-4 shrink-0 text-[#6B1D1D] transition-transform duration-300 group-open:rotate-45 group-open:text-red-800" />
                 </summary>
-                <p className="px-5 pb-5 text-xs sm:text-sm text-slate-400 leading-relaxed">
+                <p className="px-5 pb-5 text-xs sm:text-sm text-[#5B1B1B] leading-relaxed">
                   {faq.answer}
                 </p>
               </details>
@@ -642,8 +642,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="relative overflow-hidden py-20 sm:py-24 bg-[#060A12] border-t border-white/5">
-        <div className="absolute -top-24 left-1/3 w-96 h-96 rounded-full bg-emerald-500/10 blur-3xl pointer-events-none" />
+      <section className="relative overflow-hidden py-20 sm:py-24 bg-[#FFF5F5] border-t border-red-900/20">
+        <div className="absolute -top-24 left-1/3 w-96 h-96 rounded-full bg-red-100 blur-3xl pointer-events-none" />
         <FloatingBitcoin
           className="left-3 top-10 sm:left-[8%] sm:top-16"
           size={48}
@@ -661,33 +661,33 @@ export default function HomePage() {
           opacity={0.18}
         />
         <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 mb-5">
+          <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-red-100 text-red-800 border border-red-400 mb-5">
             <CheckCircle2 className="w-3 h-3" />
             Clear reporting from day one
           </span>
-          <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
+          <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#2B0B0E]">
             Ready to see your numbers clearly?
           </h2>
-          <p className="mt-4 text-sm sm:text-base text-slate-400 leading-relaxed max-w-2xl mx-auto">
+          <p className="mt-4 text-sm sm:text-base text-[#5B1B1B] leading-relaxed max-w-2xl mx-auto">
             Sign in to review plans, calculate projected daily profit and follow every deposit,
             withdrawal and investment in your ledger.
           </p>
           <div className="mt-7 flex flex-col sm:flex-row justify-center gap-3">
             <Link
               href="/login"
-              className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-sm font-bold transition shadow-lg shadow-emerald-500/20"
+              className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-red-700 hover:bg-red-800 text-white text-sm font-bold transition shadow-lg shadow-red-900/20"
             >
               Investor login
               <ArrowRight className="w-4 h-4" />
             </Link>
             <Link
               href="/contact"
-              className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-slate-900 border border-white/10 hover:border-emerald-500/30 text-slate-200 text-sm font-semibold transition"
+              className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-white border border-red-900/20 hover:border-red-400 text-[#2B0B0E] text-sm font-semibold transition"
             >
               Contact the team
             </Link>
           </div>
-          <p className="mt-5 text-[10px] text-slate-600">
+          <p className="mt-5 text-[10px] text-[#7F1D1D]">
             Capital at risk. Demonstration platform. Not authorised or regulated by the FCA.
           </p>
         </div>

@@ -88,15 +88,15 @@ export default function KycQueue({ onChanged }: KycQueueProps) {
   };
 
   return (
-    <section className="glass-card rounded-2xl p-6 border border-cyan-500/15">
+    <section className="glass-card rounded-2xl p-6 border border-red-300">
       <div className="mb-4 flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <Clock className="w-4 h-4 text-cyan-400" />
+          <Clock className="w-4 h-4 text-red-800" />
           <div>
-            <h3 className="font-bold text-white text-base">
+            <h3 className="font-bold text-[#2B0B0E] text-base">
               KYC Review Queue ({applications.length})
             </h3>
-            <p className="text-[11px] text-slate-500">
+            <p className="text-[11px] text-[#6B1D1D]">
               Approve identity checks to unlock withdrawals.
             </p>
           </div>
@@ -104,7 +104,7 @@ export default function KycQueue({ onChanged }: KycQueueProps) {
         <button
           type="button"
           onClick={load}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-slate-900 px-2.5 py-1.5 text-[10px] font-semibold text-slate-300 hover:text-white"
+          className="inline-flex items-center gap-1.5 rounded-lg border border-red-900/20 bg-white px-2.5 py-1.5 text-[10px] font-semibold text-[#3F1414] hover:text-[#2B0B0E]"
         >
           <RefreshCw className="w-3 h-3" />
           Refresh
@@ -118,19 +118,19 @@ export default function KycQueue({ onChanged }: KycQueueProps) {
         </div>
       )}
       {message && (
-        <div className="mb-3 flex items-center gap-2 rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-3 text-xs text-emerald-300">
+        <div className="mb-3 flex items-center gap-2 rounded-xl border border-red-400 bg-red-100 p-3 text-xs text-red-800">
           <BadgeCheck className="w-4 h-4 shrink-0" />
           {message}
         </div>
       )}
 
       {loading ? (
-        <div className="flex items-center gap-2 rounded-xl border border-dashed border-white/10 p-5 text-xs text-slate-400">
-          <span className="w-4 h-4 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin" />
+        <div className="flex items-center gap-2 rounded-xl border border-dashed border-red-900/20 p-5 text-xs text-[#5B1B1B]">
+          <span className="w-4 h-4 border-2 border-red-700 border-t-transparent rounded-full animate-spin" />
           Loading applications...
         </div>
       ) : applications.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-white/10 p-6 text-center text-xs text-slate-500">
+        <div className="rounded-xl border border-dashed border-red-900/20 p-6 text-center text-xs text-[#6B1D1D]">
           No pending KYC applications.
         </div>
       ) : (
@@ -138,11 +138,11 @@ export default function KycQueue({ onChanged }: KycQueueProps) {
           {applications.map((application) => {
             const details = application.kycDetails;
             return (
-              <article key={application.id} className="rounded-xl border border-white/5 bg-slate-900/50 p-4">
+              <article key={application.id} className="rounded-xl border border-red-900/20 bg-rose-50 p-4">
                 <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
                   <div>
-                    <p className="text-sm font-semibold text-white">{details?.legalName || application.name}</p>
-                    <p className="text-[10px] text-slate-500">
+                    <p className="text-sm font-semibold text-[#2B0B0E]">{details?.legalName || application.name}</p>
+                    <p className="text-[10px] text-[#6B1D1D]">
                       {application.email} · submitted {formatDate(details?.submittedAt)}
                     </p>
                   </div>
@@ -154,24 +154,24 @@ export default function KycQueue({ onChanged }: KycQueueProps) {
                 {details && (
                   <dl className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2 text-[11px]">
                     <div>
-                      <dt className="text-slate-500">Date of birth</dt>
-                      <dd className="text-slate-200">{formatDate(details.dateOfBirth)}</dd>
+                      <dt className="text-[#6B1D1D]">Date of birth</dt>
+                      <dd className="text-[#2B0B0E]">{formatDate(details.dateOfBirth)}</dd>
                     </div>
                     <div>
-                      <dt className="text-slate-500">Country</dt>
-                      <dd className="text-slate-200">{details.country}</dd>
+                      <dt className="text-[#6B1D1D]">Country</dt>
+                      <dd className="text-[#2B0B0E]">{details.country}</dd>
                     </div>
                     <div className="sm:col-span-2">
-                      <dt className="text-slate-500">Residential address</dt>
-                      <dd className="text-slate-200">{details.address}</dd>
+                      <dt className="text-[#6B1D1D]">Residential address</dt>
+                      <dd className="text-[#2B0B0E]">{details.address}</dd>
                     </div>
                     <div>
-                      <dt className="text-slate-500">Document type</dt>
-                      <dd className="text-slate-200">{details.documentType.replace(/_/g, " ")}</dd>
+                      <dt className="text-[#6B1D1D]">Document type</dt>
+                      <dd className="text-[#2B0B0E]">{details.documentType.replace(/_/g, " ")}</dd>
                     </div>
                     <div>
-                      <dt className="text-slate-500">Document number</dt>
-                      <dd className="font-mono text-slate-200">{details.documentReference}</dd>
+                      <dt className="text-[#6B1D1D]">Document number</dt>
+                      <dd className="font-mono text-[#2B0B0E]">{details.documentReference}</dd>
                     </div>
                   </dl>
                 )}
@@ -185,14 +185,14 @@ export default function KycQueue({ onChanged }: KycQueueProps) {
                     }
                     placeholder="Rejection reason (optional)"
                     maxLength={200}
-                    className="flex-1 rounded-lg border border-white/10 bg-slate-900 px-3 py-2 text-[11px] text-white placeholder-slate-600 focus:border-cyan-400 focus:outline-none"
+                    className="flex-1 rounded-lg border border-red-900/20 bg-white px-3 py-2 text-[11px] text-[#2B0B0E] placeholder-[#8A4A4A] focus:border-red-700 focus:outline-none"
                   />
                   <div className="flex items-center gap-2">
                     <button
                       type="button"
                       disabled={busyId === application.id}
                       onClick={() => review(application.id, "APPROVE")}
-                      className="inline-flex items-center gap-1 rounded-lg bg-emerald-500 px-3 py-2 text-[11px] font-bold text-slate-950 hover:bg-emerald-400 disabled:opacity-50"
+                      className="inline-flex items-center gap-1 rounded-lg bg-red-700 px-3 py-2 text-[11px] font-bold text-white hover:bg-red-800 disabled:opacity-50"
                     >
                       <Check className="w-3.5 h-3.5" />
                       Approve

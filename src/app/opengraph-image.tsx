@@ -16,7 +16,7 @@ export default function OpenGraphImage() {
           flexDirection: "column",
           justifyContent: "space-between",
           padding: "72px",
-          background: "linear-gradient(135deg, #080C15 0%, #0B1624 60%, #0C2A24 100%)",
+          background: "linear-gradient(135deg, #FFFFFF 0%, #FFF1F2 60%, #FFE4E6 100%)",
           color: "#F8FAFC",
           fontFamily: "sans-serif",
         }}
@@ -30,7 +30,7 @@ export default function OpenGraphImage() {
               alignItems: "center",
               justifyContent: "center",
               borderRadius: 18,
-              background: "linear-gradient(135deg, #10B981, #06B6D4)",
+              background: "linear-gradient(135deg, #DC2626, #E11D48)",
               color: "#04110D",
               fontSize: 38,
               fontWeight: 800,
@@ -58,7 +58,7 @@ export default function OpenGraphImage() {
         </div>
 
         <div style={{ display: "flex", alignItems: "center", gap: 14, color: "#6EE7B7", fontSize: 20 }}>
-          <span style={{ width: 10, height: 10, borderRadius: 999, background: "#10B981" }} />
+          <span style={{ width: 10, height: 10, borderRadius: 999, background: "#DC2626" }} />
           Capital at risk. Demonstration platform.
         </div>
       </div>

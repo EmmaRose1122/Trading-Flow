@@ -2,7 +2,10 @@ import fs from "fs";
 import path from "path";
 import bcrypt from "bcryptjs";
 import { Pool } from "pg";
-import { calculateDailyProfit } from "./money";
+import {
+  DAILY_RETURN_PERCENT,
+  DEPOSIT_MATURITY_MS,
+} from "./deposit";
 import {
   PLATFORM_REFERRAL_CODE,
   REFERRAL_LEVEL_RATES,
@@ -73,6 +76,8 @@ export interface Wallet {
   totalDeposited: number;
   totalWithdrawn: number;
   totalReferralEarnings?: number;
+  totalDepositProfit?: number;
+  lastDepositProfitAt?: string;
   updatedAt: string;
 }
 
@@ -123,10 +128,12 @@ export interface Transaction {
   payoutWalletId?: string;
   proofUrl?: string;
   depositAccountId?: string;
+  approvedAt?: string;
   referralLevel?: number;
   sourceUserId?: string;
   sourceUserName?: string;
   investmentId?: string;
+  depositId?: string;
   note?: string;
   adminId?: string;
   previousBalance?: number;
@@ -151,10 +158,15 @@ const DB_FILE = process.env.DB_FILE
     : path.join(process.cwd(), ".data", "db.json");
 const DB_DIR = path.dirname(DB_FILE);
 
-const CURRENT_PLAN_RATES: Record<string, number> = {
-  plan_starter: 1.5,
-  plan_premium: 2.0,
-  plan_vip: 3.0,
+const SINGLE_PLAN: InvestmentPlan = {
+  id: "plan_daily",
+  name: "Daily 2% Plan",
+  minAmount: 10,
+  maxAmount: 1_000_000_000,
+  dailyPercentage: 2,
+  durationDays: 36500,
+  capitalBack: false,
+  isActive: true,
 };
 
 function ensureBootstrapAdmin(data: DatabaseSchema) {
@@ -314,23 +326,20 @@ function ensurePlatformReferralCode(data: DatabaseSchema) {
 }
 
 function synchronizePlanCatalog(data: DatabaseSchema) {
-  let changed = false;
-  for (const plan of data.plans) {
-    const currentRate = CURRENT_PLAN_RATES[plan.id];
-    if (currentRate !== undefined && plan.dailyPercentage !== currentRate) {
-      plan.dailyPercentage = currentRate;
-      changed = true;
-    }
-  }
-  for (const investment of data.investments) {
-    if (investment.status !== "ACTIVE") continue;
-    const plan = data.plans.find((entry) => entry.id === investment.planId);
-    if (plan && investment.dailyPercentage !== plan.dailyPercentage) {
-      investment.dailyPercentage = plan.dailyPercentage;
-      changed = true;
-    }
-  }
-  return changed;
+  const current = data.plans[0];
+  const matches =
+    data.plans.length === 1 &&
+    current?.id === SINGLE_PLAN.id &&
+    current?.name === SINGLE_PLAN.name &&
+    current?.minAmount === SINGLE_PLAN.minAmount &&
+    current?.maxAmount === SINGLE_PLAN.maxAmount &&
+    current?.dailyPercentage === SINGLE_PLAN.dailyPercentage &&
+    current?.durationDays === SINGLE_PLAN.durationDays &&
+    current?.capitalBack === SINGLE_PLAN.capitalBack &&
+    current?.isActive === SINGLE_PLAN.isActive;
+  if (matches) return false;
+  data.plans = [{ ...SINGLE_PLAN }];
+  return true;
 }
 
 function getDefaultData(): DatabaseSchema {
@@ -384,38 +393,7 @@ function getDefaultData(): DatabaseSchema {
         updatedAt: new Date().toISOString(),
       },
     ] : [],
-    plans: [
-      {
-        id: "plan_starter",
-        name: "Starter Capital Tier",
-        minAmount: 100,
-        maxAmount: 999,
-        dailyPercentage: 1.5,
-        durationDays: 15,
-        capitalBack: true,
-        isActive: true,
-      },
-      {
-        id: "plan_premium",
-        name: "Premium Growth Tier",
-        minAmount: 1000,
-        maxAmount: 9999,
-        dailyPercentage: 2.0,
-        durationDays: 30,
-        capitalBack: true,
-        isActive: true,
-      },
-      {
-        id: "plan_vip",
-        name: "VIP Capital Partner",
-        minAmount: 10000,
-        maxAmount: 100000,
-        dailyPercentage: 3.0,
-        durationDays: 60,
-        capitalBack: true,
-        isActive: true,
-      },
-    ],
+    plans: [{ ...SINGLE_PLAN }],
     investments: includeDemoAccounts ? [
       {
         id: "inv_101",
@@ -691,6 +669,67 @@ async function mutateData<T>(mutator: (data: DatabaseSchema) => T): Promise<T> {
   }
 }
 
+function creditDepositReferralCommissions(
+  data: DatabaseSchema,
+  deposit: Transaction,
+  dateIso: string
+) {
+  const investor = data.users.find((user) => user.id === deposit.userId);
+  if (!investor || deposit.amount <= 0) return;
+
+  const alreadyCredited = new Set(
+    data.transactions
+      .filter((tx) => tx.type === "REFERRAL" && tx.depositId === deposit.id)
+      .map((tx) => tx.userId)
+  );
+
+  let current = investor;
+  const seen = new Set<string>([investor.id]);
+
+  for (let level = 1; level <= REFERRAL_LEVEL_RATES.length; level += 1) {
+    const sponsorCode = normalizeReferralCode(current.referredBy);
+    if (!sponsorCode) break;
+    const sponsor = data.users.find(
+      (user) => normalizeReferralCode(user.referralCode) === sponsorCode
+    );
+    if (!sponsor || seen.has(sponsor.id)) break;
+    seen.add(sponsor.id);
+
+    const rate = REFERRAL_LEVEL_RATES[level - 1];
+    const amount = Math.round(deposit.amount * rate) / 100;
+    if (amount > 0 && !alreadyCredited.has(sponsor.id)) {
+      const wallet = data.wallets.find((entry) => entry.userId === sponsor.id);
+      if (wallet) {
+        wallet.currentBalance = Math.round((wallet.currentBalance + amount) * 100) / 100;
+        wallet.totalReferralEarnings =
+          Math.round(((wallet.totalReferralEarnings || 0) + amount) * 100) / 100;
+        wallet.updatedAt = dateIso;
+        data.transactions.unshift({
+          id: `TX-REF-DEP-${deposit.id}-L${level}-${sponsor.id}`,
+          userId: sponsor.id,
+          userEmail: sponsor.email,
+          userName: sponsor.name,
+          type: "REFERRAL",
+          amount,
+          fee: 0,
+          status: "SUCCESS",
+          method: `Referral Commission · Level ${level}`,
+          referralLevel: level,
+          sourceUserId: investor.id,
+          sourceUserName: investor.name,
+          depositId: deposit.id,
+          previousBalance: Math.round((wallet.currentBalance - amount) * 100) / 100,
+          newBalance: wallet.currentBalance,
+          note: `Level ${level} commission from ${investor.name} · deposit`,
+          createdAt: dateIso,
+        });
+      }
+    }
+
+    current = sponsor;
+  }
+}
+
 // Database helper functions
 export const db = {
   getUsers: () => readData((data) => data.users),
@@ -843,27 +882,46 @@ export const db = {
       const accrualDate = date.toISOString().slice(0, 10);
       let processed = 0;
       let distributed = 0;
+      let eligibleDepositsTotal = 0;
 
-      for (const investment of data.investments) {
-        if (investment.status !== "ACTIVE" || investment.remainingDays <= 0) continue;
-        if (investment.lastAccruedAt === accrualDate) continue;
-        const wallet = data.wallets.find((entry) => entry.userId === investment.userId);
-        const user = data.users.find((entry) => entry.id === investment.userId);
-        if (!wallet || !user) continue;
+      for (const user of data.users) {
+        const eligibleDeposits = data.transactions.filter((tx) => {
+          if (tx.userId !== user.id || tx.type !== "DEPOSIT" || tx.status !== "APPROVED") {
+            return false;
+          }
+          const approvedAt = new Date(tx.approvedAt || tx.createdAt).getTime();
+          return approvedAt + DEPOSIT_MATURITY_MS <= date.getTime();
+        });
+        const depositTotal =
+          Math.round(
+            eligibleDeposits.reduce((total, tx) => total + tx.amount, 0) * 100
+          ) / 100;
+        if (depositTotal <= 0) continue;
 
-        const profit = calculateDailyProfit(
-          investment.investedAmount,
-          investment.dailyPercentage
-        );
-        const payoutWallet = data.payoutWallets?.find(
-          (entry) => entry.userId === user.id && entry.isProfitDestination
-        );
+        const wallet = data.wallets.find((entry) => entry.userId === user.id);
+        if (!wallet) continue;
+
+        const lastPayout = wallet.lastDepositProfitAt
+          ? new Date(wallet.lastDepositProfitAt).getTime()
+          : 0;
+        if (lastPayout && date.getTime() - lastPayout < DEPOSIT_MATURITY_MS) continue;
+
+        const profit =
+          Math.round(((depositTotal * DAILY_RETURN_PERCENT) / 100) * 100) / 100;
+        if (profit <= 0) continue;
+
+        const transactionId = `TX-DEPOSIT-PROFIT-${user.id}-${date.toISOString()}`;
+        if (data.transactions.some((tx) => tx.id === transactionId)) continue;
+
         wallet.currentBalance = Math.round((wallet.currentBalance + profit) * 100) / 100;
         wallet.totalProfit = Math.round((wallet.totalProfit + profit) * 100) / 100;
-        investment.remainingDays -= 1;
-        investment.lastAccruedAt = accrualDate;
+        wallet.totalDepositProfit =
+          Math.round(((wallet.totalDepositProfit || 0) + profit) * 100) / 100;
+        wallet.lastDepositProfitAt = date.toISOString();
+        wallet.updatedAt = date.toISOString();
+
         data.transactions.unshift({
-          id: `TX-PROFIT-${investment.id}-${accrualDate}`,
+          id: transactionId,
           userId: user.id,
           userEmail: user.email,
           userName: user.name,
@@ -871,48 +929,21 @@ export const db = {
           amount: profit,
           fee: 0,
           status: "SUCCESS",
-          method: "Automated Daily ROI",
-          destination: payoutWallet?.address,
-          payoutWalletId: payoutWallet?.id,
-          note: payoutWallet
-            ? `Daily profit for ${investment.planName} · payout destination: ${payoutWallet.label}`
-            : `Daily profit for ${investment.planName}`,
+          method: `${DAILY_RETURN_PERCENT}% Daily Deposit Profit`,
+          note: `${DAILY_RETURN_PERCENT}% daily profit on $${depositTotal.toFixed(
+            2
+          )} eligible deposits`,
           createdAt: date.toISOString(),
         });
         processed += 1;
         distributed += profit;
-
-        if (investment.remainingDays === 0) {
-          investment.status = "COMPLETED";
-          wallet.totalInvested = Math.max(
-            0,
-            Math.round((wallet.totalInvested - investment.investedAmount) * 100) / 100
-          );
-          const plan = data.plans.find((entry) => entry.id === investment.planId);
-          if (plan?.capitalBack) {
-            wallet.currentBalance =
-              Math.round((wallet.currentBalance + investment.investedAmount) * 100) / 100;
-            data.transactions.unshift({
-              id: `TX-CAPITAL-${investment.id}`,
-              userId: user.id,
-              userEmail: user.email,
-              userName: user.name,
-              type: "CAPITAL_RETURN",
-              amount: investment.investedAmount,
-              fee: 0,
-              status: "SUCCESS",
-              method: "Internal Balance",
-              note: `Principal returned for ${investment.planName}`,
-              createdAt: date.toISOString(),
-            });
-          }
-        }
-        wallet.updatedAt = date.toISOString();
+        eligibleDepositsTotal += depositTotal;
       }
 
       return {
         processed,
         distributed: Math.round(distributed * 100) / 100,
+        eligibleDepositsTotal: Math.round(eligibleDepositsTotal * 100) / 100,
         accrualDate,
       };
     }),
@@ -934,6 +965,8 @@ export const db = {
       if (tx.type === "DEPOSIT" && status === "APPROVED") {
         wallet.currentBalance = Math.round((wallet.currentBalance + tx.amount) * 100) / 100;
         wallet.totalDeposited = Math.round((wallet.totalDeposited + tx.amount) * 100) / 100;
+        tx.approvedAt = new Date().toISOString();
+        creditDepositReferralCommissions(data, tx, tx.approvedAt);
       }
       if (tx.type === "WITHDRAWAL" && status === "APPROVED") {
         wallet.totalWithdrawn = Math.round((wallet.totalWithdrawn + tx.amount) * 100) / 100;

@@ -86,12 +86,12 @@ export default function Hero3D() {
               <svg viewBox="0 0 340 104" className={styles.chartSvg}>
                 <defs>
                   <linearGradient id="hero-3d-area" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#10B981" stopOpacity="0.42" />
-                    <stop offset="100%" stopColor="#10B981" stopOpacity="0" />
+                    <stop offset="0%" stopColor="#DC2626" stopOpacity="0.32" />
+                    <stop offset="100%" stopColor="#DC2626" stopOpacity="0" />
                   </linearGradient>
                   <linearGradient id="hero-3d-line" x1="0" y1="0" x2="1" y2="0">
-                    <stop offset="0%" stopColor="#06B6D4" />
-                    <stop offset="100%" stopColor="#34D399" />
+                    <stop offset="0%" stopColor="#DC2626" />
+                    <stop offset="100%" stopColor="#FACC15" />
                   </linearGradient>
                 </defs>
                 <path
@@ -107,19 +107,19 @@ export default function Hero3D() {
                   strokeWidth="3"
                   strokeLinecap="round"
                 />
-                <circle className={styles.chartPulse} cx="322" cy="15" r="4" fill="#34D399" />
-                <circle className={styles.chartHalo} cx="322" cy="15" r="9" fill="none" stroke="#34D399" />
+                <circle className={styles.chartPulse} cx="322" cy="15" r="4" fill="#FACC15" />
+                <circle className={styles.chartHalo} cx="322" cy="15" r="9" fill="none" stroke="#FACC15" />
               </svg>
             </div>
 
             <div className={styles.statsRow}>
               <div className={styles.stat}>
-                <span>Active invested</span>
+                <span>Eligible deposits</span>
                 <strong>$18,000.00</strong>
               </div>
               <div className={`${styles.stat} ${styles.statAccent}`}>
                 <span>Daily profit</span>
-                <strong>+$320.00</strong>
+                <strong>+$360.00</strong>
               </div>
             </div>
 
@@ -127,7 +127,7 @@ export default function Hero3D() {
               <div className={styles.contracts}>
                 <span className={styles.miniAvatar}>P</span>
                 <span className={styles.miniAvatar}>S</span>
-                <span className={styles.contractText}>2 active contracts</span>
+                <span className={styles.contractText}>2 active deposits</span>
               </div>
               <span className={styles.verified}>
                 <ShieldCheck />
@@ -141,17 +141,17 @@ export default function Hero3D() {
               <TrendingUp />
               Daily profit
             </span>
-            <strong className={styles.floatValue}>+$320.00</strong>
-            <small>Accrued from 2 plans</small>
+            <strong className={styles.floatValue}>+$360.00</strong>
+            <small>2% on eligible deposits</small>
           </div>
 
           <div className={`${styles.floatingCard} ${styles.planCard}`}>
-            <span className={styles.floatLabel}>Premium Growth</span>
+            <span className={styles.floatLabel}>Daily 2% Plan</span>
             <div className={styles.planRate}>
               <strong>2.0%</strong>
               <span>daily</span>
             </div>
-            <small>30-day contract</small>
+            <small>24-hour activation</small>
           </div>
 
           <div className={styles.orb}>

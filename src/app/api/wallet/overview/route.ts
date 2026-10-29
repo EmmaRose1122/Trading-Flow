@@ -1,7 +1,15 @@
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { calculateDailyProfit, roundMoney } from "@/lib/money";
+import {
+  DAILY_RETURN_PERCENT,
+  approvedDepositTotal,
+  approvedDeposits,
+  dailyDepositProfit,
+  depositEligibleAt,
+  eligibleDepositTotal,
+  isDepositEligible,
+} from "@/lib/deposit";
 
 export async function GET() {
   const session = await getSession();
@@ -12,28 +20,33 @@ export async function GET() {
   const user = await db.findUserById(session.userId);
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const wallet = await db.getWalletByUserId(user.id);
-  const investments = await db.getInvestmentsByUserId(user.id);
   const transactions = await db.getTransactions(user.id);
 
   const pendingWithdrawal = transactions
     .filter((t) => t.type === "WITHDRAWAL" && t.status === "PENDING")
     .reduce((acc, t) => acc + t.amount, 0);
-  const activeInvestments = investments.filter((investment) => investment.status === "ACTIVE");
-  const investmentProfits = activeInvestments.map((investment) => ({
-    ...investment,
-    dailyProfit: calculateDailyProfit(investment.investedAmount, investment.dailyPercentage),
+  const totalDeposited = approvedDepositTotal(transactions, user.id);
+  const eligibleTotal = eligibleDepositTotal(transactions, user.id);
+  const deposits = approvedDeposits(transactions, user.id).map((deposit) => ({
+    id: deposit.id,
+    amount: deposit.amount,
+    method: deposit.method,
+    txHash: deposit.txHash || null,
+    createdAt: deposit.createdAt,
+    approvedAt: deposit.approvedAt || deposit.createdAt,
+    eligibleAt: depositEligibleAt(deposit).toISOString(),
+    isEligible: isDepositEligible(deposit),
+    dailyProfit: dailyDepositProfit(deposit.amount),
   }));
-  const dailyProfit = roundMoney(
-    investmentProfits.reduce((total, investment) => total + investment.dailyProfit, 0)
-  );
 
   return NextResponse.json({
     wallet,
-    activeInvestmentsCount: activeInvestments.length,
-    dailyProfit,
-    investmentProfits,
+    totalDeposited,
+    eligibleDepositTotal: eligibleTotal,
+    dailyRate: DAILY_RETURN_PERCENT,
+    dailyProfit: dailyDepositProfit(totalDeposited),
+    eligibleDailyProfit: dailyDepositProfit(eligibleTotal),
     pendingWithdrawal,
-    investments,
+    deposits,
   });
 }
-

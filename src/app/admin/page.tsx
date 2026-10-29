@@ -28,8 +28,14 @@ import {
   CircleDollarSign,
   Wallet,
 } from "lucide-react";
-import { Investment, Transaction, User, Wallet as WalletType, PayoutWallet, KycDetails } from "@/lib/db";
-import { calculateDailyProfit, roundMoney } from "@/lib/money";
+import { Transaction, User, Wallet as WalletType, PayoutWallet, KycDetails } from "@/lib/db";
+import { roundMoney } from "@/lib/money";
+import {
+  approvedDeposits,
+  dailyDepositProfit,
+  depositEligibleAt,
+  isDepositEligible,
+} from "@/lib/deposit";
 import { displayReferralCode, type ReferralSummary } from "@/lib/referral";
 
 interface AdminUser {
@@ -54,7 +60,6 @@ export default function AdminPage() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [pendingRequests, setPendingRequests] = useState<Transaction[]>([]);
   const [users, setUsers] = useState<AdminUser[]>([]);
-  const [allInvestments, setAllInvestments] = useState<Investment[]>([]);
   const [allTransactions, setAllTransactions] = useState<Transaction[]>([]);
   const [selectedUserId, setSelectedUserId] = useState("");
   const [loading, setLoading] = useState(true);
@@ -109,7 +114,6 @@ export default function AdminPage() {
       const nextUsers: AdminUser[] = Array.isArray(data.users) ? data.users : [];
       setPendingRequests(Array.isArray(data.pendingRequests) ? data.pendingRequests : []);
       setUsers(nextUsers);
-      setAllInvestments(Array.isArray(data.allInvestments) ? data.allInvestments : []);
       setAllTransactions(Array.isArray(data.allTransactions) ? data.allTransactions : []);
       const defaultPortfolioUserId =
         nextUsers.find((entry) => entry.role === "USER")?.id || nextUsers[0]?.id || "";
@@ -257,52 +261,49 @@ export default function AdminPage() {
   };
 
   const selectedUser = users.find((user) => user.id === selectedUserId) || null;
-  const selectedInvestments = [...allInvestments]
-    .filter((investment) => investment.userId === selectedUserId)
-    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   const selectedTransactions = [...allTransactions]
     .filter((transaction) => transaction.userId === selectedUserId)
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-  const selectedActiveInvestments = selectedInvestments.filter(
-    (investment) => investment.status === "ACTIVE"
+  const selectedDeposits = approvedDeposits(selectedTransactions, selectedUserId);
+  const selectedDepositTotal = roundMoney(
+    selectedDeposits.reduce((total, deposit) => total + deposit.amount, 0)
   );
-  const selectedDailyProfit = roundMoney(
-    selectedActiveInvestments.reduce(
-      (total, investment) =>
-        total + calculateDailyProfit(investment.investedAmount, investment.dailyPercentage),
-      0
-    )
+  const selectedEligibleDepositTotal = roundMoney(
+    selectedDeposits
+      .filter((deposit) => isDepositEligible(deposit))
+      .reduce((total, deposit) => total + deposit.amount, 0)
   );
+  const selectedDailyProfit = dailyDepositProfit(selectedDepositTotal);
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#080C15] text-emerald-400">
-        <div className="w-10 h-10 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen flex items-center justify-center bg-[#FFFFFF] text-red-800">
+        <div className="w-10 h-10 border-2 border-red-400 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#080C15] pb-28 lg:pb-12">
+    <div className="min-h-screen bg-[#FFFFFF] pb-28 lg:pb-12">
       <Navbar user={currentUser} />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 space-y-8">
-        <div className="flex items-center justify-between pb-2 border-b border-white/5">
+        <div className="flex items-center justify-between pb-2 border-b border-red-900/20">
           <div>
             <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-rose-500/15 text-rose-400 border border-rose-500/20 mb-1 inline-block">
               Super Admin Console
             </span>
-            <h1 className="text-2xl font-bold text-white tracking-tight">System Operations & User Controls</h1>
+            <h1 className="text-2xl font-bold text-[#2B0B0E] tracking-tight">System Operations & User Controls</h1>
           </div>
-          <div className="flex items-center gap-3 text-xs text-slate-400">
+          <div className="flex items-center gap-3 text-xs text-[#5B1B1B]">
             <span className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="w-2.5 h-2.5 rounded-full bg-red-700 animate-pulse" />
               Live Admin Session
             </span>
             <button
               type="button"
               onClick={fetchAdminData}
-              className="px-3 py-1.5 rounded-lg border border-white/10 bg-slate-900 text-[11px] font-semibold text-slate-300 hover:text-white"
+              className="px-3 py-1.5 rounded-lg border border-red-900/20 bg-white text-[11px] font-semibold text-[#3F1414] hover:text-[#2B0B0E]"
             >
               Refresh
             </button>
@@ -330,22 +331,22 @@ export default function AdminPage() {
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
                   <Clock className="w-4 h-4 text-amber-400" />
-                  <h3 className="font-bold text-white text-base">
+                  <h3 className="font-bold text-[#2B0B0E] text-base">
                     Pending Requests Queue ({pendingRequests.length})
                   </h3>
                 </div>
-                <span className="text-xs text-slate-400">Review deposits & withdrawals</span>
+                <span className="text-xs text-[#5B1B1B]">Review deposits & withdrawals</span>
               </div>
 
               {pendingRequests.length === 0 ? (
-                <div className="p-8 text-center text-slate-500 text-xs border border-dashed border-white/10 rounded-xl">
+                <div className="p-8 text-center text-[#6B1D1D] text-xs border border-dashed border-red-900/20 rounded-xl">
                   No pending deposit or withdrawal requests in queue.
                 </div>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-xs">
                     <thead>
-                      <tr className="border-b border-white/5 text-slate-400 uppercase text-[10px] tracking-wider font-semibold">
+                      <tr className="border-b border-red-900/20 text-[#5B1B1B] uppercase text-[10px] tracking-wider font-semibold">
                         <th className="py-2.5 px-3">Type</th>
                         <th className="py-2.5 px-3">User</th>
                         <th className="py-2.5 px-3">Amount</th>
@@ -353,14 +354,14 @@ export default function AdminPage() {
                         <th className="py-2.5 px-3 text-right">Actions</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-white/5 text-slate-300">
+                    <tbody className="divide-y divide-red-900/10 text-[#3F1414]">
                       {pendingRequests.map((tx) => (
-                        <tr key={tx.id} className="hover:bg-white/[0.02]">
+                        <tr key={tx.id} className="hover:bg-rose-50">
                           <td className="py-3 px-3">
                             <span
                               className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
                                 tx.type === "DEPOSIT"
-                                  ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/20"
+                                  ? "bg-red-100 text-red-800 border border-red-400"
                                   : "bg-amber-500/15 text-amber-400 border border-amber-500/20"
                               }`}
                             >
@@ -368,13 +369,13 @@ export default function AdminPage() {
                             </span>
                           </td>
                           <td className="py-3 px-3">
-                            <span className="font-medium text-white block">{tx.userName || "User"}</span>
-                            <span className="text-[10px] text-slate-500">{tx.userEmail}</span>
+                            <span className="font-medium text-[#2B0B0E] block">{tx.userName || "User"}</span>
+                            <span className="text-[10px] text-[#6B1D1D]">{tx.userEmail}</span>
                           </td>
-                          <td className="py-3 px-3 font-semibold text-white">
+                          <td className="py-3 px-3 font-semibold text-[#2B0B0E]">
                             ${tx.amount.toFixed(2)}
                           </td>
-                          <td className="py-3 px-3 font-mono text-[11px] text-slate-400 truncate max-w-xs">
+                          <td className="py-3 px-3 font-mono text-[11px] text-[#5B1B1B] truncate max-w-xs">
                             {tx.method} {tx.txHash ? `| ${tx.txHash.slice(0, 10)}...` : ""}
                             {tx.destination ? `| ${tx.destination.slice(0, 10)}...` : ""}
                           </td>
@@ -383,7 +384,7 @@ export default function AdminPage() {
                               <button
                                 disabled={actionLoading === tx.id}
                                 onClick={() => handleAction(tx.id, "APPROVE")}
-                                className="px-2.5 py-1 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs flex items-center gap-1 transition"
+                                className="px-2.5 py-1 rounded-lg bg-red-700 hover:bg-red-800 text-white font-bold text-xs flex items-center gap-1 transition"
                               >
                                 <Check className="w-3.5 h-3.5" /> Approve
                               </button>
@@ -408,47 +409,47 @@ export default function AdminPage() {
             <div className="glass-card rounded-2xl p-6">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
-                  <Users className="w-4 h-4 text-cyan-400" />
-                  <h3 className="font-bold text-white text-base">Registered Platform Accounts ({users.length})</h3>
+                  <Users className="w-4 h-4 text-red-800" />
+                  <h3 className="font-bold text-[#2B0B0E] text-base">Registered Platform Accounts ({users.length})</h3>
                 </div>
-                <span className="text-xs text-slate-400">15-level referral & affiliate overview</span>
+                <span className="text-xs text-[#5B1B1B]">15-level referral & affiliate overview</span>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs">
                   <thead>
-                    <tr className="border-b border-white/5 text-slate-400 uppercase text-[10px] tracking-wider font-semibold">
-                      <th className="py-2.5 px-3">User & Email</th>
-                      <th className="py-2.5 px-3">Referral Code</th>
-                      <th className="py-2.5 px-3">Level</th>
-                      <th className="py-2.5 px-3">Upline / Sponsor</th>
-                      <th className="py-2.5 px-3">Role</th>
-                      <th className="py-2.5 px-3">KYC / 2FA</th>
-                      <th className="py-2.5 px-3">Balance</th>
-                      <th className="py-2.5 px-3">Ref. earned</th>
-                      <th className="py-2.5 px-3">Invested</th>
-                      <th className="py-2.5 px-3 text-right">Quick Action</th>
+                    <tr className="border-b border-red-900/20 bg-red-50 text-red-900 uppercase text-[10px] tracking-wider font-bold">
+                      <th className="py-3 px-3">User & Email</th>
+                      <th className="py-3 px-3">Referral Code</th>
+                      <th className="py-3 px-3">Level</th>
+                      <th className="py-3 px-3">Upline / Sponsor</th>
+                      <th className="py-3 px-3">Role</th>
+                      <th className="py-3 px-3">KYC / 2FA</th>
+                      <th className="py-3 px-3">Balance</th>
+                      <th className="py-3 px-3">Ref. earned</th>
+                      <th className="py-3 px-3">Deposited</th>
+                      <th className="py-3 px-3 text-right">Quick Action</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-white/5 text-slate-300">
+                  <tbody className="divide-y divide-red-900/10 text-[#3F1414]">
                     {users.map((u) => (
-                      <tr key={u.id} className="hover:bg-white/[0.02]">
+                      <tr key={u.id} className="hover:bg-rose-50">
                         <td className="py-2.5 px-3">
-                          <span className="font-semibold text-white block">{u.name}</span>
-                          <span className="text-[10px] text-slate-500">{u.email}</span>
+                          <span className="font-semibold text-[#2B0B0E] block">{u.name}</span>
+                          <span className="text-[10px] text-[#6B1D1D]">{u.email}</span>
                         </td>
-                        <td className="py-2.5 px-3 font-mono font-semibold text-emerald-400">
+                        <td className="py-2.5 px-3 font-mono font-semibold text-red-800 whitespace-nowrap">
                           {displayReferralCode(u.referralCode) || "N/A"}
                         </td>
-                        <td className="py-2.5 px-3 font-semibold text-slate-200 whitespace-nowrap">
+                        <td className="py-2.5 px-3 font-semibold text-[#2B0B0E] whitespace-nowrap">
                           {u.referralSummary?.level ? `Level ${u.referralSummary.level}` : "Direct"}
                         </td>
                         <td className="py-2.5 px-3">
                           {u.referredBy ? (
-                            <span className="font-mono text-cyan-400 bg-cyan-500/10 border border-cyan-500/20 px-2 py-0.5 rounded text-[11px]">
+                            <span className="font-mono text-red-800 bg-red-100 border border-red-400 px-2 py-0.5 rounded text-[11px] whitespace-nowrap">
                               {displayReferralCode(u.referredBy)}
                             </span>
                           ) : (
-                            <span className="text-[10px] font-semibold uppercase bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-full">
+                            <span className="text-[10px] font-semibold uppercase bg-red-100 text-red-800 border border-red-400 px-2 py-0.5 rounded-full whitespace-nowrap">
                               Platform Direct
                             </span>
                           )}
@@ -457,8 +458,8 @@ export default function AdminPage() {
                           <span
                             className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
                               u.role === "ADMIN"
-                                ? "bg-rose-500/15 text-rose-400 border border-rose-500/20"
-                                : "bg-slate-800 text-slate-300"
+                                ? "bg-red-700 text-white border border-red-800"
+                                : "bg-white text-[#5B1B1B] border border-red-300"
                             }`}
                           >
                             {u.role}
@@ -469,29 +470,29 @@ export default function AdminPage() {
                             <span
                               className={`w-fit px-1.5 py-0.5 rounded text-[9px] font-bold uppercase ${
                                 u.kycStatus === "APPROVED"
-                                  ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                                  ? "bg-red-100 text-red-800 border border-red-400"
                                   : u.kycStatus === "PENDING"
                                     ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
                                     : u.kycStatus === "REJECTED"
-                                      ? "bg-rose-500/10 text-rose-400 border border-rose-500/20"
-                                      : "bg-slate-800 text-slate-400"
+                                      ? "bg-red-100 text-red-800 border border-red-400"
+                                      : "bg-white text-red-800 border border-red-300"
                               }`}
                             >
                               {(u.kycStatus || "NOT_STARTED").replace(/_/g, " ")}
                             </span>
-                            <span className={`text-[9px] font-semibold ${u.twoFactorEnabled ? "text-emerald-400" : "text-slate-500"}`}>
+                            <span className={`text-[9px] font-semibold ${u.twoFactorEnabled ? "text-red-800" : "text-[#6B1D1D]"}`}>
                               2FA {u.twoFactorEnabled ? "on" : "off"}
                             </span>
                           </div>
                         </td>
-                        <td className="py-2.5 px-3 font-semibold text-emerald-400">
+                        <td className="py-2.5 px-3 font-semibold text-red-800">
                           ${u.wallet?.currentBalance.toLocaleString(undefined, { minimumFractionDigits: 2 }) || "0.00"}
                         </td>
-                        <td className="py-2.5 px-3 font-semibold text-indigo-300">
+                        <td className="py-2.5 px-3 font-semibold text-red-800">
                           ${(u.referralSummary?.totalEarnings || 0).toFixed(2)}
                         </td>
-                        <td className="py-2.5 px-3 font-semibold text-cyan-400">
-                          ${u.wallet?.totalInvested.toLocaleString(undefined, { minimumFractionDigits: 2 }) || "0.00"}
+                        <td className="py-2.5 px-3 font-semibold text-red-800">
+                          ${u.wallet?.totalDeposited.toLocaleString(undefined, { minimumFractionDigits: 2 }) || "0.00"}
                         </td>
                         <td className="py-2.5 px-3 text-right">
                           <div className="flex items-center justify-end gap-1.5">
@@ -505,7 +506,7 @@ export default function AdminPage() {
                                     ?.scrollIntoView({ behavior: "smooth", block: "start" });
                                 }, 50);
                               }}
-                              className="inline-flex items-center gap-1 px-2 py-1 rounded bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 text-[11px] font-medium border border-cyan-500/20 transition"
+                              className="inline-flex items-center gap-1 px-2 py-1 rounded bg-red-100 hover:bg-red-200 text-red-800 text-[11px] font-medium border border-red-400 transition"
                             >
                               <Eye className="w-3 h-3" />
                               View
@@ -516,7 +517,7 @@ export default function AdminPage() {
                                 setTargetUserId(u.id);
                                 window.scrollTo({ top: 300, behavior: "smooth" });
                               }}
-                              className="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-[11px] font-medium border border-white/5 transition"
+                              className="px-2 py-1 rounded bg-rose-50 hover:bg-rose-100 text-[#3F1414] hover:text-[#2B0B0E] text-[11px] font-medium border border-red-900/20 transition"
                             >
                               Adjust
                             </button>
@@ -533,12 +534,12 @@ export default function AdminPage() {
           {/* Right Column (1 Col): Admin Actions */}
           <div className="space-y-8">
             {/* Create Account by Admin Form (Direct Upline + Free Balance) */}
-            <div className="glass-card rounded-2xl p-6 border border-cyan-500/20 shadow-xl">
+            <div className="glass-card rounded-2xl p-6 border border-red-400 shadow-xl">
               <div className="flex items-center gap-2 mb-1">
-                <UserPlus className="w-5 h-5 text-cyan-400" />
-                <h3 className="font-bold text-white text-base">Create User Account</h3>
+                <UserPlus className="w-5 h-5 text-red-800" />
+                <h3 className="font-bold text-[#2B0B0E] text-base">Create User Account</h3>
               </div>
-              <p className="text-xs text-slate-400 mb-4">
+              <p className="text-xs text-[#5B1B1B] mb-4">
                 Create user directly under the platform sponsor or a custom upline, with instant free balance credit.
               </p>
 
@@ -546,7 +547,7 @@ export default function AdminPage() {
                 <div
                   className={`mb-4 p-3 rounded-xl text-xs flex items-start gap-2 border ${
                     createMsg.type === "success"
-                      ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
+                      ? "bg-red-100 border-red-400 text-red-800"
                       : "bg-rose-500/10 border-rose-500/20 text-rose-400"
                   }`}
                 >
@@ -561,7 +562,7 @@ export default function AdminPage() {
 
               <form onSubmit={handleCreateUserSubmit} className="space-y-3.5">
                 <div>
-                  <label className="block text-[11px] font-semibold uppercase text-slate-400 mb-1">
+                  <label className="block text-[11px] font-semibold uppercase text-[#5B1B1B] mb-1">
                     Full Legal Name
                   </label>
                   <input
@@ -570,12 +571,12 @@ export default function AdminPage() {
                     value={newUserName}
                     onChange={(e) => setNewUserName(e.target.value)}
                     placeholder="e.g. John Doe"
-                    className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white placeholder-slate-500 text-xs focus:outline-none focus:border-cyan-400"
+                    className="w-full px-3 py-2 rounded-xl bg-white border border-red-900/20 text-[#2B0B0E] placeholder-[#8A4A4A] text-xs focus:outline-none focus:border-red-700"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-semibold uppercase text-slate-400 mb-1">
+                  <label className="block text-[11px] font-semibold uppercase text-[#5B1B1B] mb-1">
                     Email Address
                   </label>
                   <input
@@ -584,12 +585,12 @@ export default function AdminPage() {
                     value={newUserEmail}
                     onChange={(e) => setNewUserEmail(e.target.value)}
                     placeholder="e.g. client@example.com"
-                    className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white placeholder-slate-500 text-xs focus:outline-none focus:border-cyan-400"
+                    className="w-full px-3 py-2 rounded-xl bg-white border border-red-900/20 text-[#2B0B0E] placeholder-[#8A4A4A] text-xs focus:outline-none focus:border-red-700"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-semibold uppercase text-slate-400 mb-1">
+                  <label className="block text-[11px] font-semibold uppercase text-[#5B1B1B] mb-1">
                     Password
                   </label>
                   <input
@@ -599,19 +600,19 @@ export default function AdminPage() {
                     value={newUserPassword}
                     onChange={(e) => setNewUserPassword(e.target.value)}
                     placeholder="Minimum 6 characters"
-                    className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white placeholder-slate-500 text-xs font-mono focus:outline-none focus:border-cyan-400"
+                    className="w-full px-3 py-2 rounded-xl bg-white border border-red-900/20 text-[#2B0B0E] placeholder-[#8A4A4A] text-xs font-mono focus:outline-none focus:border-red-700"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <label className="block text-[11px] font-semibold uppercase text-slate-400 mb-1">
+                    <label className="block text-[11px] font-semibold uppercase text-[#5B1B1B] mb-1">
                       Account Role
                     </label>
                     <select
                       value={newUserRole}
                       onChange={(e) => setNewUserRole(e.target.value as "USER" | "ADMIN")}
-                      className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white text-xs focus:outline-none focus:border-cyan-400"
+                      className="w-full px-3 py-2 rounded-xl bg-white border border-red-900/20 text-[#2B0B0E] text-xs focus:outline-none focus:border-red-700"
                     >
                       <option value="USER">USER (Investor)</option>
                       <option value="ADMIN">ADMIN (Manager)</option>
@@ -619,7 +620,7 @@ export default function AdminPage() {
                   </div>
 
                   <div>
-                    <label className="block text-[11px] font-semibold uppercase text-slate-400 mb-1">
+                    <label className="block text-[11px] font-semibold uppercase text-[#5B1B1B] mb-1">
                       Initial Free Balance ($)
                     </label>
                     <input
@@ -629,29 +630,29 @@ export default function AdminPage() {
                       value={newUserInitialBalance}
                       onChange={(e) => setNewUserInitialBalance(e.target.value)}
                       placeholder="0.00"
-                      className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white placeholder-slate-500 text-xs focus:outline-none focus:border-cyan-400 font-mono"
+                      className="w-full px-3 py-2 rounded-xl bg-white border border-red-900/20 text-[#2B0B0E] placeholder-[#8A4A4A] text-xs focus:outline-none focus:border-red-700 font-mono"
                     />
                   </div>
                 </div>
 
                 <div>
                   <div className="flex items-center justify-between mb-1">
-                    <label className="block text-[11px] font-semibold uppercase text-slate-400">
+                    <label className="block text-[11px] font-semibold uppercase text-[#5B1B1B]">
                       Sponsor / Referral Code (Optional)
                     </label>
-                    <span className="text-[10px] text-emerald-400 font-medium">Platform sponsor if empty</span>
+                    <span className="text-[10px] text-red-800 font-medium">Platform sponsor if empty</span>
                   </div>
                   <input
                     type="text"
                     value={newUserReferredBy}
                     onChange={(e) => setNewUserReferredBy(e.target.value)}
                     placeholder="trading flow"
-                    className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white placeholder-slate-500 text-xs font-mono tracking-wider focus:outline-none focus:border-cyan-400"
+                    className="w-full px-3 py-2 rounded-xl bg-white border border-red-900/20 text-[#2B0B0E] placeholder-[#8A4A4A] text-xs font-mono tracking-wider focus:outline-none focus:border-red-700"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-semibold uppercase text-slate-400 mb-1">
+                  <label className="block text-[11px] font-semibold uppercase text-[#5B1B1B] mb-1">
                     Credit Note / Audit Reason (Optional)
                   </label>
                   <input
@@ -659,14 +660,14 @@ export default function AdminPage() {
                     value={newUserNote}
                     onChange={(e) => setNewUserNote(e.target.value)}
                     placeholder="e.g. VIP Welcome Bonus / Promotional Deposit"
-                    className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white placeholder-slate-500 text-xs focus:outline-none focus:border-cyan-400"
+                    className="w-full px-3 py-2 rounded-xl bg-white border border-red-900/20 text-[#2B0B0E] placeholder-[#8A4A4A] text-xs focus:outline-none focus:border-red-700"
                   />
                 </div>
 
                 <button
                   type="submit"
                   disabled={createLoading}
-                  className="w-full mt-2 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs uppercase tracking-wider transition shadow-lg shadow-cyan-500/20 active:scale-95 disabled:opacity-50 flex items-center justify-center gap-1.5"
+                  className="w-full mt-2 py-2.5 rounded-xl bg-red-700 hover:bg-red-800 text-white font-bold text-xs uppercase tracking-wider transition shadow-lg shadow-red-900/20 active:scale-95 disabled:opacity-50 flex items-center justify-center gap-1.5"
                 >
                   <UserPlus className="w-4 h-4" />
                   {createLoading ? "Creating Account..." : "Create Account & Fund Balance"}
@@ -675,12 +676,12 @@ export default function AdminPage() {
             </div>
 
             {/* Direct Balance Adjustment Form */}
-            <div className="glass-card rounded-2xl p-6 border border-emerald-500/20 shadow-xl">
+            <div className="glass-card rounded-2xl p-6 border border-red-400 shadow-xl">
               <div className="flex items-center gap-2 mb-1">
-                <Coins className="w-5 h-5 text-emerald-400" />
-                <h3 className="font-bold text-white text-base">Direct Balance Adjustment</h3>
+                <Coins className="w-5 h-5 text-red-800" />
+                <h3 className="font-bold text-[#2B0B0E] text-base">Direct Balance Adjustment</h3>
               </div>
-              <p className="text-xs text-slate-400 mb-4">
+              <p className="text-xs text-[#5B1B1B] mb-4">
                 Credit or debit balances for existing accounts with full audit tracking.
               </p>
 
@@ -688,7 +689,7 @@ export default function AdminPage() {
                 <div
                   className={`mb-4 p-3 rounded-xl text-xs flex items-center gap-2 border ${
                     adjustMsg.type === "success"
-                      ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
+                      ? "bg-red-100 border-red-400 text-red-800"
                       : "bg-rose-500/10 border-rose-500/20 text-rose-400"
                   }`}
                 >
@@ -703,13 +704,13 @@ export default function AdminPage() {
 
               <form onSubmit={handleAdjustSubmit} className="space-y-3.5">
                 <div>
-                  <label className="block text-[11px] font-semibold uppercase text-slate-400 mb-1">
+                  <label className="block text-[11px] font-semibold uppercase text-[#5B1B1B] mb-1">
                     Select User Account
                   </label>
                   <select
                     value={targetUserId}
                     onChange={(e) => setTargetUserId(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white text-xs focus:outline-none focus:border-emerald-500"
+                    className="w-full px-3 py-2 rounded-xl bg-white border border-red-900/20 text-[#2B0B0E] text-xs focus:outline-none focus:border-red-700"
                   >
                     {users.map((u) => (
                       <option key={u.id} value={u.id}>
@@ -720,7 +721,7 @@ export default function AdminPage() {
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-semibold uppercase text-slate-400 mb-1">
+                  <label className="block text-[11px] font-semibold uppercase text-[#5B1B1B] mb-1">
                     Action Type
                   </label>
                   <div className="grid grid-cols-2 gap-2">
@@ -729,8 +730,8 @@ export default function AdminPage() {
                       onClick={() => setAdjustType("CREDIT")}
                       className={`py-2 px-3 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 border transition ${
                         adjustType === "CREDIT"
-                          ? "bg-emerald-500/15 border-emerald-500 text-emerald-400"
-                          : "bg-slate-900 border-white/5 text-slate-400"
+                          ? "bg-red-100 border-red-600 text-red-800"
+                          : "bg-white border-red-900/20 text-[#5B1B1B]"
                       }`}
                     >
                       <PlusCircle className="w-3.5 h-3.5" /> Credit (+)
@@ -741,7 +742,7 @@ export default function AdminPage() {
                       className={`py-2 px-3 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 border transition ${
                         adjustType === "DEBIT"
                           ? "bg-rose-500/15 border-rose-500 text-rose-400"
-                          : "bg-slate-900 border-white/5 text-slate-400"
+                          : "bg-white border-red-900/20 text-[#5B1B1B]"
                       }`}
                     >
                       <MinusCircle className="w-3.5 h-3.5" /> Debit (-)
@@ -750,11 +751,11 @@ export default function AdminPage() {
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-semibold uppercase text-slate-400 mb-1">
+                  <label className="block text-[11px] font-semibold uppercase text-[#5B1B1B] mb-1">
                     Amount (USD)
                   </label>
                   <div className="relative">
-                    <span className="absolute left-3 top-2 text-slate-500 text-xs font-semibold">$</span>
+                    <span className="absolute left-3 top-2 text-[#6B1D1D] text-xs font-semibold">$</span>
                     <input
                       type="number"
                       step="any"
@@ -763,13 +764,13 @@ export default function AdminPage() {
                       value={adjustAmount}
                       onChange={(e) => setAdjustAmount(e.target.value)}
                       placeholder="0.00"
-                      className="w-full pl-7 pr-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white placeholder-slate-500 text-xs focus:outline-none focus:border-emerald-500"
+                      className="w-full pl-7 pr-3 py-2 rounded-xl bg-white border border-red-900/20 text-[#2B0B0E] placeholder-[#8A4A4A] text-xs focus:outline-none focus:border-red-700"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-semibold uppercase text-slate-400 mb-1">
+                  <label className="block text-[11px] font-semibold uppercase text-[#5B1B1B] mb-1">
                     Audit Reason / Note
                   </label>
                   <input
@@ -778,14 +779,14 @@ export default function AdminPage() {
                     value={adjustNote}
                     onChange={(e) => setAdjustNote(e.target.value)}
                     placeholder="e.g. Promotional Deposit Bonus or Manual Correction"
-                    className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white placeholder-slate-500 text-xs focus:outline-none focus:border-emerald-500"
+                    className="w-full px-3 py-2 rounded-xl bg-white border border-red-900/20 text-[#2B0B0E] placeholder-[#8A4A4A] text-xs focus:outline-none focus:border-red-700"
                   />
                 </div>
 
                 <button
                   type="submit"
                   disabled={adjustLoading}
-                  className="w-full mt-2 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs uppercase tracking-wider transition shadow-lg shadow-emerald-500/20 active:scale-95 disabled:opacity-50"
+                  className="w-full mt-2 py-2.5 rounded-xl bg-red-700 hover:bg-red-800 text-white font-bold text-xs uppercase tracking-wider transition shadow-lg shadow-red-900/20 active:scale-95 disabled:opacity-50"
                 >
                   {adjustLoading ? "Applying Adjustment..." : "Apply Adjustment"}
                 </button>
@@ -796,9 +797,9 @@ export default function AdminPage() {
             <div className="glass-card rounded-2xl p-6 border border-amber-500/20 shadow-xl">
               <div className="flex items-center gap-2 mb-1">
                 <KeyRound className="w-5 h-5 text-amber-400" />
-                <h3 className="font-bold text-white text-base">Admin Security & Password</h3>
+                <h3 className="font-bold text-[#2B0B0E] text-base">Admin Security & Password</h3>
               </div>
-              <p className="text-xs text-slate-400 mb-4">
+              <p className="text-xs text-[#5B1B1B] mb-4">
                 Update your administrator access password at any time.
               </p>
 
@@ -806,7 +807,7 @@ export default function AdminPage() {
                 <div
                   className={`mb-4 p-3 rounded-xl text-xs flex items-center gap-2 border ${
                     adminPasswordMsg.type === "success"
-                      ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
+                      ? "bg-red-100 border-red-400 text-red-800"
                       : "bg-rose-500/10 border-rose-500/20 text-rose-400"
                   }`}
                 >
@@ -821,7 +822,7 @@ export default function AdminPage() {
 
               <form onSubmit={handleAdminPasswordSubmit} className="space-y-3.5">
                 <div>
-                  <label className="block text-[11px] font-semibold uppercase text-slate-400 mb-1">
+                  <label className="block text-[11px] font-semibold uppercase text-[#5B1B1B] mb-1">
                     New Admin Password
                   </label>
                   <input
@@ -831,14 +832,14 @@ export default function AdminPage() {
                     value={adminNewPassword}
                     onChange={(e) => setAdminNewPassword(e.target.value)}
                     placeholder="Enter at least 6 characters"
-                    className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-white placeholder-slate-500 text-xs focus:outline-none focus:border-amber-400"
+                    className="w-full px-3 py-2 rounded-xl bg-white border border-red-900/20 text-[#2B0B0E] placeholder-[#8A4A4A] text-xs focus:outline-none focus:border-amber-400"
                   />
                 </div>
 
                 <button
                   type="submit"
                   disabled={adminPasswordLoading}
-                  className="w-full mt-2 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs uppercase tracking-wider transition shadow-lg shadow-amber-500/20 active:scale-95 disabled:opacity-50 flex items-center justify-center gap-1.5"
+                  className="w-full mt-2 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-white font-bold text-xs uppercase tracking-wider transition shadow-lg shadow-amber-500/20 active:scale-95 disabled:opacity-50 flex items-center justify-center gap-1.5"
                 >
                   <KeyRound className="w-4 h-4" />
                   {adminPasswordLoading ? "Updating Password..." : "Update Admin Password"}
@@ -856,26 +857,26 @@ export default function AdminPage() {
         {selectedUser && (
           <section
             id="admin-user-detail"
-            className="glass-card rounded-2xl p-6 scroll-mt-24 border border-cyan-500/15"
+            className="glass-card rounded-2xl p-6 scroll-mt-24 border border-red-300"
           >
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-white/5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-red-900/20">
               <div className="flex items-center gap-3">
-                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-emerald-400 to-cyan-500 text-slate-950 flex items-center justify-center font-extrabold">
+                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-red-700 to-red-800 text-white flex items-center justify-center font-extrabold">
                   {selectedUser.name.charAt(0).toUpperCase()}
                 </div>
                 <div>
                   <div className="flex items-center gap-2 flex-wrap">
-                    <h2 className="text-lg font-bold text-white">{selectedUser.name}</h2>
+                    <h2 className="text-lg font-bold text-[#2B0B0E]">{selectedUser.name}</h2>
                     <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase ${
                       selectedUser.role === "ADMIN"
                         ? "bg-rose-500/15 text-rose-300 border border-rose-500/20"
-                        : "bg-slate-800 text-slate-300"
+                        : "bg-rose-50 text-[#3F1414]"
                     }`}>
                       {selectedUser.role}
                     </span>
                   </div>
-                  <p className="text-xs text-slate-400 mt-0.5">{selectedUser.email}</p>
-                  <p className="text-[10px] text-slate-500 mt-1">
+                  <p className="text-xs text-[#5B1B1B] mt-0.5">{selectedUser.email}</p>
+                  <p className="text-[10px] text-[#6B1D1D] mt-1">
                     ID: <span className="font-mono">{selectedUser.id}</span>
                     {selectedUser.createdAt
                       ? ` · Joined ${new Date(selectedUser.createdAt).toLocaleDateString("en-GB")}`
@@ -884,33 +885,33 @@ export default function AdminPage() {
                 </div>
               </div>
               <div className="flex flex-wrap items-center gap-2 text-[10px]">
-                <span className="px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 font-semibold">
+                <span className="px-2.5 py-1 rounded-full bg-red-100 text-red-800 border border-red-400 font-semibold">
                   Referral: {displayReferralCode(selectedUser.referralCode) || "N/A"}
                 </span>
-                <span className="px-2.5 py-1 rounded-full bg-slate-800 text-slate-300 border border-white/5 font-semibold">
+                <span className="px-2.5 py-1 rounded-full bg-rose-50 text-[#3F1414] border border-red-900/20 font-semibold">
                   Sponsor: {selectedUser.referredBy ? displayReferralCode(selectedUser.referredBy) : "Platform direct"}
                 </span>
-                <span className="px-2.5 py-1 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/20 font-semibold">
+                <span className="px-2.5 py-1 rounded-full bg-red-100 text-red-800 border border-red-400 font-semibold">
                   Level: {selectedUser.referralSummary?.level ? selectedUser.referralSummary.level : "Direct"}
                 </span>
-                <span className="px-2.5 py-1 rounded-full bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 font-semibold">
+                <span className="px-2.5 py-1 rounded-full bg-red-100 text-red-800 border border-red-400 font-semibold">
                   Referral earned: ${(selectedUser.referralSummary?.totalEarnings || 0).toFixed(2)}
                 </span>
                 <span className={`px-2.5 py-1 rounded-full border font-semibold ${
                   selectedUser.kycStatus === "APPROVED"
-                    ? "bg-emerald-500/10 text-emerald-300 border-emerald-500/20"
+                    ? "bg-red-100 text-red-800 border-red-400"
                     : selectedUser.kycStatus === "PENDING"
                       ? "bg-amber-500/10 text-amber-300 border-amber-500/20"
                       : selectedUser.kycStatus === "REJECTED"
                         ? "bg-rose-500/10 text-rose-300 border-rose-500/20"
-                        : "bg-slate-800 text-slate-300 border-white/5"
+                        : "bg-rose-50 text-[#3F1414] border-red-900/20"
                 }`}>
                   KYC: {(selectedUser.kycStatus || "NOT_STARTED").replace(/_/g, " ")}
                 </span>
                 <span className={`px-2.5 py-1 rounded-full border font-semibold ${
                   selectedUser.twoFactorEnabled
-                    ? "bg-emerald-500/10 text-emerald-300 border-emerald-500/20"
-                    : "bg-slate-800 text-slate-300 border-white/5"
+                    ? "bg-red-100 text-red-800 border-red-400"
+                    : "bg-rose-50 text-[#3F1414] border-red-900/20"
                 }`}>
                   2FA: {selectedUser.twoFactorEnabled ? "enabled" : "disabled"}
                 </span>
@@ -923,31 +924,31 @@ export default function AdminPage() {
                   icon: Wallet,
                   label: "Wallet balance",
                   value: `$${(selectedUser.wallet?.currentBalance || 0).toFixed(2)}`,
-                  color: "text-emerald-400",
+                  color: "text-red-800",
                 },
                 {
                   icon: TrendingUp,
-                  label: "Active invested",
-                  value: `$${(selectedUser.wallet?.totalInvested || 0).toFixed(2)}`,
-                  color: "text-cyan-400",
+                  label: "Total deposited",
+                  value: `$${selectedDepositTotal.toFixed(2)}`,
+                  color: "text-red-800",
                 },
                 {
                   icon: CircleDollarSign,
                   label: "Total profit",
                   value: `$${(selectedUser.wallet?.totalProfit || 0).toFixed(2)}`,
-                  color: "text-indigo-400",
+                  color: "text-red-800",
                 },
                 {
                   icon: CalendarDays,
                   label: "Projected daily",
                   value: `+$${selectedDailyProfit.toFixed(2)}`,
-                  color: "text-emerald-400",
+                  color: "text-red-800",
                 },
               ].map((stat) => {
                 const Icon = stat.icon;
                 return (
-                  <div key={stat.label} className="rounded-xl border border-white/5 bg-slate-900/60 p-3.5">
-                    <div className="flex items-center gap-2 text-[10px] uppercase tracking-wider text-slate-500">
+                  <div key={stat.label} className="rounded-xl border border-red-900/20 bg-rose-50 p-3.5">
+                    <div className="flex items-center gap-2 text-[10px] uppercase tracking-wider text-[#6B1D1D]">
                       <Icon className="w-3.5 h-3.5" />
                       {stat.label}
                     </div>
@@ -958,46 +959,46 @@ export default function AdminPage() {
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-3 text-[11px]">
-              <div className="rounded-lg bg-slate-900/40 border border-white/5 p-3">
-                <span className="text-slate-500 block">Total deposited</span>
-                <span className="text-slate-200 font-semibold mt-1 block">
-                  ${(selectedUser.wallet?.totalDeposited || 0).toFixed(2)}
+              <div className="rounded-lg bg-rose-50 border border-red-900/20 p-3">
+                <span className="text-[#6B1D1D] block">Total deposited</span>
+                <span className="text-[#2B0B0E] font-semibold mt-1 block">
+                  ${selectedDepositTotal.toFixed(2)}
                 </span>
               </div>
-              <div className="rounded-lg bg-slate-900/40 border border-white/5 p-3">
-                <span className="text-slate-500 block">Total withdrawn</span>
-                <span className="text-slate-200 font-semibold mt-1 block">
+              <div className="rounded-lg bg-rose-50 border border-red-900/20 p-3">
+                <span className="text-[#6B1D1D] block">Total withdrawn</span>
+                <span className="text-[#2B0B0E] font-semibold mt-1 block">
                   ${(selectedUser.wallet?.totalWithdrawn || 0).toFixed(2)}
                 </span>
               </div>
-              <div className="rounded-lg bg-slate-900/40 border border-white/5 p-3">
-                <span className="text-slate-500 block">Active contracts</span>
-                <span className="text-slate-200 font-semibold mt-1 block">
-                  {selectedActiveInvestments.length}
+              <div className="rounded-lg bg-rose-50 border border-red-900/20 p-3">
+                <span className="text-[#6B1D1D] block">Approved deposits</span>
+                <span className="text-[#2B0B0E] font-semibold mt-1 block">
+                  {selectedDeposits.length}
                 </span>
               </div>
-              <div className="rounded-lg bg-slate-900/40 border border-white/5 p-3">
-                <span className="text-slate-500 block">Ledger entries</span>
-                <span className="text-slate-200 font-semibold mt-1 block">
-                  {selectedTransactions.length}
+              <div className="rounded-lg bg-rose-50 border border-red-900/20 p-3">
+                <span className="text-[#6B1D1D] block">Eligible deposits</span>
+                <span className="text-[#2B0B0E] font-semibold mt-1 block">
+                  ${selectedEligibleDepositTotal.toFixed(2)}
                 </span>
               </div>
             </div>
 
             <div className="mt-3 grid grid-cols-1 lg:grid-cols-2 gap-3 text-[11px]">
-              <div className="rounded-xl border border-white/5 bg-slate-900/40 p-3">
+              <div className="rounded-xl border border-red-900/20 bg-rose-50 p-3">
                 <div className="flex items-center justify-between gap-2">
-                  <span className="text-slate-500">Profit payout destination</span>
+                  <span className="text-[#6B1D1D]">Profit payout destination</span>
                   {(() => {
                     const preferred = selectedUser.payoutWallets?.find(
                       (wallet) => wallet.isProfitDestination
                     );
                     return preferred ? (
-                      <span className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 text-[9px] font-bold uppercase text-emerald-300">
+                      <span className="rounded-full border border-red-400 bg-red-100 px-2 py-0.5 text-[9px] font-bold uppercase text-red-800">
                         {preferred.label}
                       </span>
                     ) : (
-                      <span className="rounded-full border border-white/10 bg-slate-800 px-2 py-0.5 text-[9px] font-bold uppercase text-slate-400">
+                      <span className="rounded-full border border-red-900/20 bg-rose-50 px-2 py-0.5 text-[9px] font-bold uppercase text-[#5B1B1B]">
                         Not configured
                       </span>
                     );
@@ -1005,15 +1006,15 @@ export default function AdminPage() {
                 </div>
                 <div className="mt-2 space-y-1.5">
                   {(selectedUser.payoutWallets || []).length === 0 ? (
-                    <p className="text-slate-500">No payout wallets saved by this user.</p>
+                    <p className="text-[#6B1D1D]">No payout wallets saved by this user.</p>
                   ) : (
                     selectedUser.payoutWallets?.map((wallet) => (
                       <div key={wallet.id} className="flex items-center justify-between gap-2">
-                        <span className="text-slate-300">
+                        <span className="text-[#3F1414]">
                           {wallet.label} · {wallet.method}
                           {wallet.network ? ` · ${wallet.network}` : ""}
                         </span>
-                        <span className="max-w-[55%] truncate font-mono text-slate-500">
+                        <span className="max-w-[55%] truncate font-mono text-[#6B1D1D]">
                           {wallet.address}
                         </span>
                       </div>
@@ -1021,20 +1022,20 @@ export default function AdminPage() {
                   )}
                 </div>
               </div>
-              <div className="rounded-xl border border-white/5 bg-slate-900/40 p-3">
+              <div className="rounded-xl border border-red-900/20 bg-rose-50 p-3">
                 <div className="flex items-center justify-between gap-2">
-                  <span className="text-slate-500">KYC application</span>
-                  <span className="font-semibold text-slate-300">
+                  <span className="text-[#6B1D1D]">KYC application</span>
+                  <span className="font-semibold text-[#3F1414]">
                     {(selectedUser.kycStatus || "NOT_STARTED").replace(/_/g, " ")}
                   </span>
                 </div>
                 {selectedUser.kycDetails ? (
-                  <div className="mt-2 space-y-1.5 text-slate-400">
-                    <p>Legal name: <span className="text-slate-200">{selectedUser.kycDetails.legalName}</span></p>
-                    <p>Country: <span className="text-slate-200">{selectedUser.kycDetails.country}</span></p>
+                  <div className="mt-2 space-y-1.5 text-[#5B1B1B]">
+                    <p>Legal name: <span className="text-[#2B0B0E]">{selectedUser.kycDetails.legalName}</span></p>
+                    <p>Country: <span className="text-[#2B0B0E]">{selectedUser.kycDetails.country}</span></p>
                     <p>
                       Document:{" "}
-                      <span className="text-slate-200">
+                      <span className="text-[#2B0B0E]">
                         {selectedUser.kycDetails.documentType.replace(/_/g, " ")} ·{" "}
                         {selectedUser.kycDetails.documentReference}
                       </span>
@@ -1046,48 +1047,48 @@ export default function AdminPage() {
                     )}
                   </div>
                 ) : (
-                  <p className="mt-2 text-slate-500">No KYC application submitted.</p>
+                  <p className="mt-2 text-[#6B1D1D]">No KYC application submitted.</p>
                 )}
               </div>
             </div>
 
             {selectedUser.referralSummary && (
               <div className="mt-3 grid grid-cols-1 lg:grid-cols-3 gap-3 text-[11px]">
-                <div className="rounded-xl border border-white/5 bg-slate-900/40 p-3">
+                <div className="rounded-xl border border-red-900/20 bg-rose-50 p-3">
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-slate-500">Referral position</span>
-                    <span className="font-semibold text-cyan-300">
+                    <span className="text-[#6B1D1D]">Referral position</span>
+                    <span className="font-semibold text-red-800">
                       {selectedUser.referralSummary.level
                         ? `Level ${selectedUser.referralSummary.level}`
                         : "Platform direct"}
                     </span>
                   </div>
                   <div className="mt-2 flex items-center justify-between gap-2">
-                    <span className="text-slate-500">Direct partners</span>
-                    <span className="text-slate-200">{selectedUser.referralSummary.directCount}</span>
+                    <span className="text-[#6B1D1D]">Direct partners</span>
+                    <span className="text-[#2B0B0E]">{selectedUser.referralSummary.directCount}</span>
                   </div>
                   <div className="mt-1.5 flex items-center justify-between gap-2">
-                    <span className="text-slate-500">Total network</span>
-                    <span className="text-slate-200">{selectedUser.referralSummary.networkCount}</span>
+                    <span className="text-[#6B1D1D]">Total network</span>
+                    <span className="text-[#2B0B0E]">{selectedUser.referralSummary.networkCount}</span>
                   </div>
                   <div className="mt-1.5 flex items-center justify-between gap-2">
-                    <span className="text-slate-500">Referral earnings</span>
-                    <span className="font-semibold text-emerald-400">
+                    <span className="text-[#6B1D1D]">Referral earnings</span>
+                    <span className="font-semibold text-red-800">
                       ${selectedUser.referralSummary.totalEarnings.toFixed(2)}
                     </span>
                   </div>
-                  <div className="mt-3 border-t border-white/5 pt-2">
-                    <p className="text-slate-500 mb-1.5">Upline chain</p>
+                  <div className="mt-3 border-t border-red-900/20 pt-2">
+                    <p className="text-[#6B1D1D] mb-1.5">Upline chain</p>
                     {selectedUser.referralSummary.upline.length === 0 ? (
-                      <p className="text-slate-500">No sponsor recorded.</p>
+                      <p className="text-[#6B1D1D]">No sponsor recorded.</p>
                     ) : (
                       <ol className="space-y-1">
                         {selectedUser.referralSummary.upline.map((member) => (
                           <li key={`${member.level}-${member.id}`} className="flex justify-between gap-2">
-                            <span className="text-slate-500">L{member.level}</span>
-                            <span className="truncate text-slate-300">
+                            <span className="text-[#6B1D1D]">L{member.level}</span>
+                            <span className="truncate text-[#3F1414]">
                               {member.name}{" "}
-                              <span className="font-mono text-[9px] text-emerald-400">
+                              <span className="font-mono text-[9px] text-red-800">
                                 {displayReferralCode(member.referralCode)}
                               </span>
                             </span>
@@ -1098,11 +1099,11 @@ export default function AdminPage() {
                   </div>
                 </div>
 
-                <div className="lg:col-span-2 rounded-xl border border-white/5 bg-slate-900/40 p-3">
-                  <p className="text-slate-500 mb-2">15-level downline summary</p>
+                <div className="lg:col-span-2 rounded-xl border border-red-900/20 bg-rose-50 p-3">
+                  <p className="text-[#6B1D1D] mb-2">15-level downline summary</p>
                   <div className="overflow-x-auto">
                     <table className="w-full text-left text-[10px]">
-                      <thead className="text-slate-500 uppercase tracking-wider">
+                      <thead className="text-[#6B1D1D] uppercase tracking-wider">
                         <tr>
                           <th className="py-1.5 pr-2">Level</th>
                           <th className="py-1.5 pr-2">Rate</th>
@@ -1111,11 +1112,11 @@ export default function AdminPage() {
                           <th className="py-1.5 text-right">Top member</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-white/5 text-slate-300">
+                      <tbody className="divide-y divide-red-900/10 text-[#3F1414]">
                         {selectedUser.referralSummary.levels.map((level) => (
-                          <tr key={level.level} className={level.count > 0 ? "bg-emerald-500/[0.03]" : ""}>
-                            <td className="py-1.5 pr-2 font-semibold text-white">L{level.level}</td>
-                            <td className="py-1.5 pr-2 text-emerald-400">{level.rate}%</td>
+                          <tr key={level.level} className={level.count > 0 ? "bg-red-700/[0.03]" : ""}>
+                            <td className="py-1.5 pr-2 font-semibold text-[#2B0B0E]">L{level.level}</td>
+                            <td className="py-1.5 pr-2 text-red-800">{level.rate}%</td>
                             <td className="py-1.5 pr-2">{level.count}</td>
                             <td className="py-1.5 pr-2 text-right">${level.earnings.toFixed(2)}</td>
                             <td className="py-1.5 text-right truncate max-w-[140px]">
@@ -1134,36 +1135,36 @@ export default function AdminPage() {
 
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mt-6">
               <div>
-                <h3 className="text-sm font-bold text-white mb-3">Investments ({selectedInvestments.length})</h3>
-                {selectedInvestments.length === 0 ? (
-                  <p className="text-xs text-slate-500 rounded-xl border border-dashed border-white/10 p-5 text-center">
-                    No investments for this user.
+                <h3 className="text-sm font-bold text-[#2B0B0E] mb-3">Approved deposits ({selectedDeposits.length})</h3>
+                {selectedDeposits.length === 0 ? (
+                  <p className="text-xs text-[#6B1D1D] rounded-xl border border-dashed border-red-900/20 p-5 text-center">
+                    No approved deposits for this user.
                   </p>
                 ) : (
                   <div className="space-y-2.5">
-                    {selectedInvestments.map((investment) => (
-                      <div key={investment.id} className="rounded-xl border border-white/5 bg-slate-900/50 p-3.5">
+                    {selectedDeposits.map((deposit) => (
+                      <div key={deposit.id} className="rounded-xl border border-red-900/20 bg-rose-50 p-3.5">
                         <div className="flex items-start justify-between gap-3">
                           <div>
-                            <p className="text-xs font-semibold text-white">{investment.planName}</p>
-                            <p className="text-[9px] font-mono text-slate-600 mt-0.5">{investment.id}</p>
-                            <p className="text-[10px] text-slate-500 mt-1">
-                              ${investment.investedAmount.toFixed(2)} · {investment.dailyPercentage.toFixed(1)}% daily
-                            </p>
+                            <p className="text-xs font-semibold text-[#2B0B0E]">${deposit.amount.toFixed(2)}</p>
+                            <p className="text-[9px] font-mono text-[#7F1D1D] mt-0.5">{deposit.id}</p>
+                            <p className="text-[10px] text-[#6B1D1D] mt-1">{deposit.method}</p>
                           </div>
                           <span className={`px-2 py-0.5 rounded text-[9px] font-bold ${
-                            investment.status === "ACTIVE"
-                              ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                              : "bg-slate-800 text-slate-400"
+                            isDepositEligible(deposit)
+                              ? "bg-red-100 text-red-800 border border-red-400"
+                              : "bg-amber-500/10 text-amber-400 border border-amber-500/20"
                           }`}>
-                            {investment.status}
+                            {isDepositEligible(deposit) ? "ELIGIBLE" : "24H WAIT"}
                           </span>
                         </div>
-                        <div className="flex items-center justify-between mt-3 text-[10px] text-slate-500">
+                        <div className="flex items-center justify-between mt-3 text-[10px] text-[#6B1D1D]">
+                          <span>+${dailyDepositProfit(deposit.amount).toFixed(2)} / day</span>
                           <span>
-                            +${calculateDailyProfit(investment.investedAmount, investment.dailyPercentage).toFixed(2)} / day
+                            {isDepositEligible(deposit)
+                              ? "Earning now"
+                              : `Starts ${depositEligibleAt(deposit).toLocaleString("en-GB")}`}
                           </span>
-                          <span>{investment.remainingDays} of {investment.durationDays} days left</span>
                         </div>
                       </div>
                     ))}
@@ -1172,17 +1173,17 @@ export default function AdminPage() {
               </div>
 
               <div>
-                <h3 className="text-sm font-bold text-white mb-3">
+                <h3 className="text-sm font-bold text-[#2B0B0E] mb-3">
                   Recent transactions ({selectedTransactions.length})
                 </h3>
                 {selectedTransactions.length === 0 ? (
-                  <p className="text-xs text-slate-500 rounded-xl border border-dashed border-white/10 p-5 text-center">
+                  <p className="text-xs text-[#6B1D1D] rounded-xl border border-dashed border-red-900/20 p-5 text-center">
                     No transactions for this user.
                   </p>
                 ) : (
-                  <div className="overflow-x-auto rounded-xl border border-white/5">
+                  <div className="overflow-x-auto rounded-xl border border-red-900/20">
                     <table className="w-full text-left text-[11px]">
-                      <thead className="bg-slate-900/80 text-slate-500 uppercase text-[9px]">
+                      <thead className="bg-rose-50 text-[#6B1D1D] uppercase text-[9px]">
                         <tr>
                           <th className="px-3 py-2">Type</th>
                           <th className="px-3 py-2">Amount</th>
@@ -1190,7 +1191,7 @@ export default function AdminPage() {
                           <th className="px-3 py-2">Date</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-white/5 text-slate-300">
+                      <tbody className="divide-y divide-red-900/10 text-[#3F1414]">
                         {selectedTransactions.slice(0, 12).map((transaction) => {
                           const credit =
                             transaction.type === "BONUS"
@@ -1199,16 +1200,16 @@ export default function AdminPage() {
                           return (
                           <tr key={transaction.id}>
                             <td className="px-3 py-2 whitespace-nowrap">
-                              <span className="font-semibold text-slate-200 block">{transaction.type}</span>
-                              <span className="text-[9px] font-mono text-slate-600">{transaction.id}</span>
+                              <span className="font-semibold text-[#2B0B0E] block">{transaction.type}</span>
+                              <span className="text-[9px] font-mono text-[#7F1D1D]">{transaction.id}</span>
                             </td>
-                            <td className={`px-3 py-2 whitespace-nowrap ${credit ? "text-emerald-400" : "text-slate-200"}`}>
+                            <td className={`px-3 py-2 whitespace-nowrap ${credit ? "text-red-800" : "text-[#2B0B0E]"}`}>
                               {credit ? "+" : "-"}${Math.abs(transaction.amount).toFixed(2)}
                             </td>
                             <td className="px-3 py-2 whitespace-nowrap">
                               <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold ${
                                 transaction.status === "APPROVED" || transaction.status === "SUCCESS"
-                                  ? "bg-emerald-500/10 text-emerald-400"
+                                  ? "bg-red-100 text-red-800"
                                   : transaction.status === "PENDING"
                                     ? "bg-amber-500/10 text-amber-400"
                                     : "bg-rose-500/10 text-rose-400"
@@ -1216,7 +1217,7 @@ export default function AdminPage() {
                                 {transaction.status}
                               </span>
                             </td>
-                            <td className="px-3 py-2 text-slate-500 whitespace-nowrap">
+                            <td className="px-3 py-2 text-[#6B1D1D] whitespace-nowrap">
                               {new Date(transaction.createdAt).toLocaleDateString("en-GB")}
                             </td>
                           </tr>

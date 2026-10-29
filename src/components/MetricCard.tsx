@@ -20,16 +20,16 @@ export default function MetricCard({
   accentColor = "emerald",
 }: MetricCardProps) {
   const colorMap = {
-    emerald: "from-emerald-500/20 to-emerald-500/0 text-emerald-400 border-emerald-500/20",
-    cyan: "from-cyan-500/20 to-cyan-500/0 text-cyan-400 border-cyan-500/20",
+    emerald: "from-red-700/20 to-red-800/0 text-red-800 border-red-400",
+    cyan: "from-red-200 to-white text-red-800 border-red-400",
     amber: "from-amber-500/20 to-amber-500/0 text-amber-400 border-amber-500/20",
-    indigo: "from-indigo-500/20 to-indigo-500/0 text-indigo-400 border-indigo-500/20",
+    indigo: "from-rose-200 to-white text-red-800 border-red-400",
   };
 
   return (
     <div className="relative overflow-hidden rounded-2xl glass-card p-5 group">
       <div className="flex items-center justify-between mb-3">
-        <span className="text-xs font-semibold tracking-wider uppercase text-slate-400">
+        <span className="text-xs font-semibold tracking-wider uppercase text-[#5B1B1B]">
           {title}
         </span>
         <div
@@ -40,7 +40,7 @@ export default function MetricCard({
       </div>
 
       <div className="flex items-baseline gap-2 mb-1">
-        <span className="text-2xl font-bold tracking-tight text-white group-hover:text-emerald-300 transition-colors">
+        <span className="text-2xl font-bold tracking-tight text-[#2B0B0E] group-hover:text-red-900 transition-colors">
           {value}
         </span>
       </div>
@@ -50,14 +50,14 @@ export default function MetricCard({
           <span
             className={`font-semibold px-1.5 py-0.5 rounded text-[11px] ${
               isPositive
-                ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                ? "bg-red-100 text-red-800 border border-red-400"
                 : "bg-rose-500/10 text-rose-400 border border-rose-500/20"
             }`}
           >
             {change}
           </span>
         )}
-        {subtitle && <span className="text-slate-400 truncate">{subtitle}</span>}
+        {subtitle && <span className="text-[#5B1B1B] truncate">{subtitle}</span>}
       </div>
     </div>
   );

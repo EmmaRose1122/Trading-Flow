@@ -3,7 +3,7 @@
   "crons": [
     {
       "path": "/api/cron/accrue-profits",
-      "schedule": "0 0 * * *"
+      "schedule": "0 * * * *"
     }
   ]
 }

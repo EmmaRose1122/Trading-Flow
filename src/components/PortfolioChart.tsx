@@ -81,20 +81,20 @@ export default function PortfolioChart({ transactions, currentBalance }: Portfol
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <h3 className="font-semibold text-white text-base">Wallet Balance History</h3>
-            <span className={`flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full border ${isPositive ? "text-emerald-400 bg-emerald-500/10 border-emerald-500/20" : "text-rose-400 bg-rose-500/10 border-rose-500/20"}`}>
+            <h3 className="font-semibold text-[#2B0B0E] text-base">Wallet Balance History</h3>
+            <span className={`flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full border ${isPositive ? "text-red-800 bg-red-100 border-red-400" : "text-rose-400 bg-rose-500/10 border-rose-500/20"}`}>
               {isPositive ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
               {isPositive ? "+" : ""}{change.toFixed(1)}%
             </span>
           </div>
-          <p className="text-xs text-slate-400">Available balance calculated from ledger activity</p>
+          <p className="text-xs text-[#5B1B1B]">Available balance calculated from ledger activity</p>
         </div>
-        <div className="flex items-center bg-slate-900/80 p-1 rounded-xl border border-white/5">
+        <div className="flex items-center bg-rose-50 p-1 rounded-xl border border-red-900/20">
           {Object.keys(ranges).map((range) => (
             <button
               key={range}
               onClick={() => setTimeRange(range)}
-              className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${timeRange === range ? "bg-emerald-500 text-slate-950 shadow-sm" : "text-slate-400 hover:text-white"}`}
+              className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${timeRange === range ? "bg-red-700 text-white shadow-sm" : "text-[#5B1B1B] hover:text-[#2B0B0E]"}`}
             >
               {range}
             </button>
@@ -103,7 +103,7 @@ export default function PortfolioChart({ transactions, currentBalance }: Portfol
       </div>
 
       {dataPoints.length < 2 ? (
-        <div className="h-48 sm:h-56 flex items-center justify-center text-xs text-slate-500 border border-dashed border-white/10 rounded-xl">
+        <div className="h-48 sm:h-56 flex items-center justify-center text-xs text-[#6B1D1D] border border-dashed border-red-900/20 rounded-xl">
           Not enough wallet activity for this period.
         </div>
       ) : (
@@ -111,24 +111,24 @@ export default function PortfolioChart({ transactions, currentBalance }: Portfol
           <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-48 sm:h-56 overflow-visible" preserveAspectRatio="none">
             <defs>
               <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#10B981" stopOpacity="0.35" />
-                <stop offset="70%" stopColor="#06B6D4" stopOpacity="0.08" />
-                <stop offset="100%" stopColor="#080C15" stopOpacity="0" />
+                <stop offset="0%" stopColor="#DC2626" stopOpacity="0.22" />
+                <stop offset="70%" stopColor="#E11D48" stopOpacity="0.08" />
+                <stop offset="100%" stopColor="#FFFFFF" stopOpacity="0" />
               </linearGradient>
             </defs>
             {[30, 80, 130].map((y) => (
               <line key={y} x1="20" y1={y} x2={width - 20} y2={y} stroke="rgba(255,255,255,0.04)" strokeDasharray="4 4" />
             ))}
             <path d={areaD} fill="url(#chartGradient)" />
-            <path d={pathD} fill="none" stroke="#10B981" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+            <path d={pathD} fill="none" stroke="#DC2626" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
             {coordinates.map((point, index) => (
               <g key={`${dataPoints[index].timestamp}-${index}`}>
                 <title>{`${dataPoints[index].label}: $${dataPoints[index].value.toFixed(2)}`}</title>
-                <circle cx={point.x} cy={point.y} r="4" fill="#080C15" stroke="#10B981" strokeWidth="2.5" />
+                <circle cx={point.x} cy={point.y} r="4" fill="#FFFFFF" stroke="#DC2626" strokeWidth="2.5" />
               </g>
             ))}
           </svg>
-          <div className="flex justify-between text-[11px] text-slate-500 font-medium px-2 pt-2">
+          <div className="flex justify-between text-[11px] text-[#6B1D1D] font-medium px-2 pt-2">
             {dataPoints.map((point, index) => (
               <span key={`${point.timestamp}-${index}`}>{point.label}</span>
             ))}

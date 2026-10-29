@@ -4,7 +4,7 @@
     <string name="connection_title">Unable to connect</string>
     <string name="connection_error">Check your internet connection and make sure the Trading Flow server URL is correct.</string>
     <string name="server_error">The Trading Flow server returned an error. Please retry or update the server address.</string>
-    <string name="invalid_server_url">Enter a valid HTTP or HTTPS address.</string>
+    <string name="invalid_server_url">Enter a valid HTTPS website address.</string>
     <string name="server_address">Trading Flow server address</string>
     <string name="server_address_hint">Enter the deployed website URL, for example https://your-project.vercel.app</string>
     <string name="save_and_retry">Save &amp; retry</string>

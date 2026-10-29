@@ -77,20 +77,20 @@ export default function InvestModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-      <div className="relative w-full max-w-lg rounded-2xl bg-[#0F172A] border border-white/10 p-6 shadow-2xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-red-950/35 backdrop-blur-sm">
+      <div className="relative w-full max-w-lg rounded-2xl bg-white border border-red-900/20 p-6 shadow-2xl">
         <button
           onClick={onClose}
-          className="absolute top-5 right-5 text-slate-400 hover:text-white"
+          className="absolute top-5 right-5 text-[#5B1B1B] hover:text-[#2B0B0E]"
         >
           <X className="w-5 h-5" />
         </button>
 
         <div className="flex items-center gap-2 mb-1">
-          <Sparkles className="w-5 h-5 text-emerald-400" />
-          <h3 className="text-xl font-bold text-white">Subscribe: {plan.name}</h3>
+          <Sparkles className="w-5 h-5 text-red-800" />
+          <h3 className="text-xl font-bold text-[#2B0B0E]">Subscribe: {plan.name}</h3>
         </div>
-        <p className="text-xs text-slate-400 mb-4">
+        <p className="text-xs text-[#5B1B1B] mb-4">
           Lock in your capital for {plan.durationDays} days at {plan.dailyPercentage.toFixed(1)}% daily returns.
         </p>
 
@@ -104,16 +104,16 @@ export default function InvestModal({
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <div className="flex justify-between text-xs mb-1.5">
-              <span className="font-semibold uppercase text-slate-400">Investment Capital (USD)</span>
-              <span className="text-slate-400">
+              <span className="font-semibold uppercase text-[#5B1B1B]">Investment Capital (USD)</span>
+              <span className="text-[#5B1B1B]">
                 Wallet:{" "}
-                <strong className="text-emerald-400">
+                <strong className="text-red-800">
                   ${currentBalance.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                 </strong>
               </span>
             </div>
             <div className="relative">
-              <span className="absolute left-3 top-2.5 text-slate-500 text-sm font-semibold">$</span>
+              <span className="absolute left-3 top-2.5 text-[#6B1D1D] text-sm font-semibold">$</span>
               <input
                 type="number"
                 min={plan.minAmount}
@@ -123,38 +123,38 @@ export default function InvestModal({
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 placeholder={`Range: $${plan.minAmount} - $${plan.maxAmount}`}
-                className="w-full pl-8 pr-4 py-2.5 rounded-xl bg-slate-900 border border-white/10 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-emerald-500"
+                className="w-full pl-8 pr-4 py-2.5 rounded-xl bg-white border border-red-900/20 text-[#2B0B0E] placeholder-[#8A4A4A] text-sm focus:outline-none focus:border-red-700"
               />
             </div>
           </div>
 
           {/* Interactive Projected Return Breakdown */}
-          <div className="p-3.5 rounded-xl bg-slate-900/80 border border-white/5 space-y-2 text-xs">
-            <span className="font-semibold text-slate-300 block uppercase tracking-wider text-[11px]">
+          <div className="p-3.5 rounded-xl bg-rose-50 border border-red-900/20 space-y-2 text-xs">
+            <span className="font-semibold text-[#3F1414] block uppercase tracking-wider text-[11px]">
               Contract Return Projection
             </span>
-            <div className="flex justify-between text-slate-400">
+            <div className="flex justify-between text-[#5B1B1B]">
               <span>Daily ROI ({plan.dailyPercentage.toFixed(1)}%):</span>
-              <span className="font-semibold text-emerald-400">+${dailyProfit.toFixed(2)} / day</span>
+              <span className="font-semibold text-red-800">+${dailyProfit.toFixed(2)} / day</span>
             </div>
-            <div className="flex justify-between text-slate-400">
+            <div className="flex justify-between text-[#5B1B1B]">
               <span>Duration Period:</span>
-              <span className="font-semibold text-slate-200">{plan.durationDays} Days</span>
+              <span className="font-semibold text-[#2B0B0E]">{plan.durationDays} Days</span>
             </div>
-            <div className="flex justify-between text-slate-400">
+            <div className="flex justify-between text-[#5B1B1B]">
               <span>Total Estimated Profit:</span>
-              <span className="font-semibold text-cyan-400">+${totalProfit.toFixed(2)}</span>
+              <span className="font-semibold text-red-800">+${totalProfit.toFixed(2)}</span>
             </div>
-            <div className="flex justify-between pt-2 border-t border-white/5 text-sm font-bold text-white">
+            <div className="flex justify-between pt-2 border-t border-red-900/20 text-sm font-bold text-[#2B0B0E]">
               <span>Total Payout (With Principal):</span>
-              <span className="text-emerald-400">${totalPayout.toFixed(2)}</span>
+              <span className="text-red-800">${totalPayout.toFixed(2)}</span>
             </div>
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full mt-2 flex items-center justify-center gap-2 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-sm transition-all shadow-lg shadow-emerald-500/20 disabled:opacity-50"
+            className="w-full mt-2 flex items-center justify-center gap-2 py-3 rounded-xl bg-red-700 hover:bg-red-800 text-white font-bold text-sm transition-all shadow-lg shadow-red-900/20 disabled:opacity-50"
           >
             {loading ? "Locking in Capital..." : "Confirm & Activate Contract"}
             <ArrowRight className="w-4 h-4" />

@@ -28,17 +28,18 @@ export default function DisclaimerPage() {
       </section>
 
       <section>
-        <h2 className="text-xl font-bold text-white mb-3">1. Demonstration platform</h2>
+        <h2 className="text-xl font-bold text-[#2B0B0E] mb-3">1. Demonstration platform</h2>
         <p>
-          This website and dashboard are a demonstration project. {COMPANY.legalName} is presented
-          as a fictional demonstration company, and the address, email address and telephone number
-          are placeholders. The platform is not authorised or regulated by the Financial Conduct
-          Authority (FCA) and does not offer regulated financial products or services.
+          This website and dashboard are a demonstration project. The company address and contact
+          details shown on this deployment are provided by the operator and should be independently
+          verified before public launch. The platform is not authorised or regulated by the
+          Financial Conduct Authority (FCA) and does not offer regulated financial products or
+          services.
         </p>
       </section>
 
       <section>
-        <h2 className="text-xl font-bold text-white mb-3">2. No financial advice</h2>
+        <h2 className="text-xl font-bold text-[#2B0B0E] mb-3">2. No financial advice</h2>
         <p>
           Information on this website is provided for general information only. It is not
           financial, investment, tax, accounting or legal advice, and it is not a personal
@@ -48,7 +49,7 @@ export default function DisclaimerPage() {
       </section>
 
       <section>
-        <h2 className="text-xl font-bold text-white mb-3">3. Plan rates and projections</h2>
+        <h2 className="text-xl font-bold text-[#2B0B0E] mb-3">3. Plan rates and projections</h2>
         <p>
           Daily rates, total-term figures, calculator outputs and dashboard projections are
           illustrative. They are not guaranteed, not a promise of future performance and not a
@@ -57,7 +58,7 @@ export default function DisclaimerPage() {
       </section>
 
       <section>
-        <h2 className="text-xl font-bold text-white mb-3">4. No offer or solicitation</h2>
+        <h2 className="text-xl font-bold text-[#2B0B0E] mb-3">4. No offer or solicitation</h2>
         <p>
           Nothing on this website constitutes an offer, solicitation or recommendation to buy or sell
           any investment, security or financial product. Any invitation-only registration or
@@ -67,7 +68,7 @@ export default function DisclaimerPage() {
       </section>
 
       <section>
-        <h2 className="text-xl font-bold text-white mb-3">5. Accuracy and availability</h2>
+        <h2 className="text-xl font-bold text-[#2B0B0E] mb-3">5. Accuracy and availability</h2>
         <p>
           We aim to keep information accurate and available, but we do not warrant that the website
           will be uninterrupted, error-free or complete. Features, plan terms and displayed data may
@@ -76,7 +77,7 @@ export default function DisclaimerPage() {
       </section>
 
       <section>
-        <h2 className="text-xl font-bold text-white mb-3">6. Limitation of liability</h2>
+        <h2 className="text-xl font-bold text-[#2B0B0E] mb-3">6. Limitation of liability</h2>
         <p>
           To the extent permitted by law, {COMPANY.legalName} is not liable for loss arising from
           reliance on information on this demonstration website, interruptions, errors or
@@ -86,14 +87,14 @@ export default function DisclaimerPage() {
       </section>
 
       <section>
-        <h2 className="text-xl font-bold text-white mb-3">7. Contact</h2>
+        <h2 className="text-xl font-bold text-[#2B0B0E] mb-3">7. Contact</h2>
         <p>
           Questions about this notice can be sent to{" "}
-          <a href={`mailto:${COMPANY.email}`} className="text-emerald-400 hover:underline">
+          <a href={`mailto:${COMPANY.email}`} className="text-red-800 hover:underline">
             {COMPANY.email}
           </a>{" "}
           or raised through the{" "}
-          <Link href="/contact" className="text-emerald-400 hover:underline">
+          <Link href="/contact" className="text-red-800 hover:underline">
             contact page
           </Link>
           .

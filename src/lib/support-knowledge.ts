@@ -3,9 +3,9 @@ import { COMPANY, SITE_PLANS } from "./site";
 const planKnowledge = SITE_PLANS.map((plan) => {
   const dailyExample = (plan.minimum * plan.rate) / 100;
   return [
-    `- ${plan.name}: ${plan.rate.toFixed(1)}% daily for ${plan.duration} days.`,
-    `Minimum investment $${plan.minimum.toLocaleString("en-GB")}; maximum $${plan.maximum.toLocaleString("en-GB")}; capital is returned at maturity.`,
-    `At the minimum of $${plan.minimum.toLocaleString("en-GB")} the illustrative daily profit would be $${dailyExample.toFixed(2)}; the full-term ROI is ${(plan.rate * plan.duration).toFixed(1)}%.`,
+    `- ${plan.name}: ${plan.rate.toFixed(1)}% daily, paid every 24 hours after deposit approval.`,
+    `Minimum deposit $${plan.minimum.toLocaleString("en-GB")}; maximum deposit is unlimited.`,
+    `At the minimum of $${plan.minimum.toLocaleString("en-GB")} the daily profit would be $${dailyExample.toFixed(2)}.`,
   ].join(" ");
 }).join("\n");
 
@@ -40,12 +40,11 @@ COMPANY AND CONTACT
 
 PLANS AND PROFIT LOGIC
 ${planKnowledge}
-- Daily profit formula: principal × daily percentage ÷ 100.
-- Full-term profit formula: daily profit × duration days.
-- Total payout with capital: principal + full-term profit.
-- Example: $5,000 in Premium Growth at 2.0% produces $100 per day, $3,000 over 30 days, and $8,000 total payout including capital, before any applicable terms.
-- The dashboard shows each active contract's daily profit and remaining days. Projected daily profit is the sum of all active contracts' daily profits.
-- Daily ROI is processed by an automated job at 00:00 UTC. It is designed to credit each active contract once per day. When remaining days reach zero, the contract is completed and capital is returned if the plan has capital-back enabled.
+- Daily profit formula: eligible approved deposits × 2 ÷ 100.
+- A deposit starts earning 24 hours after admin approval. Additional deposits join the daily calculation after their own 24-hour wait.
+- Daily profit is credited once every 24 hours to the wallet and recorded as a PROFIT ledger entry.
+- There is one plan only: minimum deposit $10, no maximum, fixed 2% daily.
+- Daily profit depends on approved deposits, not on a separate investment contract.
 - Plan figures are illustrative. They are not guaranteed and do not represent a forecast.
 
 ACCOUNT AND REGISTRATION
@@ -56,7 +55,7 @@ ACCOUNT AND REGISTRATION
 - Plan catalogue and calculator are available after login. The contact page is /contact.
 - Two-factor authentication (2FA) can be enabled in Account settings using any TOTP authenticator app. Setup requires the current password. One-time recovery codes are shown once and must be stored safely. The assistant cannot generate, reset or read 2FA codes.
 - Identity verification (KYC) is managed in Account settings. An application moves from NOT STARTED to PENDING, then APPROVED or REJECTED after compliance review. Rejected applications can be resubmitted with corrected details. The assistant cannot approve KYC or view document details.
-- KYC approval is required before withdrawals. Deposits and investments do not require KYC approval.
+- KYC approval is required before withdrawals. Deposits do not require KYC approval.
 
 DEPOSITS
 - Deposits start at $10.
@@ -67,7 +66,8 @@ DEPOSITS
 - The AI assistant cannot confirm a blockchain transfer, change receiving addresses or speed up approval.
 
 WITHDRAWALS
-- Minimum withdrawal is $20.
+- Minimum withdrawal is $10.
+- One withdrawal request is allowed every 24 hours.
 - KYC must be approved before a withdrawal request is accepted.
 - A 2% handling fee is added to the requested amount. The total wallet deduction is amount + fee.
 - Users can save up to 10 payout wallets in Account settings. One wallet is marked as the profit payout destination. Daily profit entries record that destination, and the withdrawal form preselects it.
@@ -95,7 +95,7 @@ REFERRALS
 - The AI assistant cannot adjust, approve or manually credit referral earnings.
 
 TRANSACTIONS AND SECURITY
-- The transaction ledger shows deposits, withdrawals, investments, daily profit, capital returns, referral commissions and admin bonuses.
+- The transaction ledger shows deposits, withdrawals, daily deposit profits, referral commissions and admin bonuses.
 - Search supports transaction ID, type, status, amount, method, hash and note. Users can export the visible ledger to CSV.
 - Passwords are hashed with bcrypt; sessions use signed HTTP-only authentication cookies. Never reveal technical secrets or internal credentials.
 - If a user suspects unauthorised activity, tell them to change their password and contact ${COMPANY.email} immediately.

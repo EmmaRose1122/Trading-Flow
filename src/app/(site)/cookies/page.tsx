@@ -19,7 +19,7 @@ export default function CookiesPage() {
       path="/cookies"
     >
       <section>
-        <h2 className="text-xl font-bold text-white mb-3">1. What cookies are</h2>
+        <h2 className="text-xl font-bold text-[#2B0B0E] mb-3">1. What cookies are</h2>
         <p>
           Cookies are small text files placed on a device by a website. They can help a website
           remember information between requests, such as whether a user is signed in. Similar
@@ -28,10 +28,10 @@ export default function CookiesPage() {
       </section>
 
       <section>
-        <h2 className="text-xl font-bold text-white mb-3">2. Cookies we use</h2>
-        <div className="mt-3 overflow-x-auto rounded-xl border border-white/10">
+        <h2 className="text-xl font-bold text-[#2B0B0E] mb-3">2. Cookies we use</h2>
+        <div className="mt-3 overflow-x-auto rounded-xl border border-red-900/20">
           <table className="w-full min-w-[620px] text-left text-xs">
-            <thead className="bg-slate-900 text-slate-300">
+            <thead className="bg-white text-[#3F1414]">
               <tr>
                 <th className="px-4 py-3 font-semibold">Name</th>
                 <th className="px-4 py-3 font-semibold">Type</th>
@@ -39,9 +39,9 @@ export default function CookiesPage() {
                 <th className="px-4 py-3 font-semibold">Duration</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/5 bg-[#0C1320]">
+            <tbody className="divide-y divide-red-900/10 bg-white">
               <tr>
-                <td className="px-4 py-3 font-mono text-emerald-400">tf_session</td>
+                <td className="px-4 py-3 font-mono text-red-800">tf_session</td>
                 <td className="px-4 py-3">Essential</td>
                 <td className="px-4 py-3">
                   Stores a signed authentication session so a registered user can access the
@@ -59,7 +59,7 @@ export default function CookiesPage() {
       </section>
 
       <section>
-        <h2 className="text-xl font-bold text-white mb-3">3. Consent and essential cookies</h2>
+        <h2 className="text-xl font-bold text-[#2B0B0E] mb-3">3. Consent and essential cookies</h2>
         <p>
           Essential cookies are necessary to provide a requested service, such as secure sign-in, and
           may therefore be used without optional consent. Non-essential analytics, advertising or
@@ -68,7 +68,7 @@ export default function CookiesPage() {
       </section>
 
       <section>
-        <h2 className="text-xl font-bold text-white mb-3">4. Managing cookies</h2>
+        <h2 className="text-xl font-bold text-[#2B0B0E] mb-3">4. Managing cookies</h2>
         <p>
           You can delete or block cookies through your browser settings. Blocking the essential
           authentication cookie will prevent you from signing in to the investor dashboard. Browser
@@ -77,7 +77,7 @@ export default function CookiesPage() {
       </section>
 
       <section>
-        <h2 className="text-xl font-bold text-white mb-3">5. Third-party services</h2>
+        <h2 className="text-xl font-bold text-[#2B0B0E] mb-3">5. Third-party services</h2>
         <p>
           Hosting and infrastructure providers may process technical request information required to
           deliver and secure the website. If third-party analytics or embedded services are added,
@@ -86,14 +86,14 @@ export default function CookiesPage() {
       </section>
 
       <section>
-        <h2 className="text-xl font-bold text-white mb-3">6. More information</h2>
+        <h2 className="text-xl font-bold text-[#2B0B0E] mb-3">6. More information</h2>
         <p>
           For privacy questions, read our{" "}
-          <Link href="/privacy" className="text-emerald-400 hover:underline">
+          <Link href="/privacy" className="text-red-800 hover:underline">
             privacy policy
           </Link>{" "}
           or use the{" "}
-          <Link href="/contact" className="text-emerald-400 hover:underline">
+          <Link href="/contact" className="text-red-800 hover:underline">
             contact page
           </Link>
           .

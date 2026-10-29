@@ -2,6 +2,11 @@ import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { parseMoney, roundMoney } from "@/lib/money";
+import {
+  MIN_WITHDRAWAL,
+  WITHDRAWAL_COOLDOWN_MS,
+  mostRecentWithdrawal,
+} from "@/lib/deposit";
 
 export async function POST(req: Request) {
   try {
@@ -22,8 +27,24 @@ export async function POST(req: Request) {
         { status: 403 }
       );
     }
-    if (withdrawAmount === null || withdrawAmount < 20) {
-      return NextResponse.json({ error: "Enter a valid withdrawal of at least $20 with up to 2 decimals" }, { status: 400 });
+    if (withdrawAmount === null || withdrawAmount < MIN_WITHDRAWAL) {
+      return NextResponse.json({ error: `Enter a valid withdrawal of at least $${MIN_WITHDRAWAL} with up to 2 decimals` }, { status: 400 });
+    }
+
+    const withdrawals = await db.getTransactions(user.id);
+    const lastWithdrawal = mostRecentWithdrawal(withdrawals);
+    if (lastWithdrawal) {
+      const nextAllowedAt = new Date(lastWithdrawal.createdAt).getTime() + WITHDRAWAL_COOLDOWN_MS;
+      if (Date.now() < nextAllowedAt) {
+        return NextResponse.json(
+          {
+            error: `Withdrawals are available once every 24 hours. Next request allowed after ${new Date(
+              nextAllowedAt
+            ).toLocaleString("en-GB")}.`,
+          },
+          { status: 429 }
+        );
+      }
     }
 
     let payoutAddress = typeof destination === "string" ? destination.trim() : "";

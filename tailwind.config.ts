@@ -1,4 +1,5 @@
 import type { Config } from "tailwindcss";
+import colors from "tailwindcss/colors";
 
 const config: Config = {
   content: [
@@ -10,22 +11,26 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        background: "#080C15",
-        surface: "#0F172A",
-        card: "#131E35",
-        border: "rgba(255, 255, 255, 0.08)",
+        background: "#FFFFFF",
+        surface: "#FFF7F7",
+        card: "#FFFFFF",
+        border: "rgba(127, 29, 29, 0.12)",
         primary: {
-          DEFAULT: "#10B981",
-          hover: "#059669",
+          DEFAULT: "#DC2626",
+          hover: "#B91C1C",
         },
         cyanAccent: {
-          DEFAULT: "#06B6D4",
-          glow: "rgba(6, 182, 212, 0.3)",
+          DEFAULT: "#E11D48",
+          glow: "rgba(225, 29, 72, 0.25)",
         },
+        emerald: colors.red,
+        cyan: colors.rose,
+        indigo: colors.red,
+        teal: colors.red,
       },
       boxShadow: {
-        glow: "0 0 25px rgba(16, 185, 129, 0.2)",
-        glowCyan: "0 0 25px rgba(6, 182, 212, 0.2)",
+        glow: "0 0 25px rgba(220, 38, 38, 0.18)",
+        glowCyan: "0 0 25px rgba(225, 29, 72, 0.18)",
       },
     },
   },

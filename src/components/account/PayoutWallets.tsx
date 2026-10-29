@@ -111,19 +111,19 @@ export default function PayoutWallets({ wallets, onChanged }: PayoutWalletsProps
   };
 
   return (
-    <section id="payout-wallets" className="rounded-2xl border border-white/5 bg-[#0C1320] p-5 sm:p-6 scroll-mt-24">
+    <section id="payout-wallets" className="rounded-2xl border border-red-900/20 bg-white p-5 sm:p-6 scroll-mt-24">
       <div className="mb-5 flex items-start justify-between gap-3">
         <div className="flex items-center gap-2">
-          <Wallet className="h-4 w-4 text-emerald-400" />
+          <Wallet className="h-4 w-4 text-red-800" />
           <div>
-            <h2 className="text-base font-bold text-white">Payout wallets</h2>
-            <p className="text-xs text-slate-500">
+            <h2 className="text-base font-bold text-[#2B0B0E]">Payout wallets</h2>
+            <p className="text-xs text-[#6B1D1D]">
               Save up to {MAX_WALLETS} payout accounts and choose the one that receives your
               profits and withdrawals.
             </p>
           </div>
         </div>
-        <span className="shrink-0 rounded-full border border-white/10 bg-slate-900 px-2.5 py-1 text-[9px] font-bold uppercase text-slate-400">
+        <span className="shrink-0 rounded-full border border-red-900/20 bg-white px-2.5 py-1 text-[9px] font-bold uppercase text-[#5B1B1B]">
           {wallets.length}/{MAX_WALLETS}
         </span>
       </div>
@@ -132,7 +132,7 @@ export default function PayoutWallets({ wallets, onChanged }: PayoutWalletsProps
         <div
           className={`mb-4 rounded-xl border p-3 text-xs ${
             message.type === "success"
-              ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-400"
+              ? "border-red-400 bg-red-100 text-red-800"
               : "border-rose-500/20 bg-rose-500/10 text-rose-400"
           }`}
         >
@@ -141,7 +141,7 @@ export default function PayoutWallets({ wallets, onChanged }: PayoutWalletsProps
       )}
 
       {wallets.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-white/10 p-5 text-center text-xs text-slate-500">
+        <div className="rounded-xl border border-dashed border-red-900/20 p-5 text-center text-xs text-[#6B1D1D]">
           No payout wallets saved yet. Add one below so profit payouts have a verified destination.
         </div>
       ) : (
@@ -151,26 +151,26 @@ export default function PayoutWallets({ wallets, onChanged }: PayoutWalletsProps
               key={wallet.id}
               className={`rounded-xl border p-3.5 ${
                 wallet.isProfitDestination
-                  ? "border-emerald-500/25 bg-emerald-500/5"
-                  : "border-white/5 bg-slate-900/50"
+                  ? "border-red-400 bg-red-50"
+                  : "border-red-900/20 bg-rose-50"
               }`}
             >
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
-                    <p className="truncate text-sm font-semibold text-white">{wallet.label}</p>
+                    <p className="truncate text-sm font-semibold text-[#2B0B0E]">{wallet.label}</p>
                     {wallet.isProfitDestination && (
-                      <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 text-[9px] font-bold uppercase text-emerald-400">
+                      <span className="inline-flex items-center gap-1 rounded-full border border-red-400 bg-red-100 px-2 py-0.5 text-[9px] font-bold uppercase text-red-800">
                         <CircleDollarSign className="h-3 w-3" />
                         Profit destination
                       </span>
                     )}
                   </div>
-                  <p className="mt-0.5 text-[11px] text-slate-500">
+                  <p className="mt-0.5 text-[11px] text-[#6B1D1D]">
                     {wallet.method}
                     {wallet.network ? ` · ${wallet.network}` : ""}
                   </p>
-                  <p className="mt-1 break-all font-mono text-[11px] text-slate-300">
+                  <p className="mt-1 break-all font-mono text-[11px] text-[#3F1414]">
                     {wallet.address}
                   </p>
                 </div>
@@ -180,7 +180,7 @@ export default function PayoutWallets({ wallets, onChanged }: PayoutWalletsProps
                       type="button"
                       disabled={busyId === wallet.id}
                       onClick={() => useAsDestination(wallet.id)}
-                      className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-1.5 text-[10px] font-bold text-emerald-400 hover:bg-emerald-500/20 disabled:opacity-50"
+                      className="inline-flex items-center gap-1.5 rounded-lg border border-red-400 bg-red-100 px-2.5 py-1.5 text-[10px] font-bold text-red-800 hover:bg-red-200 disabled:opacity-50"
                     >
                       {busyId === wallet.id ? <Check className="h-3 w-3" /> : <Star className="h-3 w-3" />}
                       Use for profits
@@ -203,11 +203,11 @@ export default function PayoutWallets({ wallets, onChanged }: PayoutWalletsProps
       )}
 
       {wallets.length < MAX_WALLETS && (
-        <form onSubmit={addWallet} className="mt-5 space-y-3 border-t border-white/5 pt-5">
-          <p className="text-xs font-bold uppercase tracking-wider text-slate-400">Add payout wallet</p>
+        <form onSubmit={addWallet} className="mt-5 space-y-3 border-t border-red-900/20 pt-5">
+          <p className="text-xs font-bold uppercase tracking-wider text-[#5B1B1B]">Add payout wallet</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label htmlFor="wallet-label" className="mb-1 block text-[10px] font-semibold uppercase text-slate-500">
+              <label htmlFor="wallet-label" className="mb-1 block text-[10px] font-semibold uppercase text-[#6B1D1D]">
                 Label
               </label>
               <input
@@ -218,18 +218,18 @@ export default function PayoutWallets({ wallets, onChanged }: PayoutWalletsProps
                 value={label}
                 onChange={(event) => setLabel(event.target.value)}
                 placeholder="e.g. Main USDT wallet"
-                className="w-full rounded-xl border border-white/10 bg-slate-900 px-3 py-2.5 text-sm text-white placeholder-slate-600 focus:border-emerald-500 focus:outline-none"
+                className="w-full rounded-xl border border-red-900/20 bg-white px-3 py-2.5 text-sm text-[#2B0B0E] placeholder-[#8A4A4A] focus:border-red-700 focus:outline-none"
               />
             </div>
             <div>
-              <label htmlFor="wallet-method" className="mb-1 block text-[10px] font-semibold uppercase text-slate-500">
+              <label htmlFor="wallet-method" className="mb-1 block text-[10px] font-semibold uppercase text-[#6B1D1D]">
                 Method
               </label>
               <select
                 id="wallet-method"
                 value={method}
                 onChange={(event) => setMethod(event.target.value)}
-                className="w-full rounded-xl border border-white/10 bg-slate-900 px-3 py-2.5 text-sm text-white focus:border-emerald-500 focus:outline-none"
+                className="w-full rounded-xl border border-red-900/20 bg-white px-3 py-2.5 text-sm text-[#2B0B0E] focus:border-red-700 focus:outline-none"
               >
                 {METHODS.map((entry) => (
                   <option key={entry} value={entry}>
@@ -239,7 +239,7 @@ export default function PayoutWallets({ wallets, onChanged }: PayoutWalletsProps
               </select>
             </div>
             <div>
-              <label htmlFor="wallet-network" className="mb-1 block text-[10px] font-semibold uppercase text-slate-500">
+              <label htmlFor="wallet-network" className="mb-1 block text-[10px] font-semibold uppercase text-[#6B1D1D]">
                 Network (optional)
               </label>
               <input
@@ -249,11 +249,11 @@ export default function PayoutWallets({ wallets, onChanged }: PayoutWalletsProps
                 value={network}
                 onChange={(event) => setNetwork(event.target.value)}
                 placeholder="e.g. TRON"
-                className="w-full rounded-xl border border-white/10 bg-slate-900 px-3 py-2.5 text-sm text-white placeholder-slate-600 focus:border-emerald-500 focus:outline-none"
+                className="w-full rounded-xl border border-red-900/20 bg-white px-3 py-2.5 text-sm text-[#2B0B0E] placeholder-[#8A4A4A] focus:border-red-700 focus:outline-none"
               />
             </div>
             <div>
-              <label htmlFor="wallet-address" className="mb-1 block text-[10px] font-semibold uppercase text-slate-500">
+              <label htmlFor="wallet-address" className="mb-1 block text-[10px] font-semibold uppercase text-[#6B1D1D]">
                 Wallet address / account
               </label>
               <input
@@ -265,17 +265,17 @@ export default function PayoutWallets({ wallets, onChanged }: PayoutWalletsProps
                 value={address}
                 onChange={(event) => setAddress(event.target.value)}
                 placeholder="Paste the payout address"
-                className="w-full rounded-xl border border-white/10 bg-slate-900 px-3 py-2.5 font-mono text-sm text-white placeholder-slate-600 focus:border-emerald-500 focus:outline-none"
+                className="w-full rounded-xl border border-red-900/20 bg-white px-3 py-2.5 font-mono text-sm text-[#2B0B0E] placeholder-[#8A4A4A] focus:border-red-700 focus:outline-none"
               />
             </div>
           </div>
           {wallets.length > 0 && (
-            <label className="flex items-center gap-2 text-[11px] text-slate-400">
+            <label className="flex items-center gap-2 text-[11px] text-[#5B1B1B]">
               <input
                 type="checkbox"
                 checked={makeProfitDestination}
                 onChange={(event) => setMakeProfitDestination(event.target.checked)}
-                className="h-3.5 w-3.5 rounded border-white/20 bg-slate-900"
+                className="h-3.5 w-3.5 rounded border-red-900/20 bg-white"
               />
               Use this wallet for profit payouts
             </label>
@@ -283,7 +283,7 @@ export default function PayoutWallets({ wallets, onChanged }: PayoutWalletsProps
           <button
             type="submit"
             disabled={loading}
-            className="inline-flex items-center gap-2 rounded-xl bg-emerald-500 px-4 py-2.5 text-xs font-bold text-slate-950 hover:bg-emerald-400 disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded-xl bg-red-700 px-4 py-2.5 text-xs font-bold text-white hover:bg-red-800 disabled:opacity-50"
           >
             <PlusCircle className="h-4 w-4" />
             {loading ? "Saving..." : "Save payout wallet"}

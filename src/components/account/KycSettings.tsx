@@ -29,7 +29,7 @@ const STATUS_META: Record<
 > = {
   NOT_STARTED: {
     label: "Not started",
-    className: "border-white/10 bg-slate-900 text-slate-400",
+    className: "border-red-900/20 bg-white text-[#5B1B1B]",
     icon: ShieldAlert,
   },
   PENDING: {
@@ -39,7 +39,7 @@ const STATUS_META: Record<
   },
   APPROVED: {
     label: "Approved",
-    className: "border-emerald-500/20 bg-emerald-500/10 text-emerald-400",
+    className: "border-red-400 bg-red-100 text-red-800",
     icon: BadgeCheck,
   },
   REJECTED: {
@@ -107,13 +107,13 @@ export default function KycSettings({ status, details, onChanged }: KycSettingsP
   const today = new Date().toISOString().slice(0, 10);
 
   return (
-    <section id="kyc" className="rounded-2xl border border-white/5 bg-[#0C1320] p-5 sm:p-6 scroll-mt-24">
+    <section id="kyc" className="rounded-2xl border border-red-900/20 bg-white p-5 sm:p-6 scroll-mt-24">
       <div className="mb-5 flex items-start justify-between gap-3">
         <div className="flex items-center gap-2">
-          <FileCheck2 className="h-4 w-4 text-cyan-400" />
+          <FileCheck2 className="h-4 w-4 text-red-800" />
           <div>
-            <h2 className="text-base font-bold text-white">Identity verification (KYC)</h2>
-            <p className="text-xs text-slate-500">
+            <h2 className="text-base font-bold text-[#2B0B0E]">Identity verification (KYC)</h2>
+            <p className="text-xs text-[#6B1D1D]">
               Withdrawals require an approved identity check. Reviews are completed by our
               compliance team.
             </p>
@@ -131,7 +131,7 @@ export default function KycSettings({ status, details, onChanged }: KycSettingsP
         <div
           className={`mb-4 rounded-xl border p-3 text-xs ${
             message.type === "success"
-              ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-400"
+              ? "border-red-400 bg-red-100 text-red-800"
               : "border-rose-500/20 bg-rose-500/10 text-rose-400"
           }`}
         >
@@ -146,13 +146,13 @@ export default function KycSettings({ status, details, onChanged }: KycSettingsP
             Submitted on {formatDate(details.submittedAt)} for {details.legalName}. We will update
             this page once the review is complete.
           </p>
-          <dl className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] text-slate-300">
+          <dl className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] text-[#3F1414]">
             <div>
-              <dt className="text-slate-500">Document</dt>
+              <dt className="text-[#6B1D1D]">Document</dt>
               <dd>{details.documentType.replace(/_/g, " ")}</dd>
             </div>
             <div>
-              <dt className="text-slate-500">Country</dt>
+              <dt className="text-[#6B1D1D]">Country</dt>
               <dd>{details.country}</dd>
             </div>
           </dl>
@@ -160,19 +160,19 @@ export default function KycSettings({ status, details, onChanged }: KycSettingsP
       )}
 
       {status === "APPROVED" && details && (
-        <div className="rounded-xl border border-emerald-500/15 bg-emerald-500/5 p-4 text-xs">
-          <p className="font-semibold text-emerald-300">Identity verified</p>
-          <p className="mt-1 text-[11px] text-emerald-100/70">
+        <div className="rounded-xl border border-red-300 bg-red-50 p-4 text-xs">
+          <p className="font-semibold text-red-800">Identity verified</p>
+          <p className="mt-1 text-[11px] text-red-900/70">
             Verified {details.reviewedAt ? `on ${formatDate(details.reviewedAt)}` : ""}. You can now
             request withdrawals to your saved payout wallets.
           </p>
-          <dl className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] text-slate-300">
+          <dl className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] text-[#3F1414]">
             <div>
-              <dt className="text-slate-500">Legal name</dt>
+              <dt className="text-[#6B1D1D]">Legal name</dt>
               <dd>{details.legalName}</dd>
             </div>
             <div>
-              <dt className="text-slate-500">Country</dt>
+              <dt className="text-[#6B1D1D]">Country</dt>
               <dd>{details.country}</dd>
             </div>
           </dl>
@@ -193,7 +193,7 @@ export default function KycSettings({ status, details, onChanged }: KycSettingsP
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label htmlFor="kyc-legal-name" className="mb-1.5 block text-[11px] font-semibold uppercase text-slate-400">
+              <label htmlFor="kyc-legal-name" className="mb-1.5 block text-[11px] font-semibold uppercase text-[#5B1B1B]">
                 Full legal name
               </label>
               <input
@@ -204,11 +204,11 @@ export default function KycSettings({ status, details, onChanged }: KycSettingsP
                 maxLength={120}
                 value={legalName}
                 onChange={(event) => setLegalName(event.target.value)}
-                className="w-full rounded-xl border border-white/10 bg-slate-900 px-3 py-2.5 text-sm text-white focus:border-cyan-400 focus:outline-none"
+                className="w-full rounded-xl border border-red-900/20 bg-white px-3 py-2.5 text-sm text-[#2B0B0E] focus:border-red-700 focus:outline-none"
               />
             </div>
             <div>
-              <label htmlFor="kyc-dob" className="mb-1.5 block text-[11px] font-semibold uppercase text-slate-400">
+              <label htmlFor="kyc-dob" className="mb-1.5 block text-[11px] font-semibold uppercase text-[#5B1B1B]">
                 Date of birth
               </label>
               <input
@@ -218,11 +218,11 @@ export default function KycSettings({ status, details, onChanged }: KycSettingsP
                 max={today}
                 value={dateOfBirth}
                 onChange={(event) => setDateOfBirth(event.target.value)}
-                className="w-full rounded-xl border border-white/10 bg-slate-900 px-3 py-2.5 text-sm text-white focus:border-cyan-400 focus:outline-none"
+                className="w-full rounded-xl border border-red-900/20 bg-white px-3 py-2.5 text-sm text-[#2B0B0E] focus:border-red-700 focus:outline-none"
               />
             </div>
             <div>
-              <label htmlFor="kyc-country" className="mb-1.5 block text-[11px] font-semibold uppercase text-slate-400">
+              <label htmlFor="kyc-country" className="mb-1.5 block text-[11px] font-semibold uppercase text-[#5B1B1B]">
                 Country of residence
               </label>
               <input
@@ -233,18 +233,18 @@ export default function KycSettings({ status, details, onChanged }: KycSettingsP
                 maxLength={56}
                 value={country}
                 onChange={(event) => setCountry(event.target.value)}
-                className="w-full rounded-xl border border-white/10 bg-slate-900 px-3 py-2.5 text-sm text-white focus:border-cyan-400 focus:outline-none"
+                className="w-full rounded-xl border border-red-900/20 bg-white px-3 py-2.5 text-sm text-[#2B0B0E] focus:border-red-700 focus:outline-none"
               />
             </div>
             <div>
-              <label htmlFor="kyc-document-type" className="mb-1.5 block text-[11px] font-semibold uppercase text-slate-400">
+              <label htmlFor="kyc-document-type" className="mb-1.5 block text-[11px] font-semibold uppercase text-[#5B1B1B]">
                 Document type
               </label>
               <select
                 id="kyc-document-type"
                 value={documentType}
                 onChange={(event) => setDocumentType(event.target.value)}
-                className="w-full rounded-xl border border-white/10 bg-slate-900 px-3 py-2.5 text-sm text-white focus:border-cyan-400 focus:outline-none"
+                className="w-full rounded-xl border border-red-900/20 bg-white px-3 py-2.5 text-sm text-[#2B0B0E] focus:border-red-700 focus:outline-none"
               >
                 {DOCUMENT_TYPES.map((type) => (
                   <option key={type.value} value={type.value}>
@@ -255,7 +255,7 @@ export default function KycSettings({ status, details, onChanged }: KycSettingsP
             </div>
           </div>
           <div>
-            <label htmlFor="kyc-address" className="mb-1.5 block text-[11px] font-semibold uppercase text-slate-400">
+            <label htmlFor="kyc-address" className="mb-1.5 block text-[11px] font-semibold uppercase text-[#5B1B1B]">
               Residential address
             </label>
             <textarea
@@ -267,11 +267,11 @@ export default function KycSettings({ status, details, onChanged }: KycSettingsP
               value={address}
               onChange={(event) => setAddress(event.target.value)}
               placeholder="Street, city, postcode"
-              className="w-full rounded-xl border border-white/10 bg-slate-900 px-3 py-2.5 text-sm text-white placeholder-slate-600 focus:border-cyan-400 focus:outline-none"
+              className="w-full rounded-xl border border-red-900/20 bg-white px-3 py-2.5 text-sm text-[#2B0B0E] placeholder-[#8A4A4A] focus:border-red-700 focus:outline-none"
             />
           </div>
           <div>
-            <label htmlFor="kyc-document-reference" className="mb-1.5 block text-[11px] font-semibold uppercase text-slate-400">
+            <label htmlFor="kyc-document-reference" className="mb-1.5 block text-[11px] font-semibold uppercase text-[#5B1B1B]">
               Document number
             </label>
             <input
@@ -283,16 +283,16 @@ export default function KycSettings({ status, details, onChanged }: KycSettingsP
               value={documentReference}
               onChange={(event) => setDocumentReference(event.target.value)}
               placeholder="e.g. passport number"
-              className="w-full rounded-xl border border-white/10 bg-slate-900 px-3 py-2.5 text-sm font-mono text-white placeholder-slate-600 focus:border-cyan-400 focus:outline-none"
+              className="w-full rounded-xl border border-red-900/20 bg-white px-3 py-2.5 text-sm font-mono text-[#2B0B0E] placeholder-[#8A4A4A] focus:border-red-700 focus:outline-none"
             />
-            <p className="mt-1.5 text-[10px] text-slate-500">
+            <p className="mt-1.5 text-[10px] text-[#6B1D1D]">
               Enter the reference only. Never upload or share full document scans in chat.
             </p>
           </div>
           <button
             type="submit"
             disabled={loading}
-            className="inline-flex items-center gap-2 rounded-xl bg-cyan-500 px-5 py-2.5 text-sm font-bold text-slate-950 transition hover:bg-cyan-400 disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded-xl bg-red-700 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-red-800 disabled:opacity-50"
           >
             <Send className="h-4 w-4" />
             {loading ? "Submitting..." : "Submit verification"}
