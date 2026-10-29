@@ -159,7 +159,6 @@ export async function POST(request: Request) {
   const page = typeof body.page === "string" ? body.page : undefined;
   let lastStatus = 0;
   let lastCode = "";
-  let lastMessage = "";
   let lastError: unknown = null;
 
   for (const model of models) {
@@ -199,7 +198,6 @@ export async function POST(request: Request) {
             error?: { status?: string; message?: string };
           };
           lastCode = errorBody.error?.status || "";
-          lastMessage = (errorBody.error?.message || "").slice(0, 180);
         } catch {
           lastCode = "";
         }
@@ -252,9 +250,6 @@ export async function POST(request: Request) {
     {
       error:
         "AI support is temporarily unavailable. Please email tradingflow.demo@gmail.com.",
-      upstreamStatus: lastStatus || undefined,
-      upstreamCode: lastCode || undefined,
-      upstreamMessage: lastMessage || undefined,
     },
     { status: 502 }
   );
