@@ -1,3 +1,4 @@
+import { headers } from "next/headers";
 import Link from "next/link";
 import { Mail } from "lucide-react";
 import { breadcrumbJsonLd } from "@/lib/seo";
@@ -11,9 +12,11 @@ interface LegalPageProps {
 }
 
 export default function LegalPage({ title, summary, path, children }: LegalPageProps) {
+  const nonce = headers().get("x-nonce") || undefined;
   return (
     <>
       <script
+        nonce={nonce}
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify(breadcrumbJsonLd(title, path)).replace(/</g, "\\u003c"),

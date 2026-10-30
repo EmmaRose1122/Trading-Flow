@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import Link from "next/link";
 import {
   ArrowDownLeft,
@@ -174,9 +175,11 @@ const moneyMovements = [
 ];
 
 export default function HomePage() {
+  const nonce = headers().get("x-nonce") || undefined;
   return (
     <>
       <script
+        nonce={nonce}
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify(faqStructuredData).replace(/</g, "\\u003c"),

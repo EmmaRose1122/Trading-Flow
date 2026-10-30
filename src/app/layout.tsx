@@ -3,6 +3,8 @@ import "./globals.css";
 import SupportChat from "@/components/support/SupportChat";
 import { COMPANY, SITE_URL } from "@/lib/site";
 
+export const dynamic = "force-dynamic";
+
 const googleVerification = process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION;
 
 export const metadata: Metadata = {

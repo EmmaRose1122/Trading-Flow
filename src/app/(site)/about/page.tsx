@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Building2, CheckCircle2, ShieldCheck, Users } from "lucide-react";
@@ -35,9 +36,11 @@ const principles = [
 ];
 
 export default function AboutPage() {
+  const nonce = headers().get("x-nonce") || undefined;
   return (
     <>
       <script
+        nonce={nonce}
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify(breadcrumbJsonLd("About us", "/about")).replace(/</g, "\\u003c"),

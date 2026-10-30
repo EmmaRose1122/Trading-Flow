@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import Link from "next/link";
 import { Clock, Mail, MapPin, Phone } from "lucide-react";
 import ContactForm from "@/components/site/ContactForm";
@@ -14,9 +15,11 @@ export const metadata: Metadata = createPageMetadata({
 });
 
 export default function ContactPage() {
+  const nonce = headers().get("x-nonce") || undefined;
   return (
     <>
       <script
+        nonce={nonce}
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify([

@@ -1,8 +1,10 @@
+import { headers } from "next/headers";
 import PublicHeader from "@/components/site/PublicHeader";
 import SiteFooter from "@/components/site/SiteFooter";
 import { organizationJsonLd, websiteJsonLd } from "@/lib/seo";
 
 export default function PublicSiteLayout({ children }: { children: React.ReactNode }) {
+  const nonce = headers().get("x-nonce") || undefined;
   const structuredData = [organizationJsonLd(), websiteJsonLd()];
 
   return (
@@ -19,6 +21,7 @@ export default function PublicSiteLayout({ children }: { children: React.ReactNo
       </main>
       <SiteFooter />
       <script
+        nonce={nonce}
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify(structuredData).replace(/</g, "\\u003c"),
