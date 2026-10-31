@@ -1,0 +1,631 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>CoreChain — Investor Overview</title>
+<style>
+  @page { size: 1280px 720px; margin: 0; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: #ffffff; }
+  body { font-family: Arial, Helvetica, sans-serif; color: #2b0b0e; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .slide {
+    position: relative; width: 1280px; height: 720px; overflow: hidden;
+    background: #ffffff; page-break-after: always; break-after: page;
+    padding: 56px 64px 62px;
+  }
+  .slide:last-child { page-break-after: auto; break-after: auto; }
+  .cover { padding: 0; background: #7f1d1d; color: #fff; }
+  .cover-grid { display: grid; grid-template-columns: 57% 43%; height: 100%; }
+  .cover-left { padding: 64px 54px 56px 64px; display: flex; flex-direction: column; justify-content: space-between; position: relative; }
+  .cover-left:after { content: ""; position: absolute; right: 0; top: 0; bottom: 0; width: 1px; background: rgba(255,255,255,.18); }
+  .cover-right { position: relative; overflow: hidden; background: #160708; }
+  .cover-right img { width: 100%; height: 100%; object-fit: cover; opacity: .78; }
+  .cover-right:after { content: ""; position: absolute; inset: 0; background: linear-gradient(120deg, rgba(127,29,29,.65), rgba(0,0,0,.12)); }
+  .cover-note { position: absolute; left: 28px; right: 28px; bottom: 26px; z-index: 2; padding: 14px 16px; border: 1px solid rgba(255,255,255,.2); background: rgba(0,0,0,.32); font-size: 11px; line-height: 1.55; color: rgba(255,255,255,.8); }
+  .brand { display: flex; align-items: center; gap: 14px; }
+  .brand img { width: 56px; height: 56px; border-radius: 14px; }
+  .brand-name { font-size: 20px; font-weight: 800; letter-spacing: .02em; }
+  .brand-sub { font-size: 9px; font-weight: 700; letter-spacing: .22em; color: #fca5a5; margin-top: 4px; }
+  .cover-kicker { font-size: 11px; font-weight: 800; letter-spacing: .22em; color: #fde68a; text-transform: uppercase; }
+  .cover h1 { margin: 16px 0 0; max-width: 650px; font-size: 52px; line-height: 1.04; letter-spacing: -.035em; font-weight: 800; }
+  .cover-lede { margin: 22px 0 0; max-width: 620px; color: rgba(255,255,255,.82); font-size: 17px; line-height: 1.55; }
+  .cover-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 28px; }
+  .chip { border: 1px solid rgba(255,255,255,.22); background: rgba(255,255,255,.08); border-radius: 999px; padding: 7px 11px; font-size: 10px; font-weight: 700; color: #fff; }
+  .cover-meta { display: flex; justify-content: space-between; align-items: end; gap: 20px; font-size: 11px; color: rgba(255,255,255,.72); }
+  .eyebrow { color: #b91c1c; font-size: 10px; font-weight: 800; letter-spacing: .2em; text-transform: uppercase; }
+  .slide-title { margin: 10px 0 0; font-size: 39px; line-height: 1.08; letter-spacing: -.03em; color: #2b0b0e; font-weight: 800; }
+  .slide-lede { margin: 12px 0 0; max-width: 950px; color: #6b4a4a; font-size: 14px; line-height: 1.55; }
+  .slide-head { display: flex; justify-content: space-between; gap: 24px; align-items: end; }
+  .slide-tag { border: 1px solid #fecaca; background: #fff1f2; color: #b91c1c; border-radius: 999px; padding: 7px 11px; font-size: 9px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; white-space: nowrap; }
+  .page-no { position: absolute; right: 64px; bottom: 24px; font-size: 9px; color: #9a6a6a; letter-spacing: .12em; }
+  .footer-note { position: absolute; left: 64px; right: 150px; bottom: 24px; display: flex; justify-content: space-between; gap: 20px; font-size: 9px; color: #9a6a6a; border-top: 1px solid #f3dada; padding-top: 8px; }
+  .footer-note strong { color: #7f1d1d; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  .card { border: 1px solid #f0dada; border-radius: 18px; padding: 20px; background: #fff; }
+  .card-rose { background: #fff7f7; border-color: #f4cccc; }
+  .card-dark { background: #160708; border-color: #3c1518; color: #fff; }
+  .card h3 { margin: 10px 0 0; font-size: 16px; line-height: 1.2; }
+  .card p { margin: 8px 0 0; font-size: 11px; line-height: 1.55; color: #6b4a4a; }
+  .card-dark p { color: rgba(255,255,255,.68); }
+  .num { display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 10px; background: #b91c1c; color: #fff; font-size: 12px; font-weight: 800; }
+  .kpi { display: flex; align-items: end; gap: 8px; margin-top: 8px; color: #b91c1c; font-weight: 800; }
+  .kpi b { font-size: 40px; line-height: 1; letter-spacing: -.04em; }
+  .kpi span { font-size: 10px; color: #6b4a4a; font-weight: 700; margin-bottom: 4px; }
+  .illus { border-radius: 20px; overflow: hidden; border: 1px solid #f0dada; background: #fff7f7; }
+  .illus img { display: block; width: 100%; height: 100%; object-fit: cover; }
+  .hero-img { height: 360px; }
+  .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 26px; }
+  .step { position: relative; border: 1px solid #f0dada; background: #fff; border-radius: 16px; padding: 18px; }
+  .step-num { font-size: 10px; font-weight: 800; color: #b91c1c; letter-spacing: .15em; }
+  .step h3 { margin: 10px 0 0; font-size: 15px; }
+  .step p { margin: 7px 0 0; font-size: 11px; line-height: 1.5; color: #6b4a4a; }
+  .table { width: 100%; border-collapse: collapse; margin-top: 18px; font-size: 11px; }
+  .table th { background: #fff1f2; color: #7f1d1d; text-align: left; padding: 10px 12px; font-size: 9px; letter-spacing: .1em; text-transform: uppercase; }
+  .table td { border-top: 1px solid #f3dede; padding: 10px 12px; color: #3f1414; }
+  .table tr.total td { background: #fff1f2; font-weight: 800; color: #7f1d1d; }
+  .formula { border-radius: 18px; border: 1px solid #f0dada; background: #fff7f7; padding: 18px; }
+  .formula .line { font-size: 22px; font-weight: 800; color: #7f1d1d; letter-spacing: -.02em; }
+  .formula .small { font-size: 11px; color: #6b4a4a; margin-top: 8px; line-height: 1.5; }
+  .rate { display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #f3dede; padding: 10px 0; font-size: 12px; }
+  .rate:last-child { border-bottom: 0; }
+  .rate strong { color: #b91c1c; font-size: 16px; }
+  .pill { display: inline-block; border: 1px solid #fecaca; background: #fff1f2; border-radius: 999px; padding: 5px 9px; font-size: 9px; font-weight: 800; color: #b91c1c; text-transform: uppercase; letter-spacing: .08em; }
+  .callout { border-left: 5px solid #b91c1c; background: #fff7f7; padding: 14px 16px; border-radius: 0 12px 12px 0; font-size: 11px; line-height: 1.55; color: #5b1b1b; }
+  .callout strong { color: #7f1d1d; }
+  .dark-panel { border-radius: 20px; background: #160708; color: #fff; padding: 24px; position: relative; overflow: hidden; }
+  .dark-panel:after { content: ""; position: absolute; width: 260px; height: 260px; right: -100px; top: -120px; border-radius: 50%; background: rgba(185,28,28,.3); }
+  .dark-panel h2 { position: relative; margin: 0; font-size: 24px; letter-spacing: -.02em; }
+  .dark-panel p { position: relative; margin: 10px 0 0; font-size: 11px; line-height: 1.55; color: rgba(255,255,255,.7); }
+  .dark-panel .big { position: relative; margin: 16px 0 0; color: #fde68a; font-size: 44px; line-height: 1; font-weight: 800; letter-spacing: -.04em; }
+  .dark-panel .small { position: relative; margin-top: 6px; color: rgba(255,255,255,.55); font-size: 10px; }
+  .phone { width: 238px; height: 420px; border-radius: 30px; border: 7px solid #160708; background: #fff; box-shadow: 0 20px 45px rgba(43,11,14,.18); overflow: hidden; position: relative; margin: 0 auto; }
+  .phone-top { height: 28px; background: #160708; color: #fff; display: flex; align-items: center; justify-content: space-between; padding: 0 12px; font-size: 7px; }
+  .phone-body { padding: 14px; }
+  .phone-body .mini { font-size: 7px; color: #9a6a6a; text-transform: uppercase; letter-spacing: .12em; }
+  .phone-body .balance { font-size: 24px; font-weight: 800; color: #2b0b0e; margin-top: 3px; }
+  .mini-card { margin-top: 10px; border-radius: 10px; background: #fff1f2; border: 1px solid #fecaca; padding: 9px; }
+  .mini-card b { display: block; font-size: 11px; color: #b91c1c; }
+  .mini-card span { font-size: 7px; color: #6b4a4a; }
+  .phone-row { display: flex; justify-content: space-between; font-size: 7px; color: #6b4a4a; padding: 5px 0; border-bottom: 1px solid #f3dede; }
+  .phone-row strong { color: #2b0b0e; }
+  .contact-block { border: 1px solid #f0dada; background: #fff; border-radius: 16px; padding: 18px; }
+  .contact-block h3 { margin: 0 0 8px; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: #7f1d1d; }
+  .contact-block p { margin: 0; font-size: 14px; line-height: 1.5; color: #2b0b0e; }
+  .risk-list { margin: 14px 0 0; padding: 0; list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 10px 22px; }
+  .risk-list li { font-size: 11px; line-height: 1.55; color: #5b1b1b; padding-left: 15px; position: relative; }
+  .risk-list li:before { content: "•"; position: absolute; left: 0; color: #b91c1c; font-weight: 800; }
+  .closing { background: #7f1d1d; color: #fff; }
+  .closing .slide-title { color: #fff; }
+  .closing .eyebrow { color: #fde68a; }
+  .closing .footer-note { border-color: rgba(255,255,255,.2); color: rgba(255,255,255,.6); }
+  .closing .footer-note strong { color: #fff; }
+  .closing-grid { display: grid; grid-template-columns: 1.15fr .85fr; gap: 48px; align-items: center; height: 100%; }
+  .invite { border: 1px solid rgba(255,255,255,.25); background: rgba(0,0,0,.2); border-radius: 18px; padding: 22px; }
+  .invite .label { font-size: 9px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; color: #fde68a; }
+  .invite .code { font-family: "Courier New", monospace; font-size: 30px; font-weight: 800; letter-spacing: .08em; margin-top: 8px; }
+  .invite .url { font-size: 11px; color: rgba(255,255,255,.75); margin-top: 8px; word-break: break-all; }
+  .closing-list { list-style: none; padding: 0; margin: 20px 0 0; display: grid; gap: 10px; }
+  .closing-list li { font-size: 12px; line-height: 1.5; color: rgba(255,255,255,.85); padding-left: 16px; position: relative; }
+  .closing-list li:before { content: "→"; position: absolute; left: 0; color: #fde68a; }
+  .muted { color: #6b4a4a; }
+  .small { font-size: 10px; line-height: 1.55; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .three-col { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .stack { display: flex; flex-direction: column; gap: 12px; }
+  .tight { margin: 0; }
+  .mt-16 { margin-top: 16px; }
+  .mt-24 { margin-top: 24px; }
+  .mt-30 { margin-top: 30px; }
+@media screen { body:has(.slide:target) .slide:not(:target) { display: none; } }
+.bottom-facts { position: absolute; left: 64px; right: 64px; bottom: 64px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .bottom-facts > div { border-top: 1px solid #f3dada; padding-top: 9px; }
+  .bottom-facts b { display: block; color: #b91c1c; font-size: 9px; letter-spacing: .13em; text-transform: uppercase; }
+  .bottom-facts span { display: block; margin-top: 4px; color: #5b1b1b; font-size: 11px; line-height: 1.45; }
+</style>
+</head>
+<body>
+
+<!-- 01 COVER -->
+<section id="s1" class="slide cover">
+  <div class="cover-grid">
+    <div class="cover-left">
+      <div>
+        <div class="brand">
+          <img src="../public/brand/app-icon.png" alt="CoreChain">
+          <div>
+            <div class="brand-name">CoreChain</div>
+            <div class="brand-sub">DIGITAL ASSET INVESTMENT</div>
+          </div>
+        </div>
+        <div class="cover-kicker" style="margin-top:58px">Investor overview · 2026</div>
+        <h1>Digital asset investing with a ledger you can verify.</h1>
+        <p class="cover-lede">Bitget execution connectivity. BEP20 settlement on BNB Smart Chain. One account for the plan, the payout trail and your 15-level income network.</p>
+        <div class="cover-chips">
+          <span class="chip">Daily 2% plan</span>
+          <span class="chip">BEP20 settlement</span>
+          <span class="chip">15-level income</span>
+          <span class="chip">Singapore support</span>
+        </div>
+      </div>
+      <div class="cover-meta">
+        <span>CoreChain investor overview</span>
+        <span>Singapore support desk · SGT</span>
+      </div>
+    </div>
+    <div class="cover-right">
+      <img src="../public/images/corechain-execution.png" alt="Abstract execution and settlement network">
+      <div class="cover-note">Capital at risk. CoreChain does not claim authorisation or regulation by any financial regulator. Bitget is an independent third-party execution venue. This document is information, not an offer or financial advice.</div>
+    </div>
+  </div>
+</section>
+
+<!-- 02 OVERVIEW -->
+<section id="s2" class="slide">
+  <div class="slide-head">
+    <div>
+      <div class="eyebrow">The CoreChain account</div>
+      <h2 class="slide-title">One platform. Four clear layers.</h2>
+      <p class="slide-lede">CoreChain brings the investment plan, the ledger, the execution route and the payout proof into one investor dashboard.</p>
+    </div>
+    <span class="slide-tag">Investor overview</span>
+  </div>
+  <div class="grid-2 mt-30" style="grid-template-columns:1.05fr .95fr; align-items:stretch">
+    <div class="grid-2" style="gap:14px">
+      <div class="card card-rose"><span class="num">01</span><h3>One daily plan</h3><p>A single Daily 2% Plan with a $10 minimum, no maximum and a 24-hour activation wait.</p></div>
+      <div class="card card-rose"><span class="num">02</span><h3>Visible execution</h3><p>Orders route through authorised Bitget execution connectivity and are reconciled before the ledger updates.</p></div>
+      <div class="card card-rose"><span class="num">03</span><h3>On-chain payouts</h3><p>Completed BEP20 withdrawals carry a BNB Smart Chain transaction hash for BscScan verification.</p></div>
+      <div class="card card-rose"><span class="num">04</span><h3>15-level income</h3><p>Approved downline deposits can generate one-time commission across 15 levels, with a 15% combined rate.</p></div>
+    </div>
+    <div class="illus" style="height:100%; min-height:365px">
+      <img src="../public/images/corechain-bep20.png" alt="BEP20 chain links and blockchain blocks">
+    </div>
+  </div>
+  <div class="footer-note"><span><strong>CoreChain</strong> · Digital asset investment platform</span><span>Capital at risk · Not a regulated financial product</span></div>
+  <div class="page-no">02 / 15</div>
+</section>
+
+<!-- 03 HOW IT WORKS -->
+<section id="s3" class="slide">
+  <div class="slide-head">
+    <div>
+      <div class="eyebrow">How it works</div>
+      <h2 class="slide-title">From account to verified payout.</h2>
+      <p class="slide-lede">Four steps keep the user journey simple while the platform records what happened behind the scenes.</p>
+    </div>
+    <span class="slide-tag">4-step journey</span>
+  </div>
+  <div class="steps">
+    <div class="step"><div class="step-num">STEP 01</div><h3>Create your account</h3><p>Register with the platform invitation code <strong>corechain</strong> or a sponsor code, then sign in securely.</p></div>
+    <div class="step"><div class="step-num">STEP 02</div><h3>Choose the plan</h3><p>Review the Daily 2% Plan terms and use the dashboard calculator before funding.</p></div>
+    <div class="step"><div class="step-num">STEP 03</div><h3>Fund and activate</h3><p>Submit a deposit. After administrator approval, the 24-hour eligibility window begins.</p></div>
+    <div class="step"><div class="step-num">STEP 04</div><h3>Track and withdraw</h3><p>Follow eligible profit, downline income and withdrawal hashes in the ledger.</p></div>
+  </div>
+  <div class="grid-3 mt-30">
+    <div class="card"><div class="kpi"><b>24h</b><span>WAIT AFTER APPROVAL</span></div><p>The profit clock starts after a deposit is approved and the waiting period completes.</p></div>
+    <div class="card"><div class="kpi"><b>2%</b><span>DAILY PLAN RATE</span></div><p>Calculated on the total approved deposits that are eligible for that cycle.</p></div>
+    <div class="card"><div class="kpi"><b>15</b><span>INCOME LEVELS</span></div><p>Level income is based on approved downline deposits, not on a user's own deposit.</p></div>
+  </div>
+  <div class="bottom-facts">
+    <div><b>One plan</b><span>Start from $10</span></div>
+    <div><b>24-hour wait</b><span>Before eligibility</span></div>
+    <div><b>Ledger</b><span>Every step recorded</span></div>
+  </div>
+  <div class="footer-note"><span><strong>CoreChain</strong> · Start with the plan, follow the ledger</span><span>Plan rates are illustrative and not guaranteed</span></div>
+  <div class="page-no">03 / 15</div>
+</section>
+
+<!-- 04 PLAN -->
+<section id="s4" class="slide">
+  <div class="slide-head">
+    <div>
+      <div class="eyebrow">The plan</div>
+      <h2 class="slide-title">The Daily 2% Plan.</h2>
+      <p class="slide-lede">One plan, deliberately simple. The same terms apply whether an investor starts with $10 or adds more later.</p>
+    </div>
+    <span class="slide-tag">One plan only</span>
+  </div>
+  <div class="grid-2 mt-30" style="grid-template-columns:1.1fr .9fr">
+    <div class="dark-panel">
+      <h2>Daily 2% Plan</h2>
+      <p>Deposit from $10, add funds at any time, and earn 2% every 24 hours after each deposit completes its 24-hour waiting period.</p>
+      <div class="big">2.0%</div>
+      <div class="small">daily plan rate · illustrative, not guaranteed</div>
+      <div style="position:relative; display:flex; gap:8px; margin-top:22px; flex-wrap:wrap">
+        <span class="chip" style="border-color:rgba(253,230,138,.3); color:#fde68a">Minimum $10</span>
+        <span class="chip" style="border-color:rgba(255,255,255,.15)">No maximum</span>
+        <span class="chip" style="border-color:rgba(255,255,255,.15)">24h activation</span>
+      </div>
+    </div>
+    <div class="card card-rose">
+      <div class="rate"><span>Minimum deposit</span><strong>$10</strong></div>
+      <div class="rate"><span>Maximum deposit</span><strong>Unlimited</strong></div>
+      <div class="rate"><span>Daily rate</span><strong>2.0%</strong></div>
+      <div class="rate"><span>Profit cycle</span><strong>24 hours</strong></div>
+      <div class="rate"><span>Eligibility wait</span><strong>24 hours</strong></div>
+      <div class="rate"><span>Withdrawal minimum</span><strong>$10</strong></div>
+    </div>
+  </div>
+  <div class="callout mt-24"><strong>Important:</strong> A plan rate is not a promise of future performance. Daily profit depends on approved, eligible deposits; capital remains at risk and can be lost.</div>
+  <div class="bottom-facts">
+    <div><b>Start small</b><span>$10 minimum · unlimited maximum</span></div>
+    <div><b>Activation</b><span>24 hours after approval</span></div>
+    <div><b>Profit cycle</b><span>At most once every 24 hours</span></div>
+  </div>
+  <div class="footer-note"><span><strong>CoreChain</strong> · Daily 2% Plan</span><span>2% daily plan rate · not guaranteed</span></div>
+  <div class="page-no">04 / 15</div>
+</section>
+
+<!-- 05 ROI CALCULATION -->
+<section id="s5" class="slide">
+  <div class="slide-head">
+    <div>
+      <div class="eyebrow">ROI mechanics</div>
+      <h2 class="slide-title">How the daily ROI is calculated.</h2>
+      <p class="slide-lede">The plan uses the total approved deposits that have completed the 24-hour wait. It is not based on an unrelated contract balance.</p>
+    </div>
+    <span class="slide-tag">Formula</span>
+  </div>
+  <div class="grid-2 mt-24" style="grid-template-columns:.9fr 1.1fr">
+    <div class="stack">
+      <div class="formula"><div class="line">Eligible deposits × 2% = daily profit</div><div class="small">Only approved deposits older than 24 hours are included. Profit is credited at most once per 24-hour cycle and recorded as a ledger entry.</div></div>
+      <div class="formula"><div class="line">$1,000 × 2% = $20</div><div class="small">Illustrative daily profit on an eligible $1,000 deposit before withdrawals or any reinvestment.</div></div>
+      <div class="callout"><strong>Compounding note:</strong> if profit is withdrawn, the eligible deposit base does not grow from that profit. Adding a new approved deposit can increase the base.</div>
+    </div>
+    <div>
+      <table class="table">
+        <thead><tr><th>Eligible deposit</th><th>Daily 2%</th><th>30 days</th><th>90 days</th></tr></thead>
+        <tbody>
+          <tr><td>$100</td><td>$2.00</td><td>$60.00</td><td>$180.00</td></tr>
+          <tr><td>$1,000</td><td>$20.00</td><td>$600.00</td><td>$1,800.00</td></tr>
+          <tr><td>$5,000</td><td>$100.00</td><td>$3,000.00</td><td>$9,000.00</td></tr>
+          <tr class="total"><td>Illustrative only</td><td>2% per day</td><td>30 cycles</td><td>90 cycles</td></tr>
+        </tbody>
+      </table>
+      <p class="small mt-16">The table assumes the deposit remains eligible for every cycle, no withdrawals, no reinvestment and no change in plan terms. It is an illustration, not a forecast or guarantee.</p>
+    </div>
+  </div>
+  <div class="bottom-facts">
+    <div><b>Eligible base</b><span>Approved deposits only</span></div>
+    <div><b>Formula</b><span>Eligible deposits × 2%</span></div>
+    <div><b>Risk</b><span>Returns are not guaranteed</span></div>
+  </div>
+  <div class="footer-note"><span><strong>CoreChain</strong> · ROI calculation</span><span>Capital at risk · returns not guaranteed</span></div>
+  <div class="page-no">05 / 15</div>
+</section>
+
+<!-- 06 EARNINGS GROWTH -->
+<section id="s6" class="slide">
+  <div class="slide-head">
+    <div>
+      <div class="eyebrow">Growing your earning base</div>
+      <h2 class="slide-title">Four levers that can increase earnings.</h2>
+      <p class="slide-lede">Earnings are not automatic; each lever depends on approved deposits, eligibility and plan performance.</p>
+    </div>
+    <span class="slide-tag">Illustrative</span>
+  </div>
+  <div class="grid-4 mt-24">
+    <div class="card card-rose"><span class="pill">01</span><h3>Add eligible deposits</h3><p>A larger approved deposit base produces a larger 2% daily calculation, subject to eligibility.</p></div>
+    <div class="card card-rose"><span class="pill">02</span><h3>Keep deposits eligible</h3><p>Approved deposits that have passed the 24-hour wait are included in the cycle.</p></div>
+    <div class="card card-rose"><span class="pill">03</span><h3>Build network volume</h3><p>Each approved downline deposit can generate one-time level income across up to 15 levels.</p></div>
+    <div class="card card-rose"><span class="pill">04</span><h3>Reinvest deliberately</h3><p>Adding profit back as a new approved deposit can enlarge the eligible base, but increases exposure and risk.</p></div>
+  </div>
+  <div class="grid-2 mt-24" style="grid-template-columns:1fr 1fr">
+    <div class="card">
+      <h3 style="margin-top:0">Daily base comparison</h3>
+      <div class="rate"><span>$100 eligible</span><strong>$2 / day</strong></div>
+      <div class="rate"><span>$1,000 eligible</span><strong>$20 / day</strong></div>
+      <div class="rate"><span>$5,000 eligible</span><strong>$100 / day</strong></div>
+      <div class="rate"><span>$10,000 eligible</span><strong>$200 / day</strong></div>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0">What can slow growth</h3>
+      <div class="rate"><span>Withdrawing profit</span><strong>Base stays lower</strong></div>
+      <div class="rate"><span>Deposit not approved</span><strong>No profit</strong></div>
+      <div class="rate"><span>24-hour wait</span><strong>Not yet eligible</strong></div>
+      <div class="rate"><span>Plan changes</span><strong>Terms may change</strong></div>
+    </div>
+  </div>
+  <div class="footer-note"><span><strong>CoreChain</strong> · Earnings depend on eligible deposits</span><span>Not a guarantee of future income</span></div>
+  <div class="page-no">06 / 15</div>
+</section>
+
+<!-- 07 15 LEVELS -->
+<section id="s7" class="slide">
+  <div class="slide-head">
+    <div>
+      <div class="eyebrow">15-level income network</div>
+      <h2 class="slide-title">Income that follows a verified network.</h2>
+      <p class="slide-lede">Level income is a one-time referral commission on an approved downline deposit. It is not a daily ROI and is not paid on your own deposit.</p>
+    </div>
+    <span class="slide-tag">Maximum 15% combined</span>
+  </div>
+  <div class="grid-2 mt-24" style="grid-template-columns:1.05fr .95fr">
+    <div>
+      <div class="rate"><span>Level 1</span><strong>5.0%</strong></div>
+      <div class="rate"><span>Level 2</span><strong>3.0%</strong></div>
+      <div class="rate"><span>Level 3</span><strong>1.0%</strong></div>
+      <div class="rate"><span>Levels 4–15</span><strong>0.5% each</strong></div>
+      <div class="rate" style="border-top:2px solid #fecaca; border-bottom:0; padding-top:16px"><span style="font-weight:800; color:#2b0b0e">Combined rate</span><strong style="font-size:22px">15.0%</strong></div>
+    </div>
+    <div class="dark-panel">
+      <h2>Depth matters.</h2>
+      <p>The dashboard shows approved downline volume, active levels, the deepest active level and the commission already credited to your wallet.</p>
+      <div class="big">15</div>
+      <div class="small">levels visible in the network structure</div>
+      <div style="position:relative; display:flex; gap:5px; margin-top:22px">
+        <span style="height:8px; flex:1; border-radius:99px; background:#fde68a"></span><span style="height:8px; flex:1; border-radius:99px; background:#fde68a"></span><span style="height:8px; flex:1; border-radius:99px; background:#fde68a"></span><span style="height:8px; flex:1; border-radius:99px; background:#dc2626"></span><span style="height:8px; flex:1; border-radius:99px; background:#dc2626"></span><span style="height:8px; flex:1; border-radius:99px; background:#dc2626"></span><span style="height:8px; flex:1; border-radius:99px; background:#dc2626"></span><span style="height:8px; flex:1; border-radius:99px; background:#dc2626"></span><span style="height:8px; flex:1; border-radius:99px; background:#dc2626"></span><span style="height:8px; flex:1; border-radius:99px; background:#dc2626"></span><span style="height:8px; flex:1; border-radius:99px; background:#dc2626"></span><span style="height:8px; flex:1; border-radius:99px; background:#dc2626"></span><span style="height:8px; flex:1; border-radius:99px; background:#3c1518"></span><span style="height:8px; flex:1; border-radius:99px; background:#3c1518"></span><span style="height:8px; flex:1; border-radius:99px; background:#3c1518"></span>
+      </div>
+    </div>
+  </div>
+  <div class="callout mt-24"><strong>Example:</strong> a $1,000 approved deposit by a partner at each of the 15 levels produces $150 in combined level commission — 5% + 3% + 1% + twelve 0.5% amounts. Each commission requires a separate approved deposit in that level.</div>
+  <div class="bottom-facts">
+    <div><b>Structure</b><span>Levels 1 through 15</span></div>
+    <div><b>Combined rate</b><span>15% one-time commission</span></div>
+    <div><b>Requirement</b><span>Approved downline deposits</span></div>
+  </div>
+  <div class="footer-note"><span><strong>CoreChain</strong> · 15-level income</span><span>One-time commission · not a daily return</span></div>
+  <div class="page-no">07 / 15</div>
+</section>
+
+<!-- 08 LEVEL EXAMPLE -->
+<section id="s8" class="slide">
+  <div class="slide-head">
+    <div>
+      <div class="eyebrow">Level income example</div>
+      <h2 class="slide-title">$150 across a full 15-level chain.</h2>
+      <p class="slide-lede">This is a worked example, not a projection. It assumes one approved $1,000 deposit by a different partner at every level.</p>
+    </div>
+    <span class="slide-tag">Worked example</span>
+  </div>
+  <div class="grid-2 mt-24" style="grid-template-columns:1fr 1fr">
+    <div class="card card-rose">
+      <div class="rate"><span>Level 1 — 5% of $1,000</span><strong>$50.00</strong></div>
+      <div class="rate"><span>Level 2 — 3% of $1,000</span><strong>$30.00</strong></div>
+      <div class="rate"><span>Level 3 — 1% of $1,000</span><strong>$10.00</strong></div>
+      <div class="rate"><span>Levels 4–15 — 0.5% × 12</span><strong>$60.00</strong></div>
+      <div class="rate" style="border-top:2px solid #fecaca; border-bottom:0; padding-top:16px"><span style="font-weight:800; color:#2b0b0e">Total level income</span><strong style="font-size:22px">$150.00</strong></div>
+    </div>
+    <div class="stack">
+      <div class="callout"><strong>One-time, not daily.</strong> The $150 is credited once per approved downline deposit as level commission. It is not a recurring daily payment.</div>
+      <div class="callout"><strong>No self-income.</strong> Your own deposit does not generate level commission for you; the income follows the upline of the depositing member.</div>
+      <div class="callout"><strong>No guaranteed depth.</strong> A partner must actually join and fund at each level for the corresponding commission to arise.</div>
+      <div class="callout"><strong>Withdrawable balance.</strong> Credited commission enters the wallet and is subject to the platform's KYC and withdrawal rules.</div>
+    </div>
+  </div>
+  <div class="bottom-facts">
+    <div><b>Levels</b><span>1 through 15</span></div>
+    <div><b>Commission</b><span>One-time per approved deposit</span></div>
+    <div><b>Wallet</b><span>Withdraw after KYC</span></div>
+  </div>
+  <div class="footer-note"><span><strong>CoreChain</strong> · Illustrative level income</span><span>Actual income depends on approved downline deposits</span></div>
+  <div class="page-no">08 / 15</div>
+</section>
+
+<!-- 09 MONEY MOVEMENT -->
+<section id="s9" class="slide">
+  <div class="slide-head">
+    <div>
+      <div class="eyebrow">Deposits & withdrawals</div>
+      <h2 class="slide-title">Money movement with clear rules.</h2>
+      <p class="slide-lede">Deposits are reviewed before they become eligible. Withdrawals are reviewed and then settled in BEP20 on BNB Smart Chain.</p>
+    </div>
+    <span class="slide-tag">BEP20 · BSC</span>
+  </div>
+  <div class="grid-2 mt-24">
+    <div class="card">
+      <span class="pill">Deposits</span>
+      <div class="rate"><span>Minimum</span><strong>$10</strong></div>
+      <div class="rate"><span>Maximum</span><strong>Unlimited</strong></div>
+      <div class="rate"><span>Status</span><strong>Pending → Approved</strong></div>
+      <div class="rate"><span>Profit eligibility</span><strong>24h after approval</strong></div>
+      <p class="small mt-16">A deposit is credited only after administrator review. The reference must be unique.</p>
+    </div>
+    <div class="card">
+      <span class="pill">Withdrawals</span>
+      <div class="rate"><span>Minimum</span><strong>$10</strong></div>
+      <div class="rate"><span>Handling fee</span><strong>2% added</strong></div>
+      <div class="rate"><span>Request limit</span><strong>Once / 24h</strong></div>
+      <div class="rate"><span>KYC</span><strong>Approved first</strong></div>
+      <p class="small mt-16">A $100 request has a $2 fee, a $102 wallet deduction and a $100 payout before network conditions. Completed payouts show a BscScan hash.</p>
+    </div>
+  </div>
+  <div class="callout mt-24"><strong>BEP20 addresses only:</strong> use a 0x address with 40 hexadecimal characters. Transfers on the wrong network or to the wrong address may be irreversible.</div>
+  <div class="bottom-facts">
+    <div><b>BEP20 only</b><span>0x address · BSC</span></div>
+    <div><b>Handling fee</b><span>2% added</span></div>
+    <div><b>Payout proof</b><span>BscScan transaction hash</span></div>
+  </div>
+  <div class="footer-note"><span><strong>CoreChain</strong> · BEP20 settlement on BNB Smart Chain</span><span>Withdrawals are subject to KYC, review and on-chain conditions</span></div>
+  <div class="page-no">09 / 15</div>
+</section>
+
+<!-- 10 TECHNOLOGY -->
+<section id="s10" class="slide">
+  <div class="slide-head">
+    <div>
+      <div class="eyebrow">Technology</div>
+      <h2 class="slide-title">Execution and settlement, made visible.</h2>
+      <p class="slide-lede">Bitget provides the execution venue. BNB Smart Chain provides settlement evidence. CoreChain records the route and the result.</p>
+    </div>
+    <span class="slide-tag">Bitget · BSC</span>
+  </div>
+  <div class="grid-2 mt-24" style="grid-template-columns:1.05fr .95fr; align-items:stretch">
+    <div class="illus" style="min-height:300px"><img src="../public/images/corechain-execution.png" alt="Exchange execution network illustration"></div>
+    <div class="stack">
+      <div class="card"><div class="kpi"><b>Bitget</b><span>EXECUTION CONNECTIVITY</span></div><p>Orders are routed through authorised Bitget execution infrastructure and reconciled before the investor ledger is updated.</p></div>
+      <div class="card"><div class="kpi"><b>BEP20</b><span>ON BNB SMART CHAIN</span></div><p>Chain ID 56. Completed withdrawals store a transaction hash that can be checked on BscScan.</p></div>
+      <div class="callout"><strong>Independent venue notice:</strong> Bitget is a third-party exchange. Its services do not mean that Bitget endorses, guarantees or insures CoreChain products.</div>
+    </div>
+  </div>
+  <div class="bottom-facts">
+    <div><b>Network</b><span>BNB Smart Chain</span></div>
+    <div><b>Chain ID</b><span>56</span></div>
+    <div><b>Proof</b><span>BscScan transaction hash</span></div>
+  </div>
+  <div class="footer-note"><span><strong>CoreChain</strong> · Technology & infrastructure</span><span>Bitget is an independent execution venue</span></div>
+  <div class="page-no">10 / 15</div>
+</section>
+
+<!-- 11 SECURITY -->
+<section id="s11" class="slide">
+  <div class="slide-head">
+    <div>
+      <div class="eyebrow">Security & controls</div>
+      <h2 class="slide-title">Protection around the account and the payout.</h2>
+      <p class="slide-lede">The platform combines access controls, administrator review and server-side key isolation.</p>
+    </div>
+    <span class="slide-tag">Controls</span>
+  </div>
+  <div class="grid-2 mt-24">
+    <div class="card card-rose"><span class="num">01</span><h3>KYC before withdrawal</h3><p>Identity verification must be approved before withdrawal access is enabled.</p></div>
+    <div class="card card-rose"><span class="num">02</span><h3>2FA & session security</h3><p>Optional TOTP two-factor authentication, hashed passwords and HTTP-only signed sessions.</p></div>
+    <div class="card card-rose"><span class="num">03</span><h3>Admin approval lock</h3><p>A withdrawal moves from pending to processing under an atomic lock, preventing double approval.</p></div>
+    <div class="card card-rose"><span class="num">04</span><h3>Server-side key isolation</h3><p>The BSC signing key is read only by the server-side withdrawal service and never shown in the browser.</p></div>
+  </div>
+  <div class="callout mt-24"><strong>On-chain verification:</strong> a broadcast transfer is only marked completed after the configured confirmation. A reverted or unverified transfer is not treated as paid.</div>
+  <div class="bottom-facts">
+    <div><b>KYC</b><span>Withdrawals gated</span></div>
+    <div><b>2FA</b><span>Optional account protection</span></div>
+    <div><b>Approval</b><span>Atomic admin lock</span></div>
+  </div>
+  <div class="footer-note"><span><strong>CoreChain</strong> · Account and payout controls</span><span>No security control removes investment risk</span></div>
+  <div class="page-no">11 / 15</div>
+</section>
+
+<!-- 12 DASHBOARD / APP -->
+<section id="s12" class="slide">
+  <div class="slide-head">
+    <div>
+      <div class="eyebrow">Dashboard & mobile app</div>
+      <h2 class="slide-title">Your numbers, in one place.</h2>
+      <p class="slide-lede">The investor dashboard and Android app keep the plan, ledger and network view close at hand.</p>
+    </div>
+    <span class="slide-tag">Web + APK</span>
+  </div>
+  <div class="grid-2 mt-24" style="grid-template-columns:1fr .9fr; align-items:center">
+    <div class="grid-2" style="gap:14px">
+      <div class="card"><h3 style="margin-top:0">Daily ROI view</h3><p>Eligible deposits, projected daily profit and the next 24-hour cycle.</p></div>
+      <div class="card"><h3 style="margin-top:0">Transaction ledger</h3><p>Deposits, withdrawals, profits and level commissions with status and references.</p></div>
+      <div class="card"><h3 style="margin-top:0">15-level planner</h3><p>Approved volume, active depth, level rates and an illustrative income planner.</p></div>
+      <div class="card"><h3 style="margin-top:0">BEP20 payout trail</h3><p>Withdrawal hashes open directly on BscScan for independent checking.</p></div>
+    </div>
+    <div class="phone">
+      <div class="phone-top"><span>CoreChain</span><span>●</span></div>
+      <div class="phone-body">
+        <div class="mini">Total wallet balance</div>
+        <div class="balance">$1,240.00</div>
+        <div class="mini-card"><b>+$20.00 / day</b><span>Daily 2% · illustrative</span></div>
+        <div class="mini" style="margin-top:12px">Recent ledger</div>
+        <div class="phone-row"><span>Daily profit</span><strong>+$20.00</strong></div>
+        <div class="phone-row"><span>Level 1 income</span><strong>+$5.00</strong></div>
+        <div class="phone-row"><span>BEP20 withdrawal</span><strong>Completed</strong></div>
+        <div class="phone-row"><span>Active depth</span><strong>15 / 15</strong></div>
+        <div style="margin-top:12px; text-align:center; font-size:7px; color:#9a6a6a">Illustrative interface · not a real account</div>
+      </div>
+    </div>
+  </div>
+  <div class="bottom-facts">
+    <div><b>Web</b><span>Investor portal</span></div>
+    <div><b>Android</b><span>APK version 2.1.0</span></div>
+    <div><b>Updates</b><span>Live website updates</span></div>
+  </div>
+  <div class="footer-note"><span><strong>CoreChain</strong> · Android app version 2.1.0</span><span>Download from the website /download</span></div>
+  <div class="page-no">12 / 15</div>
+</section>
+
+<!-- 13 SUPPORT -->
+<section id="s13" class="slide">
+  <div class="slide-head">
+    <div>
+      <div class="eyebrow">Support</div>
+      <h2 class="slide-title">Singapore support, by appointment.</h2>
+      <p class="slide-lede">Questions about the plan, a BEP20 payout or the level planner can be directed to the support desk.</p>
+    </div>
+    <span class="slide-tag">SGT · UTC+8</span>
+  </div>
+  <div class="grid-2 mt-24" style="grid-template-columns:1.05fr .95fr; align-items:stretch">
+    <div class="stack">
+      <div class="contact-block"><h3>Support desk</h3><p>Singapore · Appointments only<br><span class="small">Meetings are arranged through the contact page. No walk-in street address is published.</span></p></div>
+      <div class="contact-block"><h3>Email</h3><p>corechain@gmail.com</p></div>
+      <div class="contact-block"><h3>Support hours</h3><p>Appointments only · SGT (UTC+8)</p></div>
+    </div>
+    <div class="illus" style="min-height:320px"><img src="../public/images/corechain-singapore.png" alt="Singapore financial district skyline"></div>
+  </div>
+  <div class="callout mt-24"><strong>Before contacting support:</strong> keep your transaction ID or BEP20 transaction hash ready. Never send your password, 2FA code or wallet private key.</div>
+  <div class="bottom-facts">
+    <div><b>Desk</b><span>Singapore · appointments</span></div>
+    <div><b>Email</b><span>corechain@gmail.com</span></div>
+    <div><b>Hours</b><span>SGT (UTC+8)</span></div>
+  </div>
+  <div class="footer-note"><span><strong>CoreChain</strong> · Singapore support desk</span><span>corechain@gmail.com</span></div>
+  <div class="page-no">13 / 15</div>
+</section>
+
+<!-- 14 RISK -->
+<section id="s14" class="slide">
+  <div class="slide-head">
+    <div>
+      <div class="eyebrow">Risk & responsible investing</div>
+      <h2 class="slide-title">Understand the risk before you commit.</h2>
+      <p class="slide-lede">A visible plan and on-chain settlement do not remove market, operational or technology risk.</p>
+    </div>
+    <span class="slide-tag">Read before investing</span>
+  </div>
+  <div class="card card-rose mt-24" style="padding:24px">
+    <ul class="risk-list">
+      <li><strong>Capital is at risk.</strong> Digital-asset values can fall as well as rise, and you may get back less than you deposited.</li>
+      <li><strong>Plan rates are not guarantees.</strong> The 2% daily rate is a plan term, not a promise of future performance.</li>
+      <li><strong>Level income is not fixed.</strong> It requires approved downline deposits and actual network depth.</li>
+      <li><strong>Bitget is independent.</strong> Its services are subject to its own terms and do not guarantee CoreChain products.</li>
+      <li><strong>BEP20 transfers are irreversible.</strong> Use the correct BNB Smart Chain address; wrong-network transfers may be lost.</li>
+      <li><strong>No regulator endorsement.</strong> CoreChain does not claim authorisation or regulation by any financial regulator.</li>
+      <li><strong>Not financial advice.</strong> Nothing in this document is personal investment, tax or legal advice.</li>
+      <li><strong>Operational risk exists.</strong> Platform, network, exchange and confirmation delays can affect timing.</li>
+    </ul>
+  </div>
+  <div class="callout mt-24"><strong>Responsible approach:</strong> only commit funds you can afford to lose, understand the plan's 24-hour eligibility rule, and review the full risk warning on the website before registering.</div>
+  <div class="bottom-facts">
+    <div><b>Capital</b><span>At risk</span></div>
+    <div><b>Returns</b><span>Not guaranteed</span></div>
+    <div><b>Advice</b><span>Not financial advice</span></div>
+  </div>
+  <div class="footer-note"><span><strong>CoreChain</strong> · Risk warning</span><span>Capital at risk · not a regulated financial product</span></div>
+  <div class="page-no">14 / 15</div>
+</section>
+
+<!-- 15 CLOSING -->
+<section id="s15" class="slide closing">
+  <div class="closing-grid">
+    <div>
+      <div class="eyebrow">Start with clarity</div>
+      <h2 class="slide-title">Your CoreChain account starts here.</h2>
+      <p class="slide-lede" style="color:rgba(255,255,255,.78)">Register with the platform invitation code, review the plan, and follow every approved deposit and BEP20 payout in one ledger.</p>
+      <ul class="closing-list">
+        <li>Daily 2% Plan · $10 minimum · no maximum</li>
+        <li>15-level income · 15% combined level rate</li>
+        <li>BEP20 settlement · BscScan-verifiable hashes</li>
+        <li>Singapore support desk · corechain@gmail.com</li>
+      </ul>
+    </div>
+    <div>
+      <div class="invite">
+        <div class="label">Platform invitation code</div>
+        <div class="code">corechain</div>
+        <div class="url">https://trading-flow-capital.vercel.app/register?ref=corechain</div>
+      </div>
+      <div class="invite" style="margin-top:14px">
+        <div class="label">Investor portal</div>
+        <div class="url">https://trading-flow-capital.vercel.app</div>
+        <div class="url">Android app: /download · version 2.1.0</div>
+      </div>
+      <p style="margin:20px 0 0; font-size:10px; line-height:1.6; color:rgba(255,255,255,.6)">Capital at risk. CoreChain does not claim authorisation or regulation by any financial regulator. Bitget is an independent third-party execution venue. This document is marketing information, not an offer or financial advice.</p>
+    </div>
+  </div>
+  <div class="footer-note" style="left:64px; right:150px"><span><strong>CoreChain</strong> · Digital asset investment platform</span><span>Singapore support desk · SGT</span></div>
+  <div class="page-no" style="color:rgba(255,255,255,.6)">15 / 15</div>
+</section>
+
+</body>
+</html>
