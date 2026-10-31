@@ -25,6 +25,7 @@ import {
 import DemoActivityCarousel from "@/components/site/DemoActivityCarousel";
 import FloatingBitcoin from "@/components/site/FloatingBitcoin";
 import Hero3D from "@/components/site/Hero3D";
+import LiveSignalOverview from "@/components/site/LiveSignalOverview";
 import { createPageMetadata } from "@/lib/seo";
 import { BLOCKCHAIN, EXECUTION, SITE_PLANS } from "@/lib/site";
 import { PLATFORM_REFERRAL_CODE, displayReferralCode } from "@/lib/referral";
@@ -267,6 +268,8 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      <LiveSignalOverview />
 
       <section aria-label="Platform overview" className="border-b border-red-900/20 bg-[#FFF5F5]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">

@@ -43,6 +43,7 @@ TECHNOLOGY, EXECUTION AND SETTLEMENT
 - The platform waits for on-chain confirmation before marking a withdrawal COMPLETED and stores the transaction hash for BscScan verification.
 - A completed blockchain transfer proves that tokens moved; it does not guarantee profit or protect capital.
 - The technology page at /technology explains execution, settlement, controls and the Singapore support desk.
+- The website homepage shows a live market signal overview with prices and trend labels from public exchange data. Trend labels are informational summaries, not trading advice or recommendations.
 
 PLANS AND PROFIT LOGIC
 ${planKnowledge}
