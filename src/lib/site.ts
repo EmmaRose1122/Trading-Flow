@@ -60,6 +60,7 @@ export const SITE_PLANS = [
 
 export const PUBLIC_PAGES = [
   { name: "Home", href: "/" },
+  { name: "Markets", href: "/markets" },
   { name: "Technology", href: "/technology" },
   { name: "About us", href: "/about" },
   { name: "Contact us", href: "/contact" },

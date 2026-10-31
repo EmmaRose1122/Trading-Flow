@@ -12,12 +12,12 @@ const protectedPaths = new Set([
   "/admin",
 ]);
 
-function buildCsp(nonce: string) {
+function buildCsp(nonce: string, allowInlineStyles = false) {
   const isDevelopment = process.env.NODE_ENV !== "production";
   return [
     "default-src 'self'",
     `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${isDevelopment ? " 'unsafe-eval'" : ""}`,
-    "style-src 'self'",
+    allowInlineStyles ? "style-src 'self' 'unsafe-inline'" : "style-src 'self'",
     "style-src-attr 'unsafe-inline'",
     "img-src 'self' data: blob:",
     "font-src 'self' data:",
@@ -50,8 +50,8 @@ function redirectResponse(request: NextRequest, path: string, csp: string) {
 
 export async function middleware(request: NextRequest) {
   const nonce = btoa(crypto.randomUUID());
-  const csp = buildCsp(nonce);
   const { pathname } = request.nextUrl;
+  const csp = buildCsp(nonce, pathname === "/markets");
 
   if (!protectedPaths.has(pathname)) {
     return nonceResponse(request, nonce, csp);

@@ -7,6 +7,7 @@ Full-stack digital-asset investment platform built with Next.js App Router, Tail
 - Responsive investor dashboard with mobile bottom navigation
 - Bitget execution connectivity and a public technology/trust page
 - Live market signal overview on the homepage with real public exchange data
+- Live candlestick market terminal at /markets with timeframes and trend stats
 - BEP20 settlement on BNB Smart Chain with BscScan-verifiable withdrawal hashes
 - Single daily 2% plan: $10 minimum, no maximum, profits after 24-hour deposit maturity
 - Deposit approval, daily profit accrual and 24-hour withdrawal limits

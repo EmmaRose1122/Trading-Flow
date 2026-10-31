@@ -44,6 +44,7 @@ TECHNOLOGY, EXECUTION AND SETTLEMENT
 - A completed blockchain transfer proves that tokens moved; it does not guarantee profit or protect capital.
 - The technology page at /technology explains execution, settlement, controls and the Singapore support desk.
 - The website homepage shows a live market signal overview with prices and trend labels from public exchange data. Trend labels are informational summaries, not trading advice or recommendations.
+- The /markets page shows live candlestick charts with timeframes for BTC, ETH, BNB, SOL, XRP and DOGE using public exchange data. Charts are informational, not trading advice.
 
 PLANS AND PROFIT LOGIC
 ${planKnowledge}

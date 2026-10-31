@@ -143,6 +143,13 @@ export default function LiveSignalOverview() {
               refreshed automatically. Trend labels are informational summaries, not trading
               recommendations.
             </p>
+            <a
+              href="/markets"
+              className="mt-4 inline-flex items-center gap-1.5 text-xs font-bold text-yellow-300 hover:text-yellow-200"
+            >
+              Open full candlestick charts
+              <ArrowUpRight className="h-3.5 w-3.5" />
+            </a>
           </div>
           <div className="flex items-center gap-3 text-[10px] font-semibold text-neutral-400">
             <span className="inline-flex items-center gap-1.5">
