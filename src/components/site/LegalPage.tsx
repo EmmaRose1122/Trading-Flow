@@ -17,6 +17,7 @@ export default function LegalPage({ title, summary, path, children }: LegalPageP
     <>
       <script
         nonce={nonce}
+        suppressHydrationWarning
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify(breadcrumbJsonLd(title, path)).replace(/</g, "\\u003c"),

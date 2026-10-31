@@ -57,15 +57,15 @@ export async function middleware(request: NextRequest) {
     return nonceResponse(request, nonce, csp);
   }
 
-  const token = request.cookies.get("tf_session")?.value;
+  const token = request.cookies.get("cc_session")?.value;
   if (!token || !secret || secret.length < 32) {
     return redirectResponse(request, "/login", csp);
   }
 
   try {
     const { payload } = await jwtVerify(token, new TextEncoder().encode(secret), {
-      issuer: "trading-flow",
-      audience: "trading-flow-app",
+      issuer: "corechain",
+      audience: "corechain-app",
     });
     if (pathname === "/admin" && payload.role !== "ADMIN") {
       return redirectResponse(request, "/dashboard", csp);

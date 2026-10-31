@@ -73,11 +73,13 @@ function isCredit(transaction: Transaction) {
 }
 
 function statusClass(status: Transaction["status"]) {
-  if (status === "APPROVED" || status === "SUCCESS") {
+  if (status === "APPROVED" || status === "SUCCESS" || status === "COMPLETED") {
     return "bg-red-100 text-red-800 border-red-400";
   }
-  if (status === "PENDING") return "bg-amber-500/10 text-amber-400 border-amber-500/20";
-  return "bg-rose-500/10 text-rose-400 border-rose-500/20";
+  if (status === "PENDING" || status === "PROCESSING") {
+    return "bg-amber-100 text-amber-800 border-amber-400";
+  }
+  return "bg-rose-100 text-rose-800 border-rose-400";
 }
 
 export default function ProfilePage() {
@@ -205,7 +207,7 @@ export default function ProfilePage() {
                 <p className="mt-2 text-[11px] text-[#6B1D1D]">
                   Account ID: <span className="font-mono text-[#5B1B1B]">{user.id}</span> · Member
                   since{" "}
-                  {new Date(user.createdAt).toLocaleDateString("en-GB", {
+                  {new Date(user.createdAt).toLocaleDateString("en-SG", {
                     day: "numeric",
                     month: "short",
                     year: "numeric",
@@ -301,7 +303,7 @@ export default function ProfilePage() {
                         <p className="text-sm font-semibold text-[#2B0B0E]">{money(deposit.amount)}</p>
                         <p className="mt-0.5 text-[11px] text-[#6B1D1D]">
                           {deposit.method} · approved{" "}
-                          {new Date(deposit.approvedAt).toLocaleDateString("en-GB")}
+                          {new Date(deposit.approvedAt).toLocaleDateString("en-SG")}
                         </p>
                       </div>
                       <div className="sm:text-right">
@@ -311,7 +313,7 @@ export default function ProfilePage() {
                         <p className="text-[10px] text-[#6B1D1D]">
                           {deposit.isEligible
                             ? "Earning 2% daily"
-                            : `Starts ${new Date(deposit.eligibleAt).toLocaleString("en-GB")}`}
+                            : `Starts ${new Date(deposit.eligibleAt).toLocaleString("en-SG")}`}
                         </p>
                       </div>
                     </div>
@@ -401,7 +403,7 @@ export default function ProfilePage() {
                   {recentTransactions.map((transaction) => (
                     <tr key={transaction.id}>
                       <td className="py-3 px-2 text-[#6B1D1D] whitespace-nowrap">
-                        {new Date(transaction.createdAt).toLocaleDateString("en-GB")}
+                        {new Date(transaction.createdAt).toLocaleDateString("en-SG")}
                       </td>
                       <td className="py-3 px-2 font-semibold text-[#2B0B0E] whitespace-nowrap">{transaction.type}</td>
                       <td className={`py-3 px-2 font-semibold whitespace-nowrap ${isCredit(transaction) ? "text-red-800" : "text-[#2B0B0E]"}`}>

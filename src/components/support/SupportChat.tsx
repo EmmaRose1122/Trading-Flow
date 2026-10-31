@@ -13,20 +13,20 @@ interface Message {
   content: string;
 }
 
-const supportEmail = "tradingflow.demo@gmail.com";
+const supportEmail = COMPANY.email;
 
 const welcomeMessage: Message = {
   id: "welcome",
   role: "assistant",
   content:
-    "Hi, I'm Flow — Trading Flow Capital's AI support assistant. I can explain plans, daily profit, deposits, withdrawals and account security. I cannot access accounts or approve transactions. Please never share passwords or wallet keys.",
+    "Hi, I'm Cora — CoreChain's AI support assistant. I can explain plans, Bitget execution, BEP20 settlement, deposits, withdrawals and account security. I cannot access accounts or approve transactions. Please never share passwords or wallet keys.",
 };
 
 const suggestions = [
   "How is daily profit calculated?",
   "What are the plan minimums?",
   "How do withdrawals work?",
-  "Is Trading Flow regulated?",
+  "Is CoreChain regulated?",
 ];
 
 const appNavPaths = ["/dashboard", "/plans", "/transactions", "/referrals", "/admin"];
@@ -138,7 +138,7 @@ export default function SupportChat() {
         <section
           role="dialog"
           aria-modal="false"
-          aria-label="Trading Flow AI support"
+          aria-label="CoreChain AI support"
           onKeyDown={(event) => {
             if (event.key === "Escape") setOpen(false);
           }}

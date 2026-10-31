@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { COMPANY } from "@/lib/site";
 import { buildSupportSystemPrompt } from "@/lib/support-knowledge";
 
 export const runtime = "nodejs";
@@ -105,7 +106,7 @@ export async function POST(request: Request) {
   if (!apiKey) {
     return NextResponse.json(
       {
-        error: "AI support is not configured yet. Please email tradingflow.demo@gmail.com.",
+        error: `AI support is not configured yet. Please email ${COMPANY.email}.`,
         code: "AI_NOT_CONFIGURED",
       },
       { status: 503 }
@@ -241,15 +242,14 @@ export async function POST(request: Request) {
   }
   if (lastError instanceof Error && lastError.name === "AbortError") {
     return NextResponse.json(
-      { error: "AI support timed out. Please try again or email tradingflow.demo@gmail.com." },
+      { error: `AI support timed out. Please try again or email ${COMPANY.email}.` },
       { status: 504 }
     );
   }
 
   return NextResponse.json(
     {
-      error:
-        "AI support is temporarily unavailable. Please email tradingflow.demo@gmail.com.",
+      error: `AI support is temporarily unavailable. Please email ${COMPANY.email}.`,
     },
     { status: 502 }
   );

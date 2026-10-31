@@ -58,7 +58,7 @@ export default function Navbar({ user, onOpenDeposit, onOpenWithdraw }: NavbarPr
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link href="/dashboard" aria-label="Trading Flow Capital dashboard">
+          <Link href="/dashboard" aria-label="CoreChain dashboard">
             <BrandLockup />
           </Link>
 

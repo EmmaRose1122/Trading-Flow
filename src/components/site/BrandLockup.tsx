@@ -20,10 +20,10 @@ export default function BrandLockup({ iconSize = 40, priority = false }: BrandLo
       />
       <span className="min-w-0 leading-none">
         <span className={`block whitespace-nowrap ${titleClass} font-extrabold tracking-tight text-[#2B0B0E]`}>
-          TRADING <span className="text-red-800">FLOW</span>
+          CORE<span className="text-red-800">CHAIN</span>
         </span>
         <span className="mt-1.5 block text-[9px] font-bold uppercase tracking-[0.24em] text-red-800">
-          CAPITAL
+          DIGITAL ASSET INVESTMENT
         </span>
       </span>
     </span>

@@ -1,4 +1,4 @@
-export const PLATFORM_REFERRAL_CODE = "TRADING FLOW";
+export const PLATFORM_REFERRAL_CODE = "CORECHAIN";
 export const MAX_REFERRAL_LEVELS = 15;
 
 export const REFERRAL_LEVEL_RATES: number[] = [
@@ -52,7 +52,9 @@ export interface ReferralLevelSummary {
   level: number;
   rate: number;
   count: number;
+  volume: number;
   earnings: number;
+  commissionCount: number;
   members: ReferralMember[];
 }
 
@@ -62,6 +64,10 @@ export interface ReferralSummary {
   upline: ReferralUplineMember[];
   directCount: number;
   networkCount: number;
+  networkVolume: number;
+  activeLevels: number;
+  deepestLevel: number;
+  totalRate: number;
   totalEarnings: number;
   commissionCount: number;
   levels: ReferralLevelSummary[];
@@ -120,9 +126,20 @@ export function summarizeReferralNetwork(
     level: index + 1,
     rate,
     count: 0,
+    volume: 0,
     earnings: 0,
+    commissionCount: 0,
     members: [],
   }));
+
+  const approvedVolumeByUser = new Map<string, number>();
+  for (const transaction of transactions) {
+    if (transaction.type !== "DEPOSIT" || transaction.status !== "APPROVED") continue;
+    approvedVolumeByUser.set(
+      transaction.userId,
+      (approvedVolumeByUser.get(transaction.userId) || 0) + transaction.amount
+    );
+  }
 
   const childrenBySponsor = new Map<string, ReferralUserLike[]>();
   for (const entry of users) {
@@ -151,6 +168,10 @@ export function summarizeReferralNetwork(
     const summary = levels[level - 1];
     summary.members = next.map(toMember);
     summary.count = next.length;
+    summary.volume =
+      Math.round(
+        next.reduce((total, member) => total + (approvedVolumeByUser.get(member.id) || 0), 0) * 100
+      ) / 100;
     frontier = next;
   }
 
@@ -163,13 +184,23 @@ export function summarizeReferralNetwork(
   for (const commission of ownCommissions) {
     const level = Number(commission.referralLevel);
     const summary = levels[level - 1];
-    if (summary) summary.earnings = Math.round((summary.earnings + commission.amount) * 100) / 100;
+    if (summary) {
+      summary.earnings = Math.round((summary.earnings + commission.amount) * 100) / 100;
+      summary.commissionCount += 1;
+    }
   }
 
   const totalEarnings = Math.round(
     ownCommissions.reduce((total, entry) => total + entry.amount, 0) * 100
   ) / 100;
   const networkCount = levels.reduce((total, entry) => total + entry.count, 0);
+  const networkVolume =
+    Math.round(levels.reduce((total, entry) => total + entry.volume, 0) * 100) / 100;
+  const activeLevels = levels.filter((entry) => entry.count > 0).length;
+  const deepestLevel = levels.reduce(
+    (deepest, entry) => (entry.count > 0 ? entry.level : deepest),
+    0
+  );
 
   return {
     level: upline.length,
@@ -177,6 +208,10 @@ export function summarizeReferralNetwork(
     upline,
     directCount: levels[0].count,
     networkCount,
+    networkVolume,
+    activeLevels,
+    deepestLevel,
+    totalRate: levels.reduce((total, entry) => total + entry.rate, 0),
     totalEarnings,
     commissionCount: ownCommissions.length,
     levels,

@@ -5,6 +5,7 @@ import { Pool } from "pg";
 import {
   DAILY_RETURN_PERCENT,
   DEPOSIT_MATURITY_MS,
+  WITHDRAWAL_COOLDOWN_MS,
 } from "./deposit";
 import {
   PLATFORM_REFERRAL_CODE,
@@ -121,7 +122,7 @@ export interface Transaction {
     | "REFERRAL";
   amount: number;
   fee: number;
-  status: "PENDING" | "APPROVED" | "REJECTED" | "SUCCESS";
+  status: "PENDING" | "PROCESSING" | "APPROVED" | "REJECTED" | "SUCCESS" | "COMPLETED" | "FAILED";
   method: string;
   txHash?: string;
   destination?: string;
@@ -129,6 +130,8 @@ export interface Transaction {
   proofUrl?: string;
   depositAccountId?: string;
   approvedAt?: string;
+  processedAt?: string;
+  errorMessage?: string;
   referralLevel?: number;
   sourceUserId?: string;
   sourceUserName?: string;
@@ -154,7 +157,7 @@ interface DatabaseSchema {
 const DB_FILE = process.env.DB_FILE
   ? path.resolve(process.env.DB_FILE)
   : process.env.VERCEL
-    ? path.join("/tmp", "trading-flow-db.json")
+    ? path.join("/tmp", "corechain-db.json")
     : path.join(process.cwd(), ".data", "db.json");
 const DB_DIR = path.dirname(DB_FILE);
 
@@ -175,7 +178,7 @@ function ensureBootstrapAdmin(data: DatabaseSchema) {
   const adminName = (process.env.ADMIN_NAME || "Platform Admin").trim();
   const adminReferral = PLATFORM_REFERRAL_CODE;
 
-  const demoAdminEmails = new Set(["admin@tradingflow.com"]);
+  const demoAdminEmails = new Set(["admin@corechain.test"]);
   if (
     data.users.some(
       (user) => user.role === "ADMIN" && !demoAdminEmails.has(user.email.toLowerCase())
@@ -218,58 +221,16 @@ function ensureBootstrapAdmin(data: DatabaseSchema) {
 }
 
 function getDefaultDepositAccounts(): DepositAccount[] {
-  const createdAt = new Date().toISOString();
-  return [
-    {
-      id: "dep_usdt_trc20",
-      label: "USDT (TRC20)",
-      method: "USDT (TRC20)",
-      network: "TRON",
-      currency: "USDT",
-      address: "TNVbE1fB8QzLkmXzV8o14Y7J6Xk9Pq3Wa7",
-      accountName: "Trading Flow Capital",
-      instructions: "Send only USDT on the TRC20 network to this address.",
-      isActive: true,
-      createdAt,
-    },
-    {
-      id: "dep_btc",
-      label: "Bitcoin (BTC)",
-      method: "Bitcoin (BTC)",
-      network: "Bitcoin",
-      currency: "BTC",
-      address: "bc1q8x4f0k726af8yqlpt840x9812lkm904",
-      accountName: "Trading Flow Capital",
-      instructions: "Send only Bitcoin to this address.",
-      isActive: true,
-      createdAt,
-    },
-    {
-      id: "dep_eth_erc20",
-      label: "Ethereum (ERC20)",
-      method: "Ethereum (ERC20)",
-      network: "Ethereum",
-      currency: "ETH / USDT",
-      address: "0x71C7656EC7ab88b098defB751B7401B5f6d8976F",
-      accountName: "Trading Flow Capital",
-      instructions: "Confirm the network before sending funds.",
-      isActive: true,
-      createdAt,
-    },
-    {
-      id: "dep_gbp_bank",
-      label: "GBP Bank Transfer (demo)",
-      method: "Bank Transfer",
-      network: "Faster Payments",
-      currency: "GBP",
-      address: "Demo Bank · Sort code 00-00-00 · Account 00000000",
-      accountName: "Trading Flow Capital Ltd",
-      instructions: "Demonstration account details. Replace before accepting real funds.",
-      isActive: true,
-      createdAt,
-    },
-  ];
+  // Real receiving accounts must be added by an administrator; never seed placeholder addresses.
+  return [];
 }
+
+const LEGACY_PLACEHOLDER_ACCOUNTS: Record<string, string> = {
+  dep_usdt_trc20: "TNVbE1fB8QzLkmXzV8o14Y7J6Xk9Pq3Wa7",
+  dep_btc: "bc1q8x4f0k726af8yqlpt840x9812lkm904",
+  dep_eth_erc20: "0x71C7656EC7ab88b098defB751B7401B5f6d8976F",
+  dep_gbp_bank: "Demo Bank · Sort code 00-00-00 · Account 00000000",
+};
 
 function ensureFeatureCollections(data: DatabaseSchema) {
   let changed = false;
@@ -281,6 +242,25 @@ function ensureFeatureCollections(data: DatabaseSchema) {
     data.payoutWallets = [];
     changed = true;
   }
+
+  for (const account of data.depositAccounts) {
+    const placeholder = LEGACY_PLACEHOLDER_ACCOUNTS[account.id];
+    if (placeholder && account.address === placeholder && account.isActive) {
+      account.isActive = false;
+      changed = true;
+    }
+    if (account.accountName === "Trading Flow Capital" || account.accountName === "Trading Flow Capital Ltd") {
+      account.accountName = "CoreChain";
+      changed = true;
+    }
+    if (account.id === "dep_gbp_bank" && /demo/i.test(`${account.label} ${account.instructions}`)) {
+      account.label = "GBP Bank Transfer";
+      account.instructions = "Bank transfer details are not configured.";
+      account.isActive = false;
+      changed = true;
+    }
+  }
+
   return changed;
 }
 
@@ -351,7 +331,7 @@ function getDefaultData(): DatabaseSchema {
     users: includeDemoAccounts ? [
       {
         id: "usr_admin",
-        email: "admin@tradingflow.com",
+        email: "admin@corechain.test",
         name: "Platform Master Admin",
         passwordHash: adminHash,
         role: "ADMIN",
@@ -360,7 +340,7 @@ function getDefaultData(): DatabaseSchema {
       },
       {
         id: "usr_investor",
-        email: "user@tradingflow.com",
+        email: "user@corechain.test",
         name: "Alex Stewart",
         passwordHash: userHash,
         role: "USER",
@@ -424,7 +404,7 @@ function getDefaultData(): DatabaseSchema {
       {
         id: "TX-7892104",
         userId: "usr_investor",
-        userEmail: "user@tradingflow.com",
+        userEmail: "user@corechain.test",
         userName: "Alex Stewart",
         type: "PROFIT",
         amount: 280.0,
@@ -437,7 +417,7 @@ function getDefaultData(): DatabaseSchema {
       {
         id: "TX-7892103",
         userId: "usr_investor",
-        userEmail: "user@tradingflow.com",
+        userEmail: "user@corechain.test",
         userName: "Alex Stewart",
         type: "DEPOSIT",
         amount: 5000.0,
@@ -450,7 +430,7 @@ function getDefaultData(): DatabaseSchema {
       {
         id: "TX-7892102",
         userId: "usr_investor",
-        userEmail: "user@tradingflow.com",
+        userEmail: "user@corechain.test",
         userName: "Alex Stewart",
         type: "WITHDRAWAL",
         amount: 750.0,
@@ -463,7 +443,7 @@ function getDefaultData(): DatabaseSchema {
       {
         id: "TX-7892101",
         userId: "usr_investor",
-        userEmail: "user@tradingflow.com",
+        userEmail: "user@corechain.test",
         userName: "Alex Stewart",
         type: "INVESTMENT",
         amount: 10000.0,
@@ -876,6 +856,203 @@ export const db = {
       data.transactions.unshift(tx);
       return tx;
     }),
+
+  createWithdrawalRequest: (params: {
+    id: string;
+    userId: string;
+    amount: number;
+    fee: number;
+    method: string;
+    destination: string;
+    payoutWalletId?: string;
+    note?: string;
+  }) =>
+    mutateData((data) => {
+      const user = data.users.find((entry) => entry.id === params.userId);
+      const wallet = data.wallets.find((entry) => entry.userId === params.userId);
+      if (!user || !wallet) return { error: "User wallet not found", status: 404 };
+
+      const lastWithdrawal = [...data.transactions]
+        .filter((tx) => tx.userId === user.id && tx.type === "WITHDRAWAL")
+        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0];
+      if (lastWithdrawal) {
+        const nextAllowedAt =
+          new Date(lastWithdrawal.createdAt).getTime() + WITHDRAWAL_COOLDOWN_MS;
+        if (Date.now() < nextAllowedAt) {
+          return {
+            error: `Withdrawals are available once every 24 hours. Next request allowed after ${new Date(
+              nextAllowedAt
+            ).toLocaleString("en-SG")}.`,
+            status: 429,
+          };
+        }
+      }
+
+      const totalDeduction = Math.round((params.amount + params.fee) * 100) / 100;
+      if (wallet.currentBalance < totalDeduction) {
+        return {
+          error: `Insufficient balance. Total required with fee is $${totalDeduction.toFixed(2)}`,
+          status: 400,
+        };
+      }
+
+      wallet.currentBalance = Math.round((wallet.currentBalance - totalDeduction) * 100) / 100;
+      wallet.updatedAt = new Date().toISOString();
+
+      const transaction: Transaction = {
+        id: params.id,
+        userId: user.id,
+        userEmail: user.email,
+        userName: user.name,
+        type: "WITHDRAWAL",
+        amount: params.amount,
+        fee: params.fee,
+        status: "PENDING",
+        method: params.method,
+        destination: params.destination,
+        payoutWalletId: params.payoutWalletId,
+        note: params.note || "BEP20 withdrawal request queued for admin approval",
+        createdAt: new Date().toISOString(),
+      };
+      data.transactions.unshift(transaction);
+      return { transaction };
+    }),
+
+  beginWithdrawalProcessing: (txId: string) =>
+    mutateData((data) => {
+      const tx = data.transactions.find((entry) => entry.id === txId);
+      if (!tx || tx.type !== "WITHDRAWAL") {
+        return { error: "Withdrawal not found", status: 404 };
+      }
+      if (tx.status !== "PENDING") {
+        return { error: "Withdrawal is already being processed or completed", status: 409 };
+      }
+      tx.status = "PROCESSING";
+      tx.processedAt = new Date().toISOString();
+      tx.errorMessage = undefined;
+      return { transaction: tx };
+    }),
+
+  markWithdrawalCompleted: (txId: string, txHash: string) =>
+    mutateData((data) => {
+      const tx = data.transactions.find((entry) => entry.id === txId);
+      if (!tx || tx.type !== "WITHDRAWAL") {
+        return { error: "Withdrawal not found", status: 404 };
+      }
+      if (tx.status === "COMPLETED") return { transaction: tx };
+      if (tx.status !== "PROCESSING" && tx.status !== "FAILED") {
+        return { error: "Withdrawal is not in a completable state", status: 409 };
+      }
+      tx.status = "COMPLETED";
+      tx.txHash = txHash;
+      tx.processedAt = new Date().toISOString();
+      tx.errorMessage = undefined;
+      tx.note = "BEP20 token transfer confirmed on BNB Smart Chain";
+      const wallet = data.wallets.find((entry) => entry.userId === tx.userId);
+      if (wallet) {
+        wallet.totalWithdrawn =
+          Math.round((wallet.totalWithdrawn + tx.amount) * 100) / 100;
+        wallet.updatedAt = new Date().toISOString();
+      }
+      return { transaction: tx };
+    }),
+
+  markWithdrawalFailed: (txId: string, errorMessage: string, txHash?: string) =>
+    mutateData((data) => {
+      const tx = data.transactions.find((entry) => entry.id === txId);
+      if (!tx || tx.type !== "WITHDRAWAL") {
+        return { error: "Withdrawal not found", status: 404 };
+      }
+      if (tx.status === "COMPLETED") {
+        return { error: "Completed withdrawal cannot be marked failed", status: 409 };
+      }
+      if (tx.status !== "PROCESSING" && tx.status !== "FAILED") {
+        return { error: "Withdrawal is not in a processing state", status: 409 };
+      }
+      tx.status = "FAILED";
+      tx.errorMessage = errorMessage.slice(0, 500);
+      if (txHash) tx.txHash = txHash;
+      tx.processedAt = new Date().toISOString();
+      return { transaction: tx };
+    }),
+
+  rejectWithdrawal: (txId: string, reason?: string) =>
+    mutateData((data) => {
+      const tx = data.transactions.find((entry) => entry.id === txId);
+      if (!tx || tx.type !== "WITHDRAWAL") {
+        return { error: "Withdrawal not found", status: 404 };
+      }
+      if (tx.status !== "PENDING") {
+        return { error: "Only pending withdrawals can be rejected", status: 409 };
+      }
+      const wallet = data.wallets.find((entry) => entry.userId === tx.userId);
+      if (!wallet) return { error: "User wallet not found", status: 404 };
+      wallet.currentBalance =
+        Math.round((wallet.currentBalance + tx.amount + tx.fee) * 100) / 100;
+      wallet.updatedAt = new Date().toISOString();
+      tx.status = "REJECTED";
+      tx.processedAt = new Date().toISOString();
+      tx.errorMessage = reason?.slice(0, 500) || "Withdrawal rejected by administrator";
+      return { transaction: tx };
+    }),
+
+  retryWithdrawal: (txId: string) =>
+    mutateData((data) => {
+      const tx = data.transactions.find((entry) => entry.id === txId);
+      if (!tx || tx.type !== "WITHDRAWAL") {
+        return { error: "Withdrawal not found", status: 404 };
+      }
+      if (tx.status !== "FAILED") {
+        return { error: "Only failed withdrawals can be retried", status: 409 };
+      }
+      if (tx.txHash) {
+        return {
+          error: "A blockchain transaction was already broadcast. Verify it on BscScan instead of retrying.",
+          status: 409,
+        };
+      }
+      tx.status = "PENDING";
+      tx.errorMessage = undefined;
+      tx.processedAt = undefined;
+      return { transaction: tx };
+    }),
+
+  refundFailedWithdrawal: (
+    txId: string,
+    reason?: string,
+    options: { allowBroadcasted?: boolean } = {}
+  ) =>
+    mutateData((data) => {
+      const tx = data.transactions.find((entry) => entry.id === txId);
+      if (!tx || tx.type !== "WITHDRAWAL") {
+        return { error: "Withdrawal not found", status: 404 };
+      }
+      if (tx.status !== "FAILED") {
+        return { error: "Only failed withdrawals can be refunded", status: 409 };
+      }
+      if (tx.txHash && !options.allowBroadcasted) {
+        return {
+          error: "This withdrawal was broadcast on-chain. Verify it on BscScan before refunding.",
+          status: 409,
+        };
+      }
+      const wallet = data.wallets.find((entry) => entry.userId === tx.userId);
+      if (!wallet) return { error: "User wallet not found", status: 404 };
+      wallet.currentBalance =
+        Math.round((wallet.currentBalance + tx.amount + tx.fee) * 100) / 100;
+      wallet.updatedAt = new Date().toISOString();
+      tx.status = "REJECTED";
+      tx.processedAt = new Date().toISOString();
+      tx.errorMessage = reason?.slice(0, 500) || "Failed withdrawal refunded by administrator";
+      return { transaction: tx };
+    }),
+
+  getWithdrawals: () =>
+    readData((data) =>
+      data.transactions
+        .filter((tx) => tx.type === "WITHDRAWAL")
+        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    ),
 
   accrueProfits: (date = new Date()) =>
     mutateData((data) => {

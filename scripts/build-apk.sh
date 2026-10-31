@@ -6,7 +6,7 @@ ANDROID_SRC="$ROOT/android-webview"
 BUILD_DIR="$ROOT/.apk-build"
 OUTPUT_DIR="$ROOT/public/downloads"
 APP_URL="${APP_URL:-https://trading-flow-capital.vercel.app}"
-VERSION_NAME="${VERSION_NAME:-1.0.0}"
+VERSION_NAME="${VERSION_NAME:-2.1.0}"
 VERSION_CODE="${VERSION_CODE:-$(date +%y%m%d%H)}"
 
 if [ -z "${JAVA_HOME:-}" ] && command -v javac >/dev/null 2>&1; then
@@ -123,20 +123,20 @@ fi
   --ks-key-alias "$KEY_ALIAS" \
   --ks-pass "pass:$STORE_PASSWORD" \
   --key-pass "pass:$STORE_PASSWORD" \
-  --out "$OUTPUT_DIR/trading-flow.apk" \
+  --out "$OUTPUT_DIR/corechain.apk" \
   "$BUILD_DIR/aligned.apk"
 
-"$JAVA" -jar "$APKSIGNER_JAR" verify --verbose "$OUTPUT_DIR/trading-flow.apk" >/dev/null
-rm -f "$OUTPUT_DIR/trading-flow.apk.idsig"
+"$JAVA" -jar "$APKSIGNER_JAR" verify --verbose "$OUTPUT_DIR/corechain.apk" >/dev/null
+rm -f "$OUTPUT_DIR/corechain.apk.idsig"
 
-SHA256="$(sha256sum "$OUTPUT_DIR/trading-flow.apk" | awk '{print $1}')"
-SIZE="$(wc -c < "$OUTPUT_DIR/trading-flow.apk" | tr -d ' ')"
+SHA256="$(sha256sum "$OUTPUT_DIR/corechain.apk" | awk '{print $1}')"
+SIZE="$(wc -c < "$OUTPUT_DIR/corechain.apk" | tr -d ' ')"
 CREATED_AT="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 cat > "$OUTPUT_DIR/app-version.json" <<EOF
 {
   "versionName": "$VERSION_NAME",
   "versionCode": $VERSION_CODE,
-  "apkUrl": "/downloads/trading-flow.apk",
+  "apkUrl": "/downloads/corechain.apk",
   "sha256": "$SHA256",
   "sizeBytes": $SIZE,
   "publishedAt": "$CREATED_AT",
@@ -144,7 +144,7 @@ cat > "$OUTPUT_DIR/app-version.json" <<EOF
 }
 EOF
 
-echo "APK built: $OUTPUT_DIR/trading-flow.apk"
+echo "APK built: $OUTPUT_DIR/corechain.apk"
 echo "Version: $VERSION_NAME ($VERSION_CODE)"
 echo "Server URL: $APP_URL"
 echo "SHA-256: $SHA256"

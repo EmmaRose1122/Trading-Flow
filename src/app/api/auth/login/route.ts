@@ -19,21 +19,20 @@ export async function POST(req: Request) {
       process.env.ADMIN_PASSWORD && process.env.ADMIN_PASSWORD.trim().length >= 6
     );
 
-    // In production with demo accounts disabled, ensure demo accounts cannot be logged into
-    // unless this email is the explicitly configured ADMIN_EMAIL with an ADMIN_PASSWORD.
+    // Legacy test accounts are blocked in production unless explicitly enabled or configured.
     if (
       process.env.NODE_ENV === "production" &&
       process.env.ENABLE_DEMO_ACCOUNTS !== "true"
     ) {
-      if (normalizedEmail === "user@tradingflow.com") {
-        return NextResponse.json({ error: "Demo investor account is disabled in production" }, { status: 401 });
+      if (normalizedEmail === "user@corechain.test") {
+        return NextResponse.json({ error: "This investor account is disabled in production" }, { status: 401 });
       }
       if (
-        normalizedEmail === "admin@tradingflow.com" &&
+        normalizedEmail === "admin@corechain.test" &&
         !hasConfiguredAdminPassword &&
-        configuredAdminEmail !== "admin@tradingflow.com"
+        configuredAdminEmail !== "admin@corechain.test"
       ) {
-        return NextResponse.json({ error: "Demo admin is disabled in production" }, { status: 401 });
+        return NextResponse.json({ error: "This administrator account is disabled in production" }, { status: 401 });
       }
     }
 

@@ -6,16 +6,16 @@ import { createPageMetadata } from "@/lib/seo";
 export const metadata: Metadata = createPageMetadata({
   title: "Cookie Policy",
   description:
-    "Learn which cookies Trading Flow Capital uses, why the authentication cookie is essential, and how to manage cookies in your browser.",
+    "Learn which cookies CoreChain uses, why the authentication cookie is essential, and how to manage cookies in your browser.",
   path: "/cookies",
-  keywords: ["cookie policy", "essential cookies", "Trading Flow Capital cookies"],
+  keywords: ["cookie policy", "essential cookies", "CoreChain cookies"],
 });
 
 export default function CookiesPage() {
   return (
     <LegalPage
       title="Cookie policy"
-      summary="This policy explains how cookies and similar storage technologies are used on the Trading Flow Capital website and investor dashboard."
+      summary="This policy explains how cookies and similar storage technologies are used on the CoreChain website and investor dashboard."
       path="/cookies"
     >
       <section>
@@ -41,7 +41,7 @@ export default function CookiesPage() {
             </thead>
             <tbody className="divide-y divide-red-900/10 bg-white">
               <tr>
-                <td className="px-4 py-3 font-mono text-red-800">tf_session</td>
+                <td className="px-4 py-3 font-mono text-red-800">cc_session</td>
                 <td className="px-4 py-3">Essential</td>
                 <td className="px-4 py-3">
                   Stores a signed authentication session so a registered user can access the

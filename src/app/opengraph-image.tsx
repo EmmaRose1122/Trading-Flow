@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 
 export const runtime = "edge";
-export const alt = "Trading Flow Capital — UK investment dashboard";
+export const alt = "CoreChain — Bitget execution and BEP20 settlement";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -17,7 +17,7 @@ export default function OpenGraphImage() {
           justifyContent: "space-between",
           padding: "72px",
           background: "linear-gradient(135deg, #FFFFFF 0%, #FFF1F2 60%, #FFE4E6 100%)",
-          color: "#F8FAFC",
+          color: "#2B0B0E",
           fontFamily: "sans-serif",
         }}
       >
@@ -36,14 +36,14 @@ export default function OpenGraphImage() {
               fontWeight: 800,
             }}
           >
-            TF
+            CC
           </div>
           <div style={{ display: "flex", flexDirection: "column" }}>
             <span style={{ fontSize: 34, fontWeight: 800, letterSpacing: -1 }}>
-              Trading Flow Capital
+              CoreChain
             </span>
-            <span style={{ fontSize: 18, color: "#94A3B8", marginTop: 6 }}>
-              United Kingdom · Investor dashboard
+            <span style={{ fontSize: 18, color: "#6B1D1D", marginTop: 6 }}>
+              Bitget execution · BEP20 settlement
             </span>
           </div>
         </div>
@@ -52,14 +52,14 @@ export default function OpenGraphImage() {
           <span style={{ fontSize: 64, fontWeight: 800, lineHeight: 1.08, letterSpacing: -2 }}>
             A clearer view of your investment journey.
           </span>
-          <span style={{ fontSize: 24, color: "#CBD5E1", marginTop: 24, lineHeight: 1.4 }}>
-            Transparent plans · Daily profit reporting · Transaction-ledger visibility
+          <span style={{ fontSize: 24, color: "#3F1414", marginTop: 24, lineHeight: 1.4 }}>
+            Exchange execution · On-chain settlement · Transaction-ledger visibility
           </span>
         </div>
 
-        <div style={{ display: "flex", alignItems: "center", gap: 14, color: "#6EE7B7", fontSize: 20 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 14, color: "#FCA5A5", fontSize: 20 }}>
           <span style={{ width: 10, height: 10, borderRadius: 999, background: "#DC2626" }} />
-          Capital at risk. Demonstration platform.
+          Capital at risk. Not a regulated financial product.
         </div>
       </div>
     ),

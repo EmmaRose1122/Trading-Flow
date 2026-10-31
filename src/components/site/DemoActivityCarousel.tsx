@@ -57,32 +57,32 @@ const statusClass: Record<DemoActivity["status"], string> = {
 const demoActivities: DemoActivity[] = [
   { id: "INV-2041", name: "Amelia R.", type: "investment", amount: -5000, status: "ACTIVE", detail: "Daily 2% Plan", time: "2 min ago" },
   { id: "ROI-1041", name: "Noah T.", type: "profit", amount: 200, status: "SUCCESS", detail: "2% daily deposit profit", time: "4 min ago" },
-  { id: "DEP-3041", name: "Sofia K.", type: "deposit", amount: 2500, status: "APPROVED", detail: "USDT · TRC20", time: "7 min ago" },
-  { id: "WDR-4041", name: "James L.", type: "withdrawal", amount: -750, status: "PENDING", detail: "Bitcoin network", time: "11 min ago" },
+  { id: "DEP-3041", name: "Sofia K.", type: "deposit", amount: 2500, status: "APPROVED", detail: "USDT · BEP20", time: "7 min ago" },
+  { id: "WDR-4041", name: "James L.", type: "withdrawal", amount: -750, status: "PENDING", detail: "BEP20 · BSC", time: "11 min ago" },
   { id: "INV-2042", name: "Priya M.", type: "investment", amount: -1000, status: "ACTIVE", detail: "Daily 2% Plan", time: "15 min ago" },
   { id: "ROI-1042", name: "Adam H.", type: "profit", amount: 120, status: "SUCCESS", detail: "2% daily deposit profit", time: "19 min ago" },
-  { id: "DEP-3042", name: "Emma S.", type: "deposit", amount: 10000, status: "APPROVED", detail: "Bank wire · GBP", time: "24 min ago" },
-  { id: "WDR-4042", name: "Daniel A.", type: "withdrawal", amount: -320, status: "APPROVED", detail: "USDT · ERC20", time: "31 min ago" },
+  { id: "DEP-3042", name: "Emma S.", type: "deposit", amount: 10000, status: "APPROVED", detail: "USDT · BEP20", time: "24 min ago" },
+  { id: "WDR-4042", name: "Daniel A.", type: "withdrawal", amount: -320, status: "APPROVED", detail: "USDC · BEP20", time: "31 min ago" },
   { id: "INV-2043", name: "Maya N.", type: "investment", amount: -15000, status: "ACTIVE", detail: "Daily 2% Plan", time: "38 min ago" },
   { id: "ROI-1043", name: "Oliver B.", type: "profit", amount: 450, status: "SUCCESS", detail: "2% daily deposit profit", time: "44 min ago" },
-  { id: "DEP-3043", name: "Zara Q.", type: "deposit", amount: 500, status: "PENDING", detail: "USDT · TRC20", time: "51 min ago" },
-  { id: "WDR-4043", name: "Lucas P.", type: "withdrawal", amount: -1250, status: "PENDING", detail: "Bitcoin network", time: "1 hr ago" },
+  { id: "DEP-3043", name: "Zara Q.", type: "deposit", amount: 500, status: "PENDING", detail: "USDT · BEP20", time: "51 min ago" },
+  { id: "WDR-4043", name: "Lucas P.", type: "withdrawal", amount: -1250, status: "PENDING", detail: "BEP20 · BSC", time: "1 hr ago" },
   { id: "INV-2044", name: "Aisha F.", type: "investment", amount: -2500, status: "ACTIVE", detail: "Daily 2% Plan", time: "1 hr ago" },
   { id: "ROI-1044", name: "Ethan C.", type: "profit", amount: 50, status: "SUCCESS", detail: "2% daily deposit profit", time: "2 hrs ago" },
-  { id: "DEP-3044", name: "Grace W.", type: "deposit", amount: 1800, status: "APPROVED", detail: "USDT · ERC20", time: "2 hrs ago" },
-  { id: "WDR-4044", name: "Hamza D.", type: "withdrawal", amount: -400, status: "APPROVED", detail: "USDT · TRC20", time: "3 hrs ago" },
+  { id: "DEP-3044", name: "Grace W.", type: "deposit", amount: 1800, status: "APPROVED", detail: "USDC · BEP20", time: "2 hrs ago" },
+  { id: "WDR-4044", name: "Hamza D.", type: "withdrawal", amount: -400, status: "APPROVED", detail: "USDT · BEP20", time: "3 hrs ago" },
   { id: "INV-2045", name: "Chloe J.", type: "investment", amount: -8000, status: "ACTIVE", detail: "Daily 2% Plan", time: "3 hrs ago" },
   { id: "ROI-1045", name: "Leo V.", type: "profit", amount: 160, status: "SUCCESS", detail: "2% daily deposit profit", time: "4 hrs ago" },
-  { id: "DEP-3045", name: "Hannah G.", type: "deposit", amount: 3000, status: "APPROVED", detail: "Bank wire · GBP", time: "4 hrs ago" },
-  { id: "WDR-4045", name: "Samir I.", type: "withdrawal", amount: -980, status: "PENDING", detail: "Bitcoin network", time: "5 hrs ago" },
+  { id: "DEP-3045", name: "Hannah G.", type: "deposit", amount: 3000, status: "APPROVED", detail: "USDT · BEP20", time: "4 hrs ago" },
+  { id: "WDR-4045", name: "Samir I.", type: "withdrawal", amount: -980, status: "PENDING", detail: "BEP20 · BSC", time: "5 hrs ago" },
   { id: "INV-2046", name: "Isla E.", type: "investment", amount: -450, status: "ACTIVE", detail: "Daily 2% Plan", time: "5 hrs ago" },
   { id: "ROI-1046", name: "Theo M.", type: "profit", amount: 90, status: "SUCCESS", detail: "2% daily deposit profit", time: "6 hrs ago" },
-  { id: "DEP-3046", name: "Nina O.", type: "deposit", amount: 6400, status: "PENDING", detail: "USDT · TRC20", time: "6 hrs ago" },
-  { id: "WDR-4046", name: "Ryan K.", type: "withdrawal", amount: -2100, status: "APPROVED", detail: "USDT · ERC20", time: "7 hrs ago" },
+  { id: "DEP-3046", name: "Nina O.", type: "deposit", amount: 6400, status: "PENDING", detail: "USDT · BEP20", time: "6 hrs ago" },
+  { id: "WDR-4046", name: "Ryan K.", type: "withdrawal", amount: -2100, status: "APPROVED", detail: "USDC · BEP20", time: "7 hrs ago" },
 ];
 
 function formatMoney(amount: number) {
-  return `${amount >= 0 ? "+" : "-"}$${Math.abs(amount).toLocaleString("en-GB", {
+  return `${amount >= 0 ? "+" : "-"}$${Math.abs(amount).toLocaleString("en-SG", {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   })}`;
@@ -130,7 +130,7 @@ export default function DemoActivityCarousel() {
       <div className="flex items-center justify-between gap-4 mb-5">
         <div className="flex items-center gap-2 text-[11px] text-neutral-400">
           <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
-          24 simulated activity records
+          24 illustrative activity records
         </div>
         <div className="flex items-center gap-1.5">
           <button
@@ -163,7 +163,7 @@ export default function DemoActivityCarousel() {
       <div
         ref={trackRef}
         role="region"
-        aria-label="Simulated platform activity carousel"
+        aria-label="Illustrative platform activity carousel"
         aria-roledescription="carousel"
         tabIndex={0}
         onMouseEnter={() => setHovering(true)}
@@ -181,7 +181,7 @@ export default function DemoActivityCarousel() {
               key={activity.id}
               role="group"
               aria-roledescription="slide"
-              aria-label={`Simulated ${meta.label} record ${index + 1} of ${demoActivities.length}`}
+              aria-label={`Illustrative ${meta.label} record ${index + 1} of ${demoActivities.length}`}
               className={`snap-start shrink-0 w-[278px] sm:w-[296px] rounded-2xl border p-4 transition-all duration-500 ${
                 index === activeIndex
                   ? "border-red-500/60 bg-gradient-to-b from-[#1B0F10] to-[#0B0B0C] shadow-[0_20px_50px_-20px_rgba(220,38,38,0.55)]"
@@ -232,8 +232,7 @@ export default function DemoActivityCarousel() {
       </div>
 
       <p className="mt-1 text-[10px] text-neutral-400">
-        Simulated activity records only. Names, IDs, balances and activity are fictional and are not
-        real customer records.
+        Illustrative activity records only. Names, IDs, balances and activity are sample data and are not real customer records.
       </p>
     </div>
   );

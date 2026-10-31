@@ -13,9 +13,12 @@ import {
   AlertCircle,
   ArrowDownLeft,
   ArrowUpRight,
+  ExternalLink,
+  Clock,
   TrendingUp,
 } from "lucide-react";
 import { Transaction, User } from "@/lib/db";
+import { bscScanTxUrl, isWithdrawalSettled } from "@/lib/bep20";
 
 export default function TransactionsPage() {
   const router = useRouter();
@@ -96,7 +99,7 @@ export default function TransactionsPage() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `tradingflow_transactions_${Date.now()}.csv`;
+    link.download = `corechain_transactions_${Date.now()}.csv`;
     document.body.appendChild(link);
     link.click();
     link.remove();
@@ -241,9 +244,9 @@ export default function TransactionsPage() {
                                 : tx.type === "DEPOSIT"
                                 ? "bg-red-100 text-red-800 border border-red-400"
                                 : tx.type === "WITHDRAWAL"
-                                ? "bg-amber-500/15 text-amber-400 border border-amber-500/20"
+                                ? "bg-amber-100 text-amber-800 border border-amber-400"
                                 : tx.type === "REFERRAL"
-                                ? "bg-fuchsia-500/15 text-fuchsia-400 border border-fuchsia-500/20"
+                                ? "bg-fuchsia-100 text-fuchsia-800 border border-fuchsia-400"
                                 : "bg-red-700/15 text-red-800 border border-red-400"
                             }`}
                           >
@@ -263,26 +266,47 @@ export default function TransactionsPage() {
                         <td className="py-3.5 px-4 text-[#3F1414] whitespace-nowrap">
                           {tx.method}
                         </td>
-                        <td className="py-3.5 px-4 font-mono text-[11px] text-[#5B1B1B] truncate max-w-xs">
-                          {tx.txHash || tx.destination || tx.note || "N/A"}
+                        <td className="py-3.5 px-4 font-mono text-[11px] text-[#5B1B1B] max-w-xs">
+                          {tx.txHash ? (
+                            <a
+                              href={bscScanTxUrl(tx.txHash)}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="inline-flex items-center gap-1 break-all font-semibold text-red-800 hover:underline"
+                            >
+                              {tx.txHash}
+                              <ExternalLink className="w-3 h-3 shrink-0" />
+                            </a>
+                          ) : (
+                            <span className="block truncate">{tx.destination || tx.note || "N/A"}</span>
+                          )}
                         </td>
                         <td className="py-3.5 px-4 whitespace-nowrap">
                           <span
                             className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-semibold uppercase ${
-                              tx.status === "APPROVED" || tx.status === "SUCCESS"
+                              isWithdrawalSettled(tx.status)
                                 ? "bg-red-100 text-red-800 border border-red-400"
                                 : tx.status === "PENDING"
-                                ? "bg-amber-500/15 text-amber-400 border border-amber-500/20"
-                                : "bg-rose-500/15 text-rose-400 border border-rose-500/20"
+                                ? "bg-amber-100 text-amber-800 border border-amber-400"
+                                : tx.status === "PROCESSING"
+                                ? "bg-sky-100 text-sky-800 border border-sky-400"
+                                : "bg-rose-100 text-rose-800 border border-rose-400"
                             }`}
                           >
-                            {tx.status === "APPROVED" || tx.status === "SUCCESS" ? (
+                            {isWithdrawalSettled(tx.status) ? (
                               <CheckCircle2 className="w-3 h-3" />
+                            ) : tx.status === "PENDING" || tx.status === "PROCESSING" ? (
+                              <Clock className="w-3 h-3" />
                             ) : (
                               <AlertCircle className="w-3 h-3" />
                             )}
                             {tx.status}
                           </span>
+                          {tx.errorMessage && (
+                            <span className="mt-1 block max-w-[180px] whitespace-normal text-[9px] font-medium normal-case text-[#6B1D1D]">
+                              {tx.errorMessage}
+                            </span>
+                          )}
                         </td>
                       </tr>
                     );

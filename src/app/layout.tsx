@@ -10,46 +10,47 @@ const googleVerification = process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION;
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "Trading Flow Capital | UK Investment Dashboard",
-    template: "%s | Trading Flow Capital",
+    default: "CoreChain | Digital Asset Investment Platform",
+    template: "%s | CoreChain",
   },
   description:
-    "A UK-focused investment dashboard for comparing transparent plans, tracking projected daily profit and reviewing portfolio activity.",
+    "CoreChain combines Bitget execution connectivity, BEP20 settlement on BNB Smart Chain and a transparent investor ledger for daily profit and verified withdrawals.",
   applicationName: COMPANY.name,
   authors: [{ name: COMPANY.legalName, url: SITE_URL }],
   creator: COMPANY.name,
   publisher: COMPANY.legalName,
   category: "finance",
   keywords: [
-    "UK investment platform",
-    "investment dashboard",
-    "daily profit tracker",
-    "investment plans UK",
-    "portfolio reporting",
+    "digital asset investment platform",
+    "Bitget execution",
+    "BEP20 settlement",
+    "BNB Smart Chain",
+    "daily profit dashboard",
+    "verified crypto withdrawals",
   ],
   alternates: { canonical: "/" },
   openGraph: {
     type: "website",
-    locale: "en_GB",
+    locale: "en_SG",
     url: "/",
     siteName: COMPANY.name,
-    title: "Trading Flow Capital | UK Investment Dashboard",
+    title: "CoreChain | Digital Asset Investment Platform",
     description:
-      "Compare investment plans, projected daily profit and portfolio activity in one UK-focused dashboard.",
+      "Bitget execution connectivity, BEP20 settlement on BNB Smart Chain and a transparent investor ledger.",
     images: [
       {
         url: "/opengraph-image",
         width: 1200,
         height: 630,
-        alt: "Trading Flow Capital — UK investment dashboard",
+        alt: "CoreChain — Bitget execution and BEP20 settlement",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Trading Flow Capital | UK Investment Dashboard",
+    title: "CoreChain | Digital Asset Investment Platform",
     description:
-      "Compare investment plans, projected daily profit and portfolio activity in one UK-focused dashboard.",
+      "Bitget execution connectivity, BEP20 settlement on BNB Smart Chain and a transparent investor ledger.",
     images: ["/opengraph-image"],
   },
   robots: {
@@ -90,7 +91,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en-GB" className="dark">
+    <html lang="en-SG" className="dark">
       <body className="bg-background min-h-screen text-[#2B0B0E] antialiased selection:bg-red-700 selection:text-[#2B0B0E]">
         {children}
         <SupportChat />

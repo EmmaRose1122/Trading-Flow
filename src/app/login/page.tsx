@@ -82,7 +82,7 @@ export default function LoginPage() {
           <Link
             href="/"
             className="inline-flex mb-3"
-            aria-label="Trading Flow Capital home"
+            aria-label="CoreChain home"
           >
             <BrandLockup iconSize={48} priority />
           </Link>
@@ -92,7 +92,7 @@ export default function LoginPage() {
           <p className="text-xs text-[#5B1B1B] mt-1">
             {challengeToken
               ? "Enter the code from your authenticator app or a recovery code."
-              : "Sign in to track balances, manage contracts & audit transactions"}
+              : "Sign in to track balances, execution activity and BEP20 settlement records"}
           </p>
         </div>
 
@@ -200,7 +200,7 @@ export default function LoginPage() {
                 disabled={loading}
                 className="w-full mt-2 py-3 rounded-xl bg-red-700 hover:bg-red-800 text-white font-bold text-sm tracking-wide transition shadow-lg shadow-red-900/20 flex items-center justify-center gap-2 disabled:opacity-50"
               >
-                {loading ? "Authenticating..." : "Sign In to Trading Flow"}
+                {loading ? "Authenticating..." : "Sign In to CoreChain"}
                 <ArrowRight className="w-4 h-4" />
               </button>
             </form>

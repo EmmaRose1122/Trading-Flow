@@ -1,4 +1,4 @@
-package com.tradingflow.app;
+package com.corechain.app;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -30,7 +30,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class MainActivity extends Activity {
-    private static final String PREFS_NAME = "trading_flow";
+    private static final String PREFS_NAME = "corechain";
     private static final String SERVER_URL_KEY = "server_url";
 
     private WebView webView;
@@ -95,7 +95,7 @@ public class MainActivity extends Activity {
         settings.setAllowContentAccess(false);
         settings.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
         settings.setMediaPlaybackRequiresUserGesture(true);
-        settings.setUserAgentString(settings.getUserAgentString() + " TradingFlowAndroid/1.0");
+        settings.setUserAgentString(settings.getUserAgentString() + " CoreChainAndroid/2.0");
 
         CookieManager cookieManager = CookieManager.getInstance();
         cookieManager.setAcceptCookie(true);

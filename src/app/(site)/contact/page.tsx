@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import Link from "next/link";
-import { Clock, Mail, MapPin, Phone } from "lucide-react";
+import { Clock, Globe2, Mail } from "lucide-react";
 import ContactForm from "@/components/site/ContactForm";
 import { breadcrumbJsonLd, contactPageJsonLd, createPageMetadata } from "@/lib/seo";
 import { COMPANY } from "@/lib/site";
@@ -9,9 +9,14 @@ import { COMPANY } from "@/lib/site";
 export const metadata: Metadata = createPageMetadata({
   title: "Contact Us",
   description:
-    "Contact Trading Flow Capital by email, telephone or post. UK support hours are Monday to Friday, 09:00–17:00 GMT.",
+    "Contact CoreChain by email or arrange an appointment with the Singapore support desk. BEP20 transaction questions can include the on-chain transaction hash.",
   path: "/contact",
-  keywords: ["contact Trading Flow Capital", "UK investment support", "investment platform contact"],
+  keywords: [
+    "contact CoreChain",
+    "Bitget execution support",
+    "BEP20 withdrawal support",
+    "Singapore support desk",
+  ],
 });
 
 export default function ContactPage() {
@@ -20,6 +25,7 @@ export default function ContactPage() {
     <>
       <script
         nonce={nonce}
+        suppressHydrationWarning
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify([
@@ -43,11 +49,12 @@ export default function ContactPage() {
               Contact us
             </p>
             <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-[#2B0B0E]">
-              Talk to the Trading Flow team
+              Talk to the CoreChain team
             </h1>
             <p className="mt-5 text-base text-[#3F1414] leading-relaxed">
-              For account, plan or technical questions, contact our UK support team using the
-              details below or prepare an email through the enquiry form.
+              For account, Bitget execution, BEP20 settlement or verification questions, contact
+              the CoreChain team or arrange an appointment with the Singapore support desk using the
+              details below.
             </p>
           </div>
         </div>
@@ -58,21 +65,15 @@ export default function ContactPage() {
           <div className="lg:col-span-2 space-y-4">
             {[
               {
-                icon: MapPin,
-                title: "Office",
-                content: COMPANY.addressLine,
+                icon: Globe2,
+                title: "Singapore support desk",
+                content: `${COMPANY.singapore.locality} · Appointments only · ${COMPANY.singapore.timezone}`,
               },
               {
                 icon: Mail,
                 title: "Email",
                 content: COMPANY.email,
                 href: `mailto:${COMPANY.email}`,
-              },
-              {
-                icon: Phone,
-                title: "Telephone",
-                content: COMPANY.phoneDisplay,
-                href: `tel:${COMPANY.phone.replace(/\s/g, "")}`,
               },
               {
                 icon: Clock,
@@ -108,8 +109,9 @@ export default function ContactPage() {
               );
             })}
             <p className="px-1 text-[11px] leading-relaxed text-[#6B1D1D]">
-              Demonstration contact details must be replaced with verified company information
-              before this website is used publicly.
+              The Singapore desk is an appointment-based support function. No walk-in office
+              address is published. BEP20 transaction questions should include the transaction hash
+              shown in your dashboard.
             </p>
           </div>
 

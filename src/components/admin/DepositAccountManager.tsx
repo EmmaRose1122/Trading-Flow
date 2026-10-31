@@ -373,7 +373,7 @@ export default function DepositAccountManager({ onChanged }: DepositAccountManag
               maxLength={120}
               value={form.accountName}
               onChange={(event) => update("accountName", event.target.value)}
-              placeholder="Trading Flow Capital"
+              placeholder="CoreChain"
               className="w-full rounded-xl border border-red-900/20 bg-white px-3 py-2.5 text-sm text-[#2B0B0E] placeholder-[#8A4A4A] focus:border-red-700 focus:outline-none"
             />
           </div>

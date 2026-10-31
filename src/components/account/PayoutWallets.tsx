@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Check, CircleDollarSign, PlusCircle, Star, Trash2, Wallet } from "lucide-react";
 import type { PayoutWallet } from "@/lib/db";
+import { BEP20_NETWORK_LABEL, isBep20Address } from "@/lib/bep20";
 
 interface PayoutWalletsProps {
   wallets: PayoutWallet[];
@@ -10,20 +11,11 @@ interface PayoutWalletsProps {
 }
 
 const MAX_WALLETS = 10;
-
-const METHODS = [
-  "USDT (TRC20)",
-  "USDT (ERC20)",
-  "Bitcoin (BTC)",
-  "Ethereum (ETH)",
-  "Bank Transfer",
-  "Other",
-];
+const PAYOUT_METHOD = "BEP20 Token (BSC)";
+const PAYOUT_NETWORK = "BNB Smart Chain";
 
 export default function PayoutWallets({ wallets, onChanged }: PayoutWalletsProps) {
   const [label, setLabel] = useState("");
-  const [method, setMethod] = useState(METHODS[0]);
-  const [network, setNetwork] = useState("");
   const [address, setAddress] = useState("");
   const [makeProfitDestination, setMakeProfitDestination] = useState(wallets.length === 0);
   const [loading, setLoading] = useState(false);
@@ -33,6 +25,13 @@ export default function PayoutWallets({ wallets, onChanged }: PayoutWalletsProps
   const addWallet = async (event: React.FormEvent) => {
     event.preventDefault();
     setMessage(null);
+    if (!isBep20Address(address)) {
+      setMessage({
+        type: "error",
+        text: "Enter a valid BEP20 address starting with 0x and containing 40 hexadecimal characters.",
+      });
+      return;
+    }
     setLoading(true);
     try {
       const response = await fetch("/api/user/wallets", {
@@ -40,8 +39,8 @@ export default function PayoutWallets({ wallets, onChanged }: PayoutWalletsProps
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           label,
-          method,
-          network,
+          method: PAYOUT_METHOD,
+          network: PAYOUT_NETWORK,
           address,
           isProfitDestination: makeProfitDestination,
         }),
@@ -49,7 +48,6 @@ export default function PayoutWallets({ wallets, onChanged }: PayoutWalletsProps
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Unable to save payout wallet");
       setLabel("");
-      setNetwork("");
       setAddress("");
       setMakeProfitDestination(false);
       setMessage({ type: "success", text: "Payout wallet saved." });
@@ -118,8 +116,8 @@ export default function PayoutWallets({ wallets, onChanged }: PayoutWalletsProps
           <div>
             <h2 className="text-base font-bold text-[#2B0B0E]">Payout wallets</h2>
             <p className="text-xs text-[#6B1D1D]">
-              Save up to {MAX_WALLETS} payout accounts and choose the one that receives your
-              profits and withdrawals.
+              Save up to {MAX_WALLETS} BEP20 addresses on BNB Smart Chain. Withdrawals are broadcast
+              automatically to the destination you select here.
             </p>
           </div>
         </div>
@@ -146,65 +144,81 @@ export default function PayoutWallets({ wallets, onChanged }: PayoutWalletsProps
         </div>
       ) : (
         <ul className="space-y-2.5">
-          {wallets.map((wallet) => (
-            <li
-              key={wallet.id}
-              className={`rounded-xl border p-3.5 ${
-                wallet.isProfitDestination
-                  ? "border-red-400 bg-red-50"
-                  : "border-red-900/20 bg-rose-50"
-              }`}
-            >
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2">
-                    <p className="truncate text-sm font-semibold text-[#2B0B0E]">{wallet.label}</p>
-                    {wallet.isProfitDestination && (
-                      <span className="inline-flex items-center gap-1 rounded-full border border-red-400 bg-red-100 px-2 py-0.5 text-[9px] font-bold uppercase text-red-800">
-                        <CircleDollarSign className="h-3 w-3" />
-                        Profit destination
-                      </span>
+          {wallets.map((wallet) => {
+            const bep20 = isBep20Address(wallet.address);
+            return (
+              <li
+                key={wallet.id}
+                className={`rounded-xl border p-3.5 ${
+                  wallet.isProfitDestination
+                    ? "border-red-400 bg-red-50"
+                    : "border-red-900/20 bg-rose-50"
+                }`}
+              >
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="truncate text-sm font-semibold text-[#2B0B0E]">{wallet.label}</p>
+                      {wallet.isProfitDestination && (
+                        <span className="inline-flex items-center gap-1 rounded-full border border-red-400 bg-red-100 px-2 py-0.5 text-[9px] font-bold uppercase text-red-800">
+                          <CircleDollarSign className="h-3 w-3" />
+                          Profit destination
+                        </span>
+                      )}
+                      {!bep20 && (
+                        <span className="rounded-full border border-rose-400 bg-rose-100 px-2 py-0.5 text-[9px] font-bold uppercase text-rose-800">
+                          Not BEP20
+                        </span>
+                      )}
+                    </div>
+                    <p className="mt-0.5 text-[11px] text-[#6B1D1D]">
+                      {bep20 ? BEP20_NETWORK_LABEL : wallet.method}
+                      {wallet.network ? ` · ${wallet.network}` : ""}
+                    </p>
+                    <p className="mt-1 break-all font-mono text-[11px] text-[#3F1414]">
+                      {wallet.address}
+                    </p>
+                    {!bep20 && (
+                      <p className="mt-1 text-[10px] font-semibold text-rose-700">
+                        Automated withdrawals require a 0x BEP20 address. Remove this wallet and add
+                        a BEP20 address.
+                      </p>
                     )}
                   </div>
-                  <p className="mt-0.5 text-[11px] text-[#6B1D1D]">
-                    {wallet.method}
-                    {wallet.network ? ` · ${wallet.network}` : ""}
-                  </p>
-                  <p className="mt-1 break-all font-mono text-[11px] text-[#3F1414]">
-                    {wallet.address}
-                  </p>
-                </div>
-                <div className="flex shrink-0 items-center gap-2">
-                  {!wallet.isProfitDestination && (
+                  <div className="flex shrink-0 items-center gap-2">
+                    {!wallet.isProfitDestination && bep20 && (
+                      <button
+                        type="button"
+                        disabled={busyId === wallet.id}
+                        onClick={() => useAsDestination(wallet.id)}
+                        className="inline-flex items-center gap-1.5 rounded-lg border border-red-400 bg-red-100 px-2.5 py-1.5 text-[10px] font-bold text-red-800 hover:bg-red-200 disabled:opacity-50"
+                      >
+                        {busyId === wallet.id ? <Check className="h-3 w-3" /> : <Star className="h-3 w-3" />}
+                        Use for profits
+                      </button>
+                    )}
                     <button
                       type="button"
                       disabled={busyId === wallet.id}
-                      onClick={() => useAsDestination(wallet.id)}
-                      className="inline-flex items-center gap-1.5 rounded-lg border border-red-400 bg-red-100 px-2.5 py-1.5 text-[10px] font-bold text-red-800 hover:bg-red-200 disabled:opacity-50"
+                      onClick={() => removeWallet(wallet.id)}
+                      className="rounded-lg border border-rose-500/20 bg-rose-500/10 p-1.5 text-rose-400 hover:bg-rose-500/20 disabled:opacity-50"
+                      aria-label={`Remove ${wallet.label}`}
                     >
-                      {busyId === wallet.id ? <Check className="h-3 w-3" /> : <Star className="h-3 w-3" />}
-                      Use for profits
+                      <Trash2 className="h-3.5 w-3.5" />
                     </button>
-                  )}
-                  <button
-                    type="button"
-                    disabled={busyId === wallet.id}
-                    onClick={() => removeWallet(wallet.id)}
-                    className="rounded-lg border border-rose-500/20 bg-rose-500/10 p-1.5 text-rose-400 hover:bg-rose-500/20 disabled:opacity-50"
-                    aria-label={`Remove ${wallet.label}`}
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </button>
+                  </div>
                 </div>
-              </div>
-            </li>
-          ))}
+              </li>
+            );
+          })}
         </ul>
       )}
 
       {wallets.length < MAX_WALLETS && (
         <form onSubmit={addWallet} className="mt-5 space-y-3 border-t border-red-900/20 pt-5">
-          <p className="text-xs font-bold uppercase tracking-wider text-[#5B1B1B]">Add payout wallet</p>
+          <p className="text-xs font-bold uppercase tracking-wider text-[#5B1B1B]">
+            Add BEP20 payout wallet
+          </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label htmlFor="wallet-label" className="mb-1 block text-[10px] font-semibold uppercase text-[#6B1D1D]">
@@ -222,51 +236,35 @@ export default function PayoutWallets({ wallets, onChanged }: PayoutWalletsProps
               />
             </div>
             <div>
-              <label htmlFor="wallet-method" className="mb-1 block text-[10px] font-semibold uppercase text-[#6B1D1D]">
-                Method
+              <label className="mb-1 block text-[10px] font-semibold uppercase text-[#6B1D1D]">
+                Network
               </label>
-              <select
-                id="wallet-method"
-                value={method}
-                onChange={(event) => setMethod(event.target.value)}
-                className="w-full rounded-xl border border-red-900/20 bg-white px-3 py-2.5 text-sm text-[#2B0B0E] focus:border-red-700 focus:outline-none"
-              >
-                {METHODS.map((entry) => (
-                  <option key={entry} value={entry}>
-                    {entry}
-                  </option>
-                ))}
-              </select>
+              <div className="flex min-h-[42px] items-center rounded-xl border border-red-900/20 bg-[#FFF5F5] px-3 text-xs font-semibold text-red-800">
+                {BEP20_NETWORK_LABEL}
+              </div>
             </div>
-            <div>
-              <label htmlFor="wallet-network" className="mb-1 block text-[10px] font-semibold uppercase text-[#6B1D1D]">
-                Network (optional)
-              </label>
-              <input
-                id="wallet-network"
-                type="text"
-                maxLength={60}
-                value={network}
-                onChange={(event) => setNetwork(event.target.value)}
-                placeholder="e.g. TRON"
-                className="w-full rounded-xl border border-red-900/20 bg-white px-3 py-2.5 text-sm text-[#2B0B0E] placeholder-[#8A4A4A] focus:border-red-700 focus:outline-none"
-              />
-            </div>
-            <div>
+            <div className="sm:col-span-2">
               <label htmlFor="wallet-address" className="mb-1 block text-[10px] font-semibold uppercase text-[#6B1D1D]">
-                Wallet address / account
+                BEP20 wallet address
               </label>
               <input
                 id="wallet-address"
                 type="text"
                 required
-                minLength={6}
-                maxLength={240}
                 value={address}
                 onChange={(event) => setAddress(event.target.value)}
-                placeholder="Paste the payout address"
-                className="w-full rounded-xl border border-red-900/20 bg-white px-3 py-2.5 font-mono text-sm text-[#2B0B0E] placeholder-[#8A4A4A] focus:border-red-700 focus:outline-none"
+                placeholder="0x..."
+                spellCheck={false}
+                autoComplete="off"
+                className={`w-full rounded-xl border bg-white px-3 py-2.5 font-mono text-sm text-[#2B0B0E] placeholder-[#8A4A4A] focus:border-red-700 focus:outline-none ${
+                  address && !isBep20Address(address) ? "border-rose-400" : "border-red-900/20"
+                }`}
               />
+              {address && !isBep20Address(address) && (
+                <p className="mt-1 text-[10px] font-semibold text-rose-600">
+                  Enter a valid 42-character BEP20 address starting with 0x.
+                </p>
+              )}
             </div>
           </div>
           {wallets.length > 0 && (

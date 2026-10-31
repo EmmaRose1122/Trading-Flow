@@ -7,9 +7,9 @@ import { COMPANY } from "@/lib/site";
 export const metadata: Metadata = createPageMetadata({
   title: "Disclaimer & Risk Warning",
   description:
-    "Important risk, regulatory and informational disclaimers for the Trading Flow Capital website and investment dashboard.",
+    "Important risk, regulatory and informational disclaimers for the CoreChain website and investment dashboard.",
   path: "/disclaimer",
-  keywords: ["investment risk warning", "financial disclaimer", "Trading Flow Capital disclaimer"],
+  keywords: ["investment risk warning", "financial disclaimer", "CoreChain disclaimer"],
 });
 
 export default function DisclaimerPage() {
@@ -28,13 +28,13 @@ export default function DisclaimerPage() {
       </section>
 
       <section>
-        <h2 className="text-xl font-bold text-[#2B0B0E] mb-3">1. Demonstration platform</h2>
+        <h2 className="text-xl font-bold text-[#2B0B0E] mb-3">1. Platform status</h2>
         <p>
-          This website and dashboard are a demonstration project. The company address and contact
-          details shown on this deployment are provided by the operator and should be independently
-          verified before public launch. The platform is not authorised or regulated by the
-          Financial Conduct Authority (FCA) and does not offer regulated financial products or
-          services.
+          CoreChain is a digital-asset investment platform with Bitget execution connectivity and
+          BEP20 settlement on BNB Smart Chain. CoreChain does not claim authorisation or regulation
+          by any financial regulator and does not offer regulated financial products or services.
+          Bitget is an independent third-party exchange; its services are subject to Bitget&apos;s
+          own terms and do not guarantee CoreChain products.
         </p>
       </section>
 
@@ -58,7 +58,18 @@ export default function DisclaimerPage() {
       </section>
 
       <section>
-        <h2 className="text-xl font-bold text-[#2B0B0E] mb-3">4. No offer or solicitation</h2>
+        <h2 className="text-xl font-bold text-[#2B0B0E] mb-3">4. Exchange and blockchain risk</h2>
+        <p>
+          Digital-asset execution depends on third-party exchange infrastructure and network
+          availability. Orders may be delayed, rejected or filled at different prices. BEP20
+          transfers are irreversible once confirmed, and a transaction hash proves that a transfer
+          occurred, not that an investment was profitable. You are responsible for checking that any
+          payout address you provide supports BEP20 assets on BNB Smart Chain.
+        </p>
+      </section>
+
+      <section>
+        <h2 className="text-xl font-bold text-[#2B0B0E] mb-3">5. No offer or solicitation</h2>
         <p>
           Nothing on this website constitutes an offer, solicitation or recommendation to buy or sell
           any investment, security or financial product. Any invitation-only registration or
@@ -68,7 +79,7 @@ export default function DisclaimerPage() {
       </section>
 
       <section>
-        <h2 className="text-xl font-bold text-[#2B0B0E] mb-3">5. Accuracy and availability</h2>
+        <h2 className="text-xl font-bold text-[#2B0B0E] mb-3">6. Accuracy and availability</h2>
         <p>
           We aim to keep information accurate and available, but we do not warrant that the website
           will be uninterrupted, error-free or complete. Features, plan terms and displayed data may
@@ -77,17 +88,16 @@ export default function DisclaimerPage() {
       </section>
 
       <section>
-        <h2 className="text-xl font-bold text-[#2B0B0E] mb-3">6. Limitation of liability</h2>
+        <h2 className="text-xl font-bold text-[#2B0B0E] mb-3">7. Limitation of liability</h2>
         <p>
           To the extent permitted by law, {COMPANY.legalName} is not liable for loss arising from
-          reliance on information on this demonstration website, interruptions, errors or
-          unauthorised access. Nothing in this notice excludes liability that cannot lawfully be
-          excluded.
+          reliance on information on this website, interruptions, errors or unauthorised access.
+          Nothing in this notice excludes liability that cannot lawfully be excluded.
         </p>
       </section>
 
       <section>
-        <h2 className="text-xl font-bold text-[#2B0B0E] mb-3">7. Contact</h2>
+        <h2 className="text-xl font-bold text-[#2B0B0E] mb-3">8. Contact</h2>
         <p>
           Questions about this notice can be sent to{" "}
           <a href={`mailto:${COMPANY.email}`} className="text-red-800 hover:underline">

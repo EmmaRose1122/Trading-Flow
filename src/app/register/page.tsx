@@ -60,13 +60,13 @@ function RegisterForm() {
         <Link
           href="/"
           className="inline-flex mb-3"
-          aria-label="Trading Flow Capital home"
+          aria-label="CoreChain home"
         >
           <BrandLockup iconSize={48} priority />
         </Link>
-        <h2 className="text-lg font-bold text-[#2B0B0E] tracking-tight">Create Institutional Account</h2>
+        <h2 className="text-lg font-bold text-[#2B0B0E] tracking-tight">Create Investor Account</h2>
         <p className="text-xs text-[#5B1B1B] mt-1">
-          Join via sponsor invitation to access algorithmic yields & partner rewards
+          Join via sponsor invitation to access the daily plan and partner rewards
         </p>
       </div>
 
@@ -153,7 +153,7 @@ function RegisterForm() {
               required
               value={referredBy}
               onChange={(e) => setReferredBy(e.target.value)}
-              placeholder="trading flow"
+              placeholder="corechain"
               className="w-full pl-9 pr-4 py-2.5 rounded-xl bg-white border border-red-900/20 text-[#2B0B0E] placeholder-[#8A4A4A] text-sm font-mono tracking-wider focus:outline-none focus:border-red-700"
             />
           </div>

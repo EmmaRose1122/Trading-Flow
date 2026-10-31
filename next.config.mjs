@@ -43,10 +43,10 @@ const nextConfig = {
         (source) => ({ source, headers: privateNoStore })
       ),
       {
-        source: "/downloads/trading-flow.apk",
+        source: "/downloads/corechain.apk",
         headers: [
           { key: "Content-Type", value: "application/vnd.android.package-archive" },
-          { key: "Content-Disposition", value: "attachment; filename=\"trading-flow.apk\"" },
+          { key: "Content-Disposition", value: "attachment; filename=\"corechain.apk\"" },
           { key: "Cache-Control", value: "public, max-age=0, must-revalidate" },
         ],
       },

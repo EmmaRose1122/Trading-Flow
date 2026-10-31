@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Mail, MapPin, Phone } from "lucide-react";
+import { Globe2, Mail } from "lucide-react";
 import BrandLockup from "@/components/site/BrandLockup";
 import { COMPANY, LEGAL_PAGES, PUBLIC_PAGES } from "@/lib/site";
 import { PLATFORM_REFERRAL_CODE, displayReferralCode } from "@/lib/referral";
@@ -14,8 +14,8 @@ export default function SiteFooter() {
               <BrandLockup iconSize={36} />
             </Link>
             <p className="text-xs text-[#5B1B1B] leading-relaxed max-w-xs">
-              A UK-focused investment dashboard for transparent plans, daily reporting and
-              portfolio oversight.
+              Digital-asset investing with Bitget execution connectivity, BEP20 settlement and a
+              transparent investor ledger.
             </p>
           </div>
 
@@ -65,19 +65,17 @@ export default function SiteFooter() {
             </h2>
             <address className="not-italic space-y-3 text-xs text-[#5B1B1B]">
               <p className="flex items-start gap-2">
-                <MapPin className="w-3.5 h-3.5 mt-0.5 text-red-800 shrink-0" />
-                <span>{COMPANY.addressLine}</span>
+                <Globe2 className="w-3.5 h-3.5 mt-0.5 text-red-800 shrink-0" />
+                <span>
+                  {COMPANY.singapore.label}
+                  <br />
+                  {COMPANY.singapore.locality} · Appointments only
+                </span>
               </p>
               <p className="flex items-center gap-2">
                 <Mail className="w-3.5 h-3.5 text-red-800 shrink-0" />
                 <a href={`mailto:${COMPANY.email}`} className="hover:text-red-900 break-all">
                   {COMPANY.email}
-                </a>
-              </p>
-              <p className="flex items-center gap-2">
-                <Phone className="w-3.5 h-3.5 text-red-800 shrink-0" />
-                <a href={`tel:${COMPANY.phone.replace(/\s/g, "")}`} className="hover:text-red-900">
-                  {COMPANY.phoneDisplay}
                 </a>
               </p>
               <p className="text-[11px] text-[#6B1D1D]">{COMPANY.hours}</p>
@@ -99,14 +97,15 @@ export default function SiteFooter() {
             Nothing on this website constitutes financial, tax or legal advice.
           </p>
           <p className="text-[11px] leading-relaxed text-[#7F1D1D]">
-            Trading Flow Capital Ltd is a demonstration platform. Company registration and
-            regulatory details should be independently verified before public launch. It is not
-            authorised or regulated by the Financial Conduct Authority and does not offer regulated
-            investment services.
+            CoreChain is a digital-asset investment platform. Bitget is an independent third-party
+            execution venue and does not guarantee CoreChain products. BEP20 settlement makes a
+            payout verifiable after it is sent; it does not protect capital or guarantee returns.
+            CoreChain does not claim authorisation or regulation by any financial regulator and does
+            not offer regulated investment services.
           </p>
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-[11px] text-[#6B1D1D]">
             <p>© {new Date().getFullYear()} {COMPANY.legalName}. All rights reserved.</p>
-            <p>Formby, Liverpool, United Kingdom</p>
+            <p>Singapore support desk · Appointments only</p>
           </div>
         </div>
       </div>

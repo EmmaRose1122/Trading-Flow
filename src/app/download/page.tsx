@@ -11,15 +11,15 @@ import {
 import BrandLockup from "@/components/site/BrandLockup";
 
 export const metadata: Metadata = {
-  title: "Download Android App | Trading Flow",
-  description: "Install the Trading Flow Android app for a faster mobile dashboard experience.",
+  title: "Download Android App",
+  description: "Install the CoreChain Android app for a faster mobile dashboard experience.",
 };
 
 const installSteps = [
-  "Download the Trading Flow APK on your Android phone.",
+  "Download the CoreChain APK on your Android phone.",
   "If prompted, allow installation from this browser in Android settings.",
   "Open the APK and tap Install.",
-  "Sign in with your registered Trading Flow account.",
+  "Sign in with your registered CoreChain account.",
 ];
 
 export default function DownloadPage() {
@@ -27,7 +27,7 @@ export default function DownloadPage() {
     <div className="min-h-screen bg-[#FFFFFF]">
       <header className="border-b border-red-900/20 bg-[#FFFFFF]/90 backdrop-blur-xl">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          <Link href="/" aria-label="Trading Flow Capital home">
+          <Link href="/" aria-label="CoreChain home">
             <BrandLockup iconSize={36} />
           </Link>
           <Link
@@ -48,7 +48,7 @@ export default function DownloadPage() {
               Android App
             </span>
             <h1 className="text-3xl sm:text-4xl font-extrabold text-[#2B0B0E] tracking-tight leading-tight">
-              Trading Flow in your pocket
+              CoreChain in your pocket
             </h1>
             <p className="mt-4 text-sm text-[#5B1B1B] leading-relaxed">
               Install the Android app for quick access to your portfolio, daily profit breakdown,
@@ -57,8 +57,8 @@ export default function DownloadPage() {
 
             <div className="mt-6 space-y-3">
               <a
-                href="/downloads/trading-flow.apk"
-                download="trading-flow.apk"
+                href="/downloads/corechain.apk"
+                download="corechain.apk"
                 className="inline-flex w-full sm:w-auto items-center justify-center gap-2.5 px-6 py-3.5 rounded-xl bg-red-700 hover:bg-red-800 text-white font-bold text-sm transition shadow-lg shadow-red-900/20 active:scale-[0.98]"
               >
                 <Download className="w-5 h-5" />
@@ -86,8 +86,8 @@ export default function DownloadPage() {
                 <ShieldCheck className="w-5 h-5 text-red-800 mb-2" />
                 <h2 className="text-sm font-semibold text-[#2B0B0E]">Secure sign-in</h2>
                 <p className="mt-1 text-xs text-[#5B1B1B] leading-relaxed">
-                  Your registered account signs in through the encrypted Trading Flow session flow.
-                  Demo accounts and shortcut logins are not available.
+                  Your registered account signs in through the encrypted CoreChain session flow.
+                  Shortcut logins are not available.
                 </p>
               </div>
             </div>

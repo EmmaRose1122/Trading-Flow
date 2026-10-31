@@ -52,13 +52,13 @@ const STATUS_META: Record<
 function formatDate(value?: string) {
   if (!value) return "—";
   const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? value : date.toLocaleDateString("en-GB");
+  return Number.isNaN(date.getTime()) ? value : date.toLocaleDateString("en-SG");
 }
 
 export default function KycSettings({ status, details, onChanged }: KycSettingsProps) {
   const [legalName, setLegalName] = useState(details?.legalName || "");
   const [dateOfBirth, setDateOfBirth] = useState(details?.dateOfBirth || "");
-  const [country, setCountry] = useState(details?.country || "United Kingdom");
+  const [country, setCountry] = useState(details?.country || "Singapore");
   const [address, setAddress] = useState(details?.address || "");
   const [documentType, setDocumentType] = useState(details?.documentType || "PASSPORT");
   const [documentReference, setDocumentReference] = useState("");

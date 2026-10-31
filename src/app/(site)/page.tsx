@@ -1,41 +1,46 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
+import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowDownLeft,
   ArrowRight,
   ArrowUpRight,
+  BadgeCheck,
   BarChart3,
+  Blocks,
   CalendarDays,
   CheckCircle2,
   CircleDollarSign,
   Clock,
+  ExternalLink,
   Layers,
   Lock,
+  Network,
   Plus,
   ShieldCheck,
   TrendingUp,
-  Users,
   Wallet,
 } from "lucide-react";
 import DemoActivityCarousel from "@/components/site/DemoActivityCarousel";
 import FloatingBitcoin from "@/components/site/FloatingBitcoin";
 import Hero3D from "@/components/site/Hero3D";
 import { createPageMetadata } from "@/lib/seo";
-import { SITE_PLANS } from "@/lib/site";
+import { BLOCKCHAIN, EXECUTION, SITE_PLANS } from "@/lib/site";
 import { PLATFORM_REFERRAL_CODE, displayReferralCode } from "@/lib/referral";
 
 export const metadata: Metadata = createPageMetadata({
-  title: "UK Investment Dashboard & Transparent Investment Plans",
+  title: "Digital Asset Investment Platform | Bitget Execution & BEP20",
   description:
-    "Trading Flow Capital gives UK-focused investors a clear view of investment plans, projected daily profit, transaction history and portfolio reporting.",
+    "CoreChain combines Bitget execution connectivity, BEP20 settlement on BNB Smart Chain and a transparent investor ledger for daily profit, deposits and verified withdrawals.",
   path: "/",
   keywords: [
-    "UK investment dashboard",
-    "investment plans UK",
-    "daily profit tracker",
-    "portfolio dashboard",
-    "Trading Flow Capital",
+    "digital asset investment platform",
+    "Bitget execution",
+    "BEP20 withdrawals",
+    "BNB Smart Chain",
+    "daily profit dashboard",
+    "CoreChain",
   ],
 });
 
@@ -56,11 +61,9 @@ const benefits = [
     text: "Automated accrual logic records each day's ROI and updates the remaining contract term.",
   },
   {
-    icon: Users,
-    title: "Invitation-based access",
-    text: `Registration defaults to the platform invitation code ${displayReferralCode(
-      PLATFORM_REFERRAL_CODE
-    )}, while sponsor codes keep every account traceable.`,
+    icon: Network,
+    title: "Execution and settlement",
+    text: `Orders route through authorised ${EXECUTION.venue} connectivity, while completed payouts carry a ${BLOCKCHAIN.standard} transaction hash for BscScan verification.`,
   },
 ];
 
@@ -91,9 +94,9 @@ const steps = [
 
 const homeFaqs = [
   {
-    question: "What is Trading Flow Capital?",
+    question: "What is CoreChain?",
     answer:
-      "Trading Flow Capital is a UK-focused investment dashboard demonstration. It shows how investment plans, projected daily profit, deposits, withdrawals and ledger records can be presented in one account.",
+      "CoreChain is a digital-asset investment platform with Bitget execution connectivity, BEP20 settlement and a single ledger for deposits, daily profit and withdrawal records. One Daily 2% Plan is available from $10.",
   },
   {
     question: "Which investment plans are available?",
@@ -108,22 +111,27 @@ const homeFaqs = [
   {
     question: "When are daily profits credited?",
     answer:
-      "The 2% profit process runs hourly and credits each user at most once every 24 hours. Only approved deposits older than 24 hours are included in that day's eligible balance.",
+      "The profit process runs once per day and credits each user at most once every 24 hours. Only approved deposits older than 24 hours are included in that day's eligible balance.",
   },
   {
-    question: "How do deposits and withdrawals work?",
+    question: "How does Bitget execution work?",
     answer:
-      "Deposits start at $10 and remain pending until human review. Withdrawals start at $20 and include a 2% handling fee added to the requested amount. Withdrawal requests are also reviewed before processing.",
+      "CoreChain routes digital-asset orders through authorised Bitget execution connectivity. The resulting fill is reconciled before the platform ledger is updated. Bitget is an independent exchange and does not guarantee CoreChain products.",
   },
   {
-    question: "Is Trading Flow Capital regulated by the FCA?",
+    question: "How are withdrawals settled?",
     answer:
-      "No. The website is a demonstration and Trading Flow Capital Ltd is not authorised or regulated by the Financial Conduct Authority. It does not offer regulated investment services. Capital is at risk and nothing on the site is financial advice.",
+      "Withdrawals require KYC approval and start at $10 with a 2% handling fee. After administrator review, BEP20 tokens are sent on BNB Smart Chain and the transaction hash is shown in your dashboard for BscScan verification.",
   },
   {
-    question: "How can I access the investor dashboard?",
+    question: "Is CoreChain regulated?",
     answer:
-      "Access uses the platform invitation code trading flow by default, or a sponsor's referral code. Once registered, you can sign in to view plans, the profit calculator, deposits, withdrawals, transaction history and your 15-level referral network.",
+      "CoreChain does not claim authorisation or regulation by any financial regulator and does not offer regulated investment services. Digital-asset values can fall as well as rise, capital is at risk and nothing on the site is financial advice.",
+  },
+  {
+    question: "Where is CoreChain based?",
+    answer:
+      "CoreChain supports investors through its Singapore support desk for regional onboarding and appointment-based meetings. Meetings are arranged through the contact page; no walk-in street address is published.",
   },
 ];
 
@@ -141,10 +149,10 @@ const faqStructuredData = {
 };
 
 const platformFacts = [
-  { value: "1", label: "Daily 2% plan" },
-  { value: "24h", label: "Reporting cycle" },
-  { value: "4", label: "Activity categories" },
-  { value: "UK", label: "Support hours" },
+  { value: "Bitget", label: "Execution connectivity" },
+  { value: "BSC", label: "BEP20 settlement" },
+  { value: "24h", label: "Profit cycle" },
+  { value: "Singapore", label: "Support desk" },
 ];
 
 const moneyMovements = [
@@ -180,6 +188,7 @@ export default function HomePage() {
     <>
       <script
         nonce={nonce}
+        suppressHydrationWarning
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify(faqStructuredData).replace(/</g, "\\u003c"),
@@ -212,15 +221,15 @@ export default function HomePage() {
           <div className="max-w-3xl hero-copy">
             <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-red-100 text-red-800 border border-red-400 mb-6">
               <span className="w-1.5 h-1.5 rounded-full bg-red-700" />
-              UK-focused investment platform
+              Bitget execution · BEP20 settlement
             </span>
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-[#2B0B0E] leading-[1.05]">
-              A clearer way to invest, track and grow.
+              Digital-asset investing with a ledger you can verify.
             </h1>
             <p className="mt-6 text-base sm:text-lg text-[#3F1414] leading-relaxed max-w-2xl">
-              Trading Flow Capital brings investment plans, projected daily profit and transaction
-              reporting into one straightforward dashboard built for UK investors who value
-              visibility.
+              CoreChain connects authorised Bitget execution with BEP20 settlement on BNB Smart
+              Chain, then records every deposit, daily profit and withdrawal in one transparent
+              investor dashboard.
             </p>
             <div className="mt-8 flex flex-col sm:flex-row gap-3">
               <Link
@@ -239,8 +248,8 @@ export default function HomePage() {
             </div>
             <div className="mt-9 flex flex-wrap gap-x-6 gap-y-3 text-xs text-[#5B1B1B]">
               {[
-                "Transparent daily reporting",
-                "One 2% daily plan",
+                "Bitget execution connectivity",
+                "BEP20 · BNB Smart Chain",
                 `Invitation code: ${displayReferralCode(PLATFORM_REFERRAL_CODE)}`,
               ].map(
                 (item) => (
@@ -292,14 +301,15 @@ export default function HomePage() {
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-2xl">
             <p className="text-xs font-bold uppercase tracking-[0.2em] text-red-800 mb-3">
-              Why Trading Flow
+              Why CoreChain
             </p>
             <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-[#2B0B0E]">
-              Designed to make investment details easier to understand
+              Exchange execution and blockchain settlement, made readable
             </h2>
             <p className="mt-4 text-sm sm:text-base text-[#5B1B1B] leading-relaxed">
-              A dashboard is only useful when the numbers are readable. We focus on plan clarity,
-              daily reporting and a complete view of account activity.
+              A dashboard is only useful when the numbers and the infrastructure behind them are
+              understandable. CoreChain shows the plan terms, execution route, daily ledger and
+              on-chain payout reference in one account.
             </p>
           </div>
 
@@ -403,7 +413,7 @@ export default function HomePage() {
                   <div className="flex justify-between gap-3">
                     <dt className="text-neutral-400">Minimum</dt>
                     <dd className="font-bold text-white">
-                      ${plan.minimum.toLocaleString("en-GB")}
+                      ${plan.minimum.toLocaleString("en-SG")}
                     </dd>
                   </div>
                   <div className="flex justify-between gap-3">
@@ -446,6 +456,132 @@ export default function HomePage() {
                 <p className="mt-2 text-xs text-[#5B1B1B] leading-relaxed">{step.text}</p>
               </article>
             ))}
+          </div>
+        </div>
+      </section>
+
+      <section id="infrastructure" className="relative overflow-hidden border-y border-red-900/20 bg-[#0B0B0C] py-20 sm:py-24">
+        <div className="absolute -right-32 top-0 h-96 w-96 rounded-full bg-red-700/10 blur-3xl" />
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-3xl">
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-yellow-300">
+              Execution & settlement
+            </p>
+            <h2 className="mt-3 text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
+              The infrastructure behind every payout
+            </h2>
+            <p className="mt-4 text-sm leading-relaxed text-neutral-300 sm:text-base">
+              Orders are executed through {EXECUTION.venue}, payouts settle in BEP20 on{" "}
+              {BLOCKCHAIN.network}, and the investor ledger records each step. Nothing is hidden in
+              a black box.
+            </p>
+          </div>
+
+          <div className="mt-10 grid grid-cols-1 gap-5 lg:grid-cols-2">
+            <article className="overflow-hidden rounded-3xl border border-white/10 bg-[#141414]">
+              <div className="relative aspect-[16/9]">
+                <Image
+                  src="/images/corechain-execution.png"
+                  alt="Abstract exchange execution and order routing visual"
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#141414] via-transparent to-transparent" />
+                <span className="absolute left-4 top-4 inline-flex items-center gap-1.5 rounded-full border border-yellow-400/30 bg-black/70 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-yellow-300 backdrop-blur">
+                  <Network className="h-3 w-3" />
+                  {EXECUTION.venue} execution
+                </span>
+              </div>
+              <div className="p-5 sm:p-6">
+                <h3 className="text-lg font-bold text-white">Order routing and reconciliation</h3>
+                <p className="mt-2 text-xs leading-relaxed text-neutral-300">
+                  CoreChain uses authorised {EXECUTION.venue} execution connectivity. Fills are
+                  reconciled before the platform ledger is updated, so the dashboard reflects the
+                  executed position rather than an estimate.
+                </p>
+                <ul className="mt-4 space-y-2 text-[11px] text-neutral-300">
+                  <li className="flex items-center gap-2">
+                    <BadgeCheck className="h-3.5 w-3.5 text-yellow-300" />
+                    Authorised exchange connectivity
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <BadgeCheck className="h-3.5 w-3.5 text-yellow-300" />
+                    Fill and fee reconciliation
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <BadgeCheck className="h-3.5 w-3.5 text-yellow-300" />
+                    Independent venue disclosure
+                  </li>
+                </ul>
+              </div>
+            </article>
+
+            <article className="overflow-hidden rounded-3xl border border-white/10 bg-[#141414]">
+              <div className="relative aspect-[16/9]">
+                <Image
+                  src="/images/corechain-bep20.png"
+                  alt="Gold chain links representing BEP20 blockchain settlement"
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#141414] via-transparent to-transparent" />
+                <span className="absolute left-4 top-4 inline-flex items-center gap-1.5 rounded-full border border-red-400/30 bg-black/70 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-red-300 backdrop-blur">
+                  <Blocks className="h-3 w-3" />
+                  BEP20 settlement
+                </span>
+              </div>
+              <div className="p-5 sm:p-6">
+                <h3 className="text-lg font-bold text-white">Withdrawals with on-chain proof</h3>
+                <p className="mt-2 text-xs leading-relaxed text-neutral-300">
+                  Approved withdrawals are signed server-side and broadcast on BNB Smart Chain. The
+                  dashboard stores the transaction hash so you can verify the transfer on BscScan.
+                </p>
+                <dl className="mt-4 grid grid-cols-2 gap-2 text-[10px]">
+                  <div className="rounded-lg border border-white/10 bg-black/30 px-2.5 py-2">
+                    <dt className="text-neutral-500">Chain ID</dt>
+                    <dd className="mt-0.5 font-bold text-white">{BLOCKCHAIN.chainId}</dd>
+                  </div>
+                  <div className="rounded-lg border border-white/10 bg-black/30 px-2.5 py-2">
+                    <dt className="text-neutral-500">Standard</dt>
+                    <dd className="mt-0.5 font-bold text-white">{BLOCKCHAIN.standard}</dd>
+                  </div>
+                </dl>
+                <div className="mt-4 flex flex-wrap gap-3">
+                  <Link
+                    href="/technology"
+                    className="inline-flex items-center gap-1.5 text-[11px] font-bold text-yellow-300 hover:text-yellow-200"
+                  >
+                    Full technology explanation
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </Link>
+                  <a
+                    href={BLOCKCHAIN.explorer}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-neutral-300 hover:text-white"
+                  >
+                    BscScan
+                    <ExternalLink className="h-3 w-3" />
+                  </a>
+                </div>
+              </div>
+            </article>
+          </div>
+
+          <div className="mt-6 flex flex-col gap-3 rounded-2xl border border-yellow-400/20 bg-yellow-400/5 p-4 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-[11px] leading-relaxed text-neutral-300">
+              {EXECUTION.venue} is an independent third-party exchange. Its services do not
+              guarantee CoreChain products, returns or capital.
+            </p>
+            <Link
+              href="/technology"
+              className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-yellow-400 px-4 py-2.5 text-[11px] font-extrabold uppercase tracking-wider text-black hover:bg-yellow-300"
+            >
+              Explore infrastructure
+              <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
           </div>
         </div>
       </section>
@@ -539,8 +675,9 @@ export default function HomePage() {
                 A day on the platform, slide by slide
               </h2>
               <p className="mt-4 text-sm sm:text-base text-[#5B1B1B] leading-relaxed">
-                Explore 24 simulated records across daily investments, profit credits, deposits and
-                withdrawals. Every slide includes a record ID, member name, amount and status.
+                Explore 24 illustrative records across daily investments, profit credits, deposits
+                and withdrawals. Every slide shows the record type, amount and status used in the
+                investor ledger.
               </p>
             </div>
             <div className="rounded-xl border border-yellow-400/25 bg-black px-4 py-3 text-xs text-neutral-300">
@@ -696,7 +833,8 @@ export default function HomePage() {
             </Link>
           </div>
           <p className="mt-5 text-[10px] text-[#7F1D1D]">
-            Capital at risk. Demonstration platform. Not authorised or regulated by the FCA.
+            Capital at risk. CoreChain does not claim authorisation or regulation by any financial
+            regulator. BEP20 settlement does not guarantee returns or protect capital.
           </p>
         </div>
       </section>

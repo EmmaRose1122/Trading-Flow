@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import { Transaction, Wallet as WalletType, User } from "@/lib/db";
 import { displayReferralCode } from "@/lib/referral";
+import { isWithdrawalSettled } from "@/lib/bep20";
 
 type DepositPosition = {
   id: string;
@@ -117,7 +118,7 @@ export default function DashboardPage() {
         <div className="flex flex-col items-center gap-3">
           <div className="w-10 h-10 border-2 border-red-400 border-t-transparent rounded-full animate-spin" />
           <span className="text-xs font-semibold tracking-wider uppercase text-[#5B1B1B]">
-            Loading Trading Flow...
+            Loading CoreChain...
           </span>
         </div>
       </div>
@@ -128,7 +129,10 @@ export default function DashboardPage() {
   const totalProf = wallet?.totalProfit || 0;
   const earnedRoi = totalDeposited ? (totalProf / totalDeposited) * 100 : 0;
   const pendingWith = transactions
-    .filter((t) => t.type === "WITHDRAWAL" && t.status === "PENDING")
+    .filter(
+      (t) =>
+        t.type === "WITHDRAWAL" && (t.status === "PENDING" || t.status === "PROCESSING")
+    )
     .reduce((acc, t) => acc + t.amount, 0);
 
   return (
@@ -285,9 +289,9 @@ export default function DashboardPage() {
                     <span>
                       {deposit.isEligible
                         ? "Earning 2% daily"
-                        : `Starts ${new Date(deposit.eligibleAt).toLocaleString("en-GB")}`}
+                        : `Starts ${new Date(deposit.eligibleAt).toLocaleString("en-SG")}`}
                     </span>
-                    <span>{new Date(deposit.approvedAt).toLocaleDateString("en-GB")}</span>
+                    <span>{new Date(deposit.approvedAt).toLocaleDateString("en-SG")}</span>
                   </div>
                 </div>
               ))}
@@ -434,7 +438,7 @@ export default function DashboardPage() {
                                 : tx.type === "DEPOSIT"
                                 ? "bg-red-100 text-red-800 border border-red-400"
                                 : tx.type === "WITHDRAWAL"
-                                ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
+                                ? "bg-amber-100 text-amber-800 border border-amber-400"
                                 : "bg-red-100 text-red-800 border border-red-400"
                             }`}
                           >
@@ -452,15 +456,17 @@ export default function DashboardPage() {
                         <td className="py-3 px-3 whitespace-nowrap">
                           <span
                             className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold uppercase ${
-                              tx.status === "APPROVED" || tx.status === "SUCCESS"
+                              isWithdrawalSettled(tx.status)
                                 ? "bg-red-100 text-red-800 border border-red-400"
-                                : tx.status === "PENDING"
-                                ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
-                                : "bg-rose-500/10 text-rose-400 border border-rose-500/20"
+                                : tx.status === "PENDING" || tx.status === "PROCESSING"
+                                ? "bg-amber-100 text-amber-800 border border-amber-400"
+                                : "bg-rose-100 text-rose-800 border border-rose-400"
                             }`}
                           >
-                            {tx.status === "APPROVED" || tx.status === "SUCCESS" ? (
+                            {isWithdrawalSettled(tx.status) ? (
                               <CheckCircle2 className="w-3 h-3" />
+                            ) : tx.status === "PENDING" || tx.status === "PROCESSING" ? (
+                              <Clock className="w-3 h-3" />
                             ) : (
                               <AlertCircle className="w-3 h-3" />
                             )}

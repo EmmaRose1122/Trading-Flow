@@ -1,13 +1,16 @@
-# Trading Flow
+# CoreChain
 
-Full-stack fintech and investment dashboard built with Next.js App Router, Tailwind CSS, JWT authentication, automated daily ROI accrual, referral accounts, and an Android WebView app.
+Full-stack digital-asset investment platform built with Next.js App Router, Tailwind CSS, JWT authentication, Bitget execution connectivity, BEP20 settlement, automated daily profit accrual, referral accounts, and an Android WebView app.
 
 ## Features
 
-- Responsive user dashboard with mobile bottom navigation
-- Daily profit calculator and per-contract profit breakdown
-- Investment plans: Starter 1.5%, Premium 2.0%, VIP 3.0%
-- Deposit and withdrawal approval workflow
+- Responsive investor dashboard with mobile bottom navigation
+- Bitget execution connectivity and a public technology/trust page
+- BEP20 settlement on BNB Smart Chain with BscScan-verifiable withdrawal hashes
+- Single daily 2% plan: $10 minimum, no maximum, profits after 24-hour deposit maturity
+- Deposit approval, daily profit accrual and 24-hour withdrawal limits
+- Admin-approved automated BEP20 (BSC) withdrawals with ethers v6, refunds and retries
+- KYC, two-factor authentication, payout wallets and a 15-level income planner with approved-volume and active-depth tracking
 - Invite-only registration with sponsor referral codes
 - Admin user creation, balance adjustments, and audit notes
 - Protected daily profit cron endpoint

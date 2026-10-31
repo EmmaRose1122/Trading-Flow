@@ -11,7 +11,7 @@ export async function GET() {
   }
 
   const all = await db.getTransactions();
-  const pending = all.filter((t) => t.status === "PENDING");
+  const pending = all.filter((t) => t.status === "PENDING" && t.type !== "WITHDRAWAL");
   const allUsers = await db.getUsers();
   const users = await Promise.all(
     allUsers.map(async (u) => ({
@@ -55,6 +55,16 @@ export async function POST(req: Request) {
     }
 
     const newStatus = action === "APPROVE" ? "APPROVED" : "REJECTED";
+    const target = (await db.getTransactions()).find((tx) => tx.id === txId);
+    if (target?.type === "WITHDRAWAL") {
+      return NextResponse.json(
+        {
+          error:
+            "Withdrawals must be processed through the BSC withdrawal approval endpoint.",
+        },
+        { status: 410 }
+      );
+    }
     const result = await db.updateTransactionStatus(txId, newStatus);
 
     if ("error" in result) {

@@ -3,24 +3,47 @@ export const SITE_URL = (
 ).replace(/\/$/, "");
 
 export const COMPANY = {
-  name: "Trading Flow Capital",
-  legalName: "Trading Flow Capital Ltd",
-  shortName: "Trading Flow",
-  tagline: "UK-focused investing with clearer daily reporting",
+  name: "CoreChain",
+  legalName: "CoreChain",
+  shortName: "CoreChain",
+  tagline: "Digital asset investing with transparent on-chain settlement",
   description:
-    "Trading Flow Capital is a UK-focused investment dashboard for tracking plans, daily profit, deposits, withdrawals and portfolio activity.",
+    "CoreChain is a digital-asset investment platform with Bitget execution connectivity, BEP20 settlement and a real-time investor ledger.",
   address: {
-    streetAddress: "4 Andrews Close, Formby",
-    addressLocality: "Liverpool",
-    postalCode: "L37 2YH",
-    addressCountry: "GB",
+    addressLocality: "Singapore",
+    addressCountry: "SG",
   },
-  addressLine: "4 Andrews Close, Formby, Liverpool, L37 2YH, United Kingdom",
-  email: "tradingflow.demo@gmail.com",
-  phone: "+44 1704 834099",
-  phoneDisplay: "01704 834099",
-  hours: "Monday to Friday, 09:00–17:00 GMT",
-  effectiveDate: "28 October 2026",
+  addressLine: "Singapore · Appointments only",
+  singapore: {
+    label: "Singapore support desk",
+    locality: "Singapore",
+    country: "Singapore",
+    countryCode: "SG",
+    timezone: "SGT (UTC+8)",
+  },
+  email: "corechain@gmail.com",
+  phone: "",
+  phoneDisplay: "",
+  hours: "Appointments only · SGT (UTC+8)",
+  effectiveDate: "31 October 2026",
+};
+
+export const EXECUTION = {
+  venue: "Bitget",
+  venueUrl: "https://www.bitget.com",
+  label: "Authorised execution connectivity",
+  summary:
+    "CoreChain routes digital-asset orders through Bitget's exchange infrastructure. Bitget provides the execution venue; CoreChain records the resulting position, settlement and ledger entries.",
+};
+
+export const BLOCKCHAIN = {
+  network: "BNB Smart Chain",
+  standard: "BEP20",
+  chainId: 56,
+  explorer: "https://bscscan.com",
+  tokenSymbol: "USDT",
+  tokenContract: "0x55d398326f99059fF775485246999027B3197955",
+  confirmations: 1,
 };
 
 export const SITE_PLANS = [
@@ -37,6 +60,7 @@ export const SITE_PLANS = [
 
 export const PUBLIC_PAGES = [
   { name: "Home", href: "/" },
+  { name: "Technology", href: "/technology" },
   { name: "About us", href: "/about" },
   { name: "Contact us", href: "/contact" },
 ];

@@ -22,7 +22,7 @@ export function createPageMetadata({
     alternates: { canonical: url },
     openGraph: {
       type: "website",
-      locale: "en_GB",
+      locale: "en_SG",
       url,
       siteName: COMPANY.name,
       title,
@@ -32,7 +32,7 @@ export function createPageMetadata({
           url: "/opengraph-image",
           width: 1200,
           height: 630,
-          alt: `${COMPANY.name} — UK investment dashboard`,
+          alt: `${COMPANY.name} — Bitget execution and BEP20 settlement`,
         },
       ],
     },
@@ -52,21 +52,24 @@ export function organizationJsonLd() {
     name: COMPANY.legalName,
     alternateName: COMPANY.name,
     url: SITE_URL,
-    logo: `${SITE_URL}/icon.svg`,
+    description: COMPANY.description,
+    logo: `${SITE_URL}/brand/favicon-512.png`,
     email: COMPANY.email,
-    telephone: COMPANY.phone,
+    ...(COMPANY.phone ? { telephone: COMPANY.phone } : {}),
     address: {
       "@type": "PostalAddress",
       ...COMPANY.address,
     },
-    contactPoint: {
-      "@type": "ContactPoint",
-      contactType: "customer support",
-      email: COMPANY.email,
-      telephone: COMPANY.phone,
-      areaServed: "GB",
-      availableLanguage: "English",
-    },
+    contactPoint: [
+      {
+        "@type": "ContactPoint",
+        contactType: "customer support",
+        email: COMPANY.email,
+        ...(COMPANY.phone ? { telephone: COMPANY.phone } : {}),
+        areaServed: "SG",
+        availableLanguage: "English",
+      },
+    ],
   };
 }
 
@@ -76,7 +79,7 @@ export function websiteJsonLd() {
     "@type": "WebSite",
     name: COMPANY.name,
     url: SITE_URL,
-    inLanguage: "en-GB",
+    inLanguage: "en-SG",
     publisher: {
       "@type": "Organization",
       name: COMPANY.legalName,
@@ -115,11 +118,21 @@ export function contactPageJsonLd() {
       "@type": "Organization",
       name: COMPANY.legalName,
       email: COMPANY.email,
-      telephone: COMPANY.phone,
+      ...(COMPANY.phone ? { telephone: COMPANY.phone } : {}),
       address: {
         "@type": "PostalAddress",
         ...COMPANY.address,
       },
+      contactPoint: [
+        {
+          "@type": "ContactPoint",
+          contactType: "customer support",
+          email: COMPANY.email,
+          ...(COMPANY.phone ? { telephone: COMPANY.phone } : {}),
+          areaServed: "SG",
+          availableLanguage: "English",
+        },
+      ],
     },
   };
 }

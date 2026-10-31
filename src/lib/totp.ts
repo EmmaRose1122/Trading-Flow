@@ -66,7 +66,7 @@ export function verifyTotpCode(secret: string, code: string, window = 1) {
   return false;
 }
 
-export function buildTotpUri(secret: string, account: string, issuer = "Trading Flow Capital") {
+export function buildTotpUri(secret: string, account: string, issuer = "CoreChain") {
   const label = `${encodeURIComponent(issuer)}:${encodeURIComponent(account)}`;
   const params = new URLSearchParams({
     secret,

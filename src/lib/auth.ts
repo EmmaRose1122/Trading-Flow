@@ -10,10 +10,10 @@ function getJwtSecret() {
   return new TextEncoder().encode(jwtSecret);
 }
 
-const TOKEN_NAME = "tf_session";
-const TOKEN_ISSUER = "trading-flow";
-const TOKEN_AUDIENCE = "trading-flow-app";
-const TWO_FACTOR_AUDIENCE = "trading-flow-2fa";
+const TOKEN_NAME = "cc_session";
+const TOKEN_ISSUER = "corechain";
+const TOKEN_AUDIENCE = "corechain-app";
+const TWO_FACTOR_AUDIENCE = "corechain-2fa";
 
 export interface SessionPayload {
   userId: string;

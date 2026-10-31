@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import KycQueue from "@/components/admin/KycQueue";
 import DepositAccountManager from "@/components/admin/DepositAccountManager";
+import AdminWithdrawals from "@/components/admin/AdminWithdrawals";
 import {
   ShieldAlert,
   Check,
@@ -646,7 +647,7 @@ export default function AdminPage() {
                     type="text"
                     value={newUserReferredBy}
                     onChange={(e) => setNewUserReferredBy(e.target.value)}
-                    placeholder="trading flow"
+                    placeholder="corechain"
                     className="w-full px-3 py-2 rounded-xl bg-white border border-red-900/20 text-[#2B0B0E] placeholder-[#8A4A4A] text-xs font-mono tracking-wider focus:outline-none focus:border-red-700"
                   />
                 </div>
@@ -854,6 +855,8 @@ export default function AdminPage() {
           <DepositAccountManager />
         </div>
 
+        <AdminWithdrawals onChanged={fetchAdminData} />
+
         {selectedUser && (
           <section
             id="admin-user-detail"
@@ -879,7 +882,7 @@ export default function AdminPage() {
                   <p className="text-[10px] text-[#6B1D1D] mt-1">
                     ID: <span className="font-mono">{selectedUser.id}</span>
                     {selectedUser.createdAt
-                      ? ` · Joined ${new Date(selectedUser.createdAt).toLocaleDateString("en-GB")}`
+                      ? ` · Joined ${new Date(selectedUser.createdAt).toLocaleDateString("en-SG")}`
                       : ""}
                   </p>
                 </div>
@@ -1108,6 +1111,7 @@ export default function AdminPage() {
                           <th className="py-1.5 pr-2">Level</th>
                           <th className="py-1.5 pr-2">Rate</th>
                           <th className="py-1.5 pr-2">Members</th>
+                          <th className="py-1.5 pr-2 text-right">Volume</th>
                           <th className="py-1.5 pr-2 text-right">Earned</th>
                           <th className="py-1.5 text-right">Top member</th>
                         </tr>
@@ -1118,6 +1122,7 @@ export default function AdminPage() {
                             <td className="py-1.5 pr-2 font-semibold text-[#2B0B0E]">L{level.level}</td>
                             <td className="py-1.5 pr-2 text-red-800">{level.rate}%</td>
                             <td className="py-1.5 pr-2">{level.count}</td>
+                            <td className="py-1.5 pr-2 text-right">${level.volume.toFixed(2)}</td>
                             <td className="py-1.5 pr-2 text-right">${level.earnings.toFixed(2)}</td>
                             <td className="py-1.5 text-right truncate max-w-[140px]">
                               {level.members[0]
@@ -1163,7 +1168,7 @@ export default function AdminPage() {
                           <span>
                             {isDepositEligible(deposit)
                               ? "Earning now"
-                              : `Starts ${depositEligibleAt(deposit).toLocaleString("en-GB")}`}
+                              : `Starts ${depositEligibleAt(deposit).toLocaleString("en-SG")}`}
                           </span>
                         </div>
                       </div>
@@ -1208,17 +1213,20 @@ export default function AdminPage() {
                             </td>
                             <td className="px-3 py-2 whitespace-nowrap">
                               <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold ${
-                                transaction.status === "APPROVED" || transaction.status === "SUCCESS"
+                                transaction.status === "APPROVED" ||
+                                transaction.status === "SUCCESS" ||
+                                transaction.status === "COMPLETED"
                                   ? "bg-red-100 text-red-800"
-                                  : transaction.status === "PENDING"
-                                    ? "bg-amber-500/10 text-amber-400"
-                                    : "bg-rose-500/10 text-rose-400"
+                                  : transaction.status === "PENDING" ||
+                                      transaction.status === "PROCESSING"
+                                    ? "bg-amber-100 text-amber-800"
+                                    : "bg-rose-100 text-rose-800"
                               }`}>
                                 {transaction.status}
                               </span>
                             </td>
                             <td className="px-3 py-2 text-[#6B1D1D] whitespace-nowrap">
-                              {new Date(transaction.createdAt).toLocaleDateString("en-GB")}
+                              {new Date(transaction.createdAt).toLocaleDateString("en-SG")}
                             </td>
                           </tr>
                           );
