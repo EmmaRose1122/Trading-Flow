@@ -392,7 +392,7 @@ export default function SettingsPage() {
           <section className="rounded-2xl border border-red-900/20 bg-white p-5">
             <h2 className="text-sm font-bold text-[#2B0B0E]">More</h2>
             <div className="mt-3 flex flex-wrap gap-2">
-              <Link href="/download" className="inline-flex items-center gap-1.5 rounded-lg border border-red-900/20 bg-white px-3 py-2 text-[11px] font-semibold text-[#3F1414] hover:text-[#2B0B0E]">
+              <Link href="/download" data-hide-in-app className="inline-flex items-center gap-1.5 rounded-lg border border-red-900/20 bg-white px-3 py-2 text-[11px] font-semibold text-[#3F1414] hover:text-[#2B0B0E]">
                 <Download className="h-3.5 w-3.5" /> Android app
               </Link>
               <Link href="/privacy" className="rounded-lg border border-red-900/20 bg-white px-3 py-2 text-[11px] font-semibold text-[#3F1414] hover:text-[#2B0B0E]">

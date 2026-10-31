@@ -6,7 +6,7 @@ ANDROID_SRC="$ROOT/android-webview"
 BUILD_DIR="$ROOT/.apk-build"
 OUTPUT_DIR="$ROOT/public/downloads"
 APP_URL="${APP_URL:-https://trading-flow-capital.vercel.app}"
-VERSION_NAME="${VERSION_NAME:-2.1.0}"
+VERSION_NAME="${VERSION_NAME:-2.2.0}"
 VERSION_CODE="${VERSION_CODE:-$(date +%y%m%d%H)}"
 
 if [ -z "${JAVA_HOME:-}" ] && command -v javac >/dev/null 2>&1; then
@@ -61,9 +61,16 @@ D8_JAR="$BUILD_TOOLS_DIR/lib/d8.jar"
 APKSIGNER_JAR="$BUILD_TOOLS_DIR/lib/apksigner.jar"
 
 rm -rf "$BUILD_DIR"
-mkdir -p "$BUILD_DIR/res" "$BUILD_DIR/gen" "$BUILD_DIR/classes" "$BUILD_DIR/dex" "$OUTPUT_DIR"
+mkdir -p "$BUILD_DIR/res" "$BUILD_DIR/gen" "$BUILD_DIR/classes" "$BUILD_DIR/dex" "$BUILD_DIR/src" "$OUTPUT_DIR"
 cp -R "$ANDROID_SRC/res/." "$BUILD_DIR/res/"
+cp -R "$ANDROID_SRC/src/." "$BUILD_DIR/src/"
 cp "$ANDROID_SRC/AndroidManifest.xml" "$BUILD_DIR/AndroidManifest.xml"
+
+VERSION_CODE_NUM="$(printf '%s' "$VERSION_CODE" | tr -cd '0-9')"
+sed -i \
+  -e "s/__VERSION_CODE__/${VERSION_CODE_NUM}/g" \
+  -e "s/__VERSION_NAME__/${VERSION_NAME}/g" \
+  "$BUILD_DIR/src/com/corechain/app/MainActivity.java"
 
 node - "$APP_URL" "$BUILD_DIR/res/values/strings.xml" <<'NODE'
 const fs = require("fs");
@@ -90,7 +97,7 @@ NODE
   --version-code "$VERSION_CODE" \
   --version-name "$VERSION_NAME"
 
-find "$ANDROID_SRC/src" "$BUILD_DIR/gen" -name '*.java' -print0 \
+find "$BUILD_DIR/src" "$BUILD_DIR/gen" -name '*.java' -print0 \
   | xargs -0 "$JAVAC" -encoding UTF-8 -source 8 -target 8 -classpath "$PLATFORM_DIR/android.jar" -d "$BUILD_DIR/classes"
 
 find "$BUILD_DIR/classes" -name '*.class' -print0 \

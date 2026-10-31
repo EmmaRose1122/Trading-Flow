@@ -1,5 +1,6 @@
 package com.corechain.app;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
@@ -29,9 +30,21 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+
 public class MainActivity extends Activity {
     private static final String PREFS_NAME = "corechain";
     private static final String SERVER_URL_KEY = "server_url";
+    private static final String UPDATE_DISMISS_KEY = "dismissed_update_code";
+    private static final int APP_VERSION_CODE = __VERSION_CODE__;
+    private static final String APP_VERSION_NAME = "__VERSION_NAME__";
 
     private WebView webView;
     private ProgressBar progressBar;
@@ -39,6 +52,7 @@ public class MainActivity extends Activity {
     private TextView errorMessage;
     private SharedPreferences preferences;
     private String appUrl;
+    private boolean updateCheckRunning = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,6 +98,7 @@ public class MainActivity extends Activity {
 
         setContentView(root);
         loadApp();
+        checkForAppUpdate();
     }
 
     private void configureWebView() {
@@ -95,7 +110,10 @@ public class MainActivity extends Activity {
         settings.setAllowContentAccess(false);
         settings.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
         settings.setMediaPlaybackRequiresUserGesture(true);
-        settings.setUserAgentString(settings.getUserAgentString() + " CoreChainAndroid/2.0");
+        settings.setUserAgentString(settings.getUserAgentString()
+                + " CoreChainAndroid/" + APP_VERSION_NAME + "/" + APP_VERSION_CODE);
+
+        webView.addJavascriptInterface(new AppBridge(), "CoreChainApp");
 
         CookieManager cookieManager = CookieManager.getInstance();
         cookieManager.setAcceptCookie(true);
@@ -198,7 +216,65 @@ public class MainActivity extends Activity {
         errorView.setVisibility(View.GONE);
         webView.setVisibility(View.VISIBLE);
         progressBar.setVisibility(View.VISIBLE);
-        webView.loadUrl(appUrl);
+        webView.loadUrl(appUrl + "/dashboard");
+    }
+
+    private void checkForAppUpdate() {
+        if (updateCheckRunning) return;
+        updateCheckRunning = true;
+        new Thread(() -> {
+            HttpURLConnection connection = null;
+            try {
+                URL url = new URL(appUrl + "/downloads/app-version.json");
+                connection = (HttpURLConnection) url.openConnection();
+                connection.setConnectTimeout(8000);
+                connection.setReadTimeout(8000);
+                connection.setRequestProperty("User-Agent",
+                        "CoreChainAndroid/" + APP_VERSION_NAME + "/" + APP_VERSION_CODE);
+                int status = connection.getResponseCode();
+                if (status < 200 || status >= 300) return;
+
+                InputStream stream = connection.getInputStream();
+                BufferedReader reader = new BufferedReader(
+                        new InputStreamReader(stream, StandardCharsets.UTF_8));
+                StringBuilder body = new StringBuilder();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    body.append(line);
+                }
+                reader.close();
+
+                JSONObject json = new JSONObject(body.toString());
+                int serverCode = json.optInt("versionCode", 0);
+                String serverName = json.optString("versionName", "");
+                String apkPath = json.optString("apkUrl", "/downloads/corechain.apk");
+                if (serverCode <= APP_VERSION_CODE) return;
+                if (preferences.getInt(UPDATE_DISMISS_KEY, 0) == serverCode) return;
+
+                final String message = getString(R.string.update_message, serverName);
+                runOnUiThread(() -> showUpdateDialog(serverCode, message, apkPath));
+            } catch (Exception ignored) {
+            } finally {
+                if (connection != null) connection.disconnect();
+                updateCheckRunning = false;
+            }
+        }).start();
+    }
+
+    private void showUpdateDialog(int serverCode, String message, String apkPath) {
+        if (isFinishing()) return;
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.update_title)
+                .setMessage(message)
+                .setPositiveButton(R.string.update_now, (dialog, which) -> {
+                    preferences.edit().remove(UPDATE_DISMISS_KEY).apply();
+                    String target = apkPath.startsWith("http") ? apkPath : appUrl + apkPath;
+                    openExternally(Uri.parse(target));
+                })
+                .setNegativeButton(R.string.update_later, (dialog, which) ->
+                        preferences.edit().putInt(UPDATE_DISMISS_KEY, serverCode).apply())
+                .setCancelable(false)
+                .show();
     }
 
     private void showError(String message) {
@@ -285,6 +361,28 @@ public class MainActivity extends Activity {
 
     private int dp(int value) {
         return Math.round(value * getResources().getDisplayMetrics().density);
+    }
+
+    @SuppressLint("JavascriptInterface")
+    private class AppBridge {
+        @android.webkit.JavascriptInterface
+        public int getVersionCode() {
+            return APP_VERSION_CODE;
+        }
+
+        @android.webkit.JavascriptInterface
+        public String getVersionName() {
+            return APP_VERSION_NAME;
+        }
+
+        @android.webkit.JavascriptInterface
+        public void openInBrowser(String url) {
+            if (url == null || !(url.startsWith("http://") || url.startsWith("https://"))) {
+                return;
+            }
+            final Uri uri = Uri.parse(url);
+            runOnUiThread(() -> openExternally(uri));
+        }
     }
 
     @Override

@@ -12,4 +12,8 @@
     <string name="change_server">Change server</string>
     <string name="cancel">Cancel</string>
     <string name="no_app_to_open_link">No app is available to open this link.</string>
+    <string name="update_title">New CoreChain version available</string>
+    <string name="update_message">Version %1$s is now available. Update to keep the latest investor and admin features.</string>
+    <string name="update_now">Update</string>
+    <string name="update_later">Later</string>
 </resources>

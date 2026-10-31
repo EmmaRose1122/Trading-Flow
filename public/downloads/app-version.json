@@ -1,9 +1,9 @@
 {
-  "versionName": "2.1.0",
-  "versionCode": 26103102,
+  "versionName": "2.2.0",
+  "versionCode": 26103103,
   "apkUrl": "/downloads/corechain.apk",
-  "sha256": "79ba3c2c32450733c0f3689ec8320ed3ba741f76e8293e0cff29a2db282678a1",
-  "sizeBytes": 127791,
-  "publishedAt": "2026-10-31T06:47:18Z",
+  "sha256": "3e9caa8f755706a4fee179358d16179ebb98acd34d9454d94390b85e92bfe4a2",
+  "sizeBytes": 131888,
+  "publishedAt": "2026-10-31T10:45:07Z",
   "serverUrl": "https://trading-flow-capital.vercel.app"
 }

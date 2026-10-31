@@ -214,7 +214,7 @@ export default function LoginPage() {
           </>
         )}
         <p className="mt-3 text-center text-[11px] text-[#6B1D1D]">
-          <Link href="/download" className="hover:text-red-900 transition">
+          <Link href="/download" data-hide-in-app className="hover:text-red-900 transition">
             Download the Android app
           </Link>
         </p>

@@ -112,3 +112,8 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: #991b1b;
 }
+
+/* Hide APK downloader entry points inside the CoreChain Android app */
+html.corechain-app [data-hide-in-app] {
+  display: none !important;
+}

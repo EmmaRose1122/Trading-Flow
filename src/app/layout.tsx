@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import SupportChat from "@/components/support/SupportChat";
+import InAppUpdateBanner from "@/components/support/InAppUpdateBanner";
 import { COMPANY, SITE_URL } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
@@ -94,6 +95,7 @@ export default function RootLayout({
     <html lang="en-SG" className="dark">
       <body className="bg-background min-h-screen text-[#2B0B0E] antialiased selection:bg-red-700 selection:text-[#2B0B0E]">
         {children}
+        <InAppUpdateBanner />
         <SupportChat />
       </body>
     </html>

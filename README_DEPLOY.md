@@ -121,8 +121,17 @@ ADMIN_EMAIL=admin@example.com ADMIN_PASSWORD='a-long-private-password' npm run c
 
 ## Android APK
 
-The APK is a lightweight WebView shell that loads the live production website. Website updates are
-available in the installed app immediately, without reinstalling the APK.
+The APK is an app-only WebView shell. It launches straight into the investor system at
+`/dashboard` (users) or `/admin` (administrators) and does not open the public marketing website.
+APK downloader links are hidden inside the app.
+
+Update notification: on startup the app fetches `/downloads/app-version.json` and compares the
+server `versionCode` with its own. If the server version is newer, the app shows an update popup
+with "Update" (opens the new APK in the browser) and "Later" (remembers the dismissed version).
+Inside the WebView, the website also shows an update banner to app user agents that report an older
+or unknown version. Always bump `VERSION_CODE` when publishing a new APK.
+
+Website updates are available in the installed app immediately, without reinstalling the APK.
 
 Build locally with JDK 17 and the Android SDK:
 

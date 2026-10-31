@@ -110,6 +110,7 @@ export default function Navbar({ user, onOpenDeposit, onOpenWithdraw }: NavbarPr
 
                 <Link
                   href="/download"
+                  data-hide-in-app
                   title="Download Android app"
                   aria-label="Download Android app"
                   className="p-2 rounded-lg text-[#5B1B1B] hover:text-red-900 hover:bg-red-200 transition-all"
@@ -183,6 +184,7 @@ export default function Navbar({ user, onOpenDeposit, onOpenWithdraw }: NavbarPr
             )}
             <Link
               href="/download"
+              data-hide-in-app
               aria-label="Download Android app"
               className="p-2 rounded-lg text-[#5B1B1B] hover:text-red-900 hover:bg-rose-50 transition"
             >
@@ -221,6 +223,7 @@ export default function Navbar({ user, onOpenDeposit, onOpenWithdraw }: NavbarPr
           })}
           <Link
             href="/download"
+            data-hide-in-app
             onClick={() => setMobileMenuOpen(false)}
             className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium text-[#3F1414] hover:bg-rose-50"
           >

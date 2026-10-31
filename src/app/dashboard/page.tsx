@@ -185,6 +185,7 @@ export default function DashboardPage() {
             </Link>
             <Link
               href="/download"
+              data-hide-in-app
               className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white text-[#2B0B0E] hover:bg-rose-50 font-semibold text-xs border border-red-900/20 transition active:scale-95"
             >
               <Download className="w-3.5 h-3.5" />
